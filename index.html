@@ -25,13 +25,12 @@
 
         const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
         
-        // Specific brick colors for each day
         const DAY_THEMES = {
-            Monday:    { bg: "#FFD000", shadow: "#f9a825", text: "#3e2723", label: "#E53935" }, // Yellow bricks, Red label
-            Tuesday:   { bg: "#1E88E5", shadow: "#1565c0", text: "#fff", label: "#FFD000" },    // Blue bricks, Yellow label
-            Wednesday: { bg: "#E53935", shadow: "#b71c1c", text: "#fff", label: "#1E88E5" },    // Red bricks, Blue label
-            Thursday:  { bg: "#FFFFFF", shadow: "#bdbdbd", text: "#1a1a1a", label: "#43A047" }, // White bricks, Green label
-            Friday:    { bg: "#43A047", shadow: "#2e7d32", text: "#fff", label: "#FFD000" }     // Green bricks, Yellow label
+            Monday:    { bg: "#FFD000", shadow: "#f9a825", text: "#3e2723", label: "#E53935" },
+            Tuesday:   { bg: "#1E88E5", shadow: "#1565c0", text: "#fff", label: "#FFD000" },
+            Wednesday: { bg: "#E53935", shadow: "#b71c1c", text: "#fff", label: "#1E88E5" },
+            Thursday:  { bg: "#FFFFFF", shadow: "#bdbdbd", text: "#1a1a1a", label: "#43A047" },
+            Friday:    { bg: "#43A047", shadow: "#2e7d32", text: "#fff", label: "#FFD000" }
         };
 
         const PREMADE = [
@@ -71,14 +70,4 @@
 
             return (
                 <div className="relative h-full w-full bg-[#2d5a27] text-white overflow-hidden studs">
-                    <main className="relative h-full flex flex-col p-6">
-                        <header className="mb-8 pt-4">
-                            <h1 className="lego-title text-5xl text-center uppercase italic leading-none tracking-tighter">THE PLAYBOOK</h1>
-                        </header>
-
-                        <div className="flex-1 overflow-y-auto space-y-12 pb-20 hide-scrollbar">
-                            {DAYS.map((day) => {
-                                const theme = DAY_THEMES[day];
-                                return (
-                                    <div key={day} className="space-y-4">
-                                        <div className="flex items-center justify-between
+                    <main className="relative h
