@@ -71,10 +71,10 @@
                 <div className="relative h-full w-full bg-[#2d5a27] text-white overflow-hidden studs">
                     <main className="relative h-full flex flex-col p-6">
                         <header className="mb-8 pt-4">
-                            <h1 className="lego-title text-5xl text-center uppercase italic leading-none">THE PLAYBOOK</h1>
+                            <h1 className="lego-title text-5xl text-center uppercase italic leading-none tracking-tighter">THE PLAYBOOK</h1>
                         </header>
 
-                        <div className="flex-1 overflow-y-auto space-y-8 pb-10 hide-scrollbar">
+                        <div className="flex-1 overflow-y-auto space-y-10 pb-10 hide-scrollbar">
                             {DAYS.map((day, i) => (
                                 <div key={day} className="space-y-4">
                                     <div className="flex items-center justify-between gap-3">
@@ -90,25 +90,30 @@
                                         </button>
                                     </div>
                                     
-                                    <div className="space-y-3">
-                                        {schedule[day].map((act, idx) => (
-                                            <div key={idx} 
-                                                className="p-4 rounded-xl border-t-2 border-white/20 shadow-lg"
-                                                style={{ 
-                                                    backgroundColor: BRICK_THEMES[i % 5].bg, 
-                                                    color: BRICK_THEMES[i % 5].text, 
-                                                    boxShadow: `0 6px 0 ${BRICK_THEMES[i % 5].shadow}` 
-                                                }}>
-                                                <div className="text-xl font-black uppercase italic leading-tight">{act}</div>
-                                            </div>
-                                        ))}
+                                    <div className="flex flex-col items-start gap-3">
+                                        {schedule[day].map((act, idx) => {
+                                            const isTitle = act === "Morning Learning";
+                                            return (
+                                                <div key={idx} 
+                                                    className={`p-3 rounded-xl border-t-2 border-white/20 shadow-lg transition-all ${isTitle ? 'w-auto px-6' : 'w-full p-4'}`}
+                                                    style={{ 
+                                                        backgroundColor: BRICK_THEMES[i % 5].bg, 
+                                                        color: BRICK_THEMES[i % 5].text, 
+                                                        boxShadow: `0 ${isTitle ? '4px' : '8px'} 0 ${BRICK_THEMES[i % 5].shadow}`,
+                                                        opacity: isTitle ? 0.9 : 1
+                                                    }}>
+                                                    <div className={`${isTitle ? 'text-sm' : 'text-xl'} font-black uppercase italic leading-tight tracking-tight`}>
+                                                        {act}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             ))}
                         </div>
                     </main>
 
-                    {/* Locker Room Drawer */}
                     {showArchive && (
                         <div className="fixed inset-0 z-50 flex flex-col justify-end">
                             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowArchive(false)} />
@@ -116,11 +121,10 @@
                                 <div className="w-16 h-2 bg-black/20 rounded-full mx-auto mb-6" />
                                 
                                 <div className="flex justify-between items-center mb-6">
-                                    <h2 className="lego-title text-3xl italic uppercase tracking-tighter">LOCKER ROOM: {activeDay}</h2>
+                                    <h2 className="lego-title text-3xl italic uppercase tracking-tighter">LOCKER ROOM</h2>
                                     <button onClick={() => setShowArchive(false)} className="bg-white text-black px-3 py-1 rounded font-black text-xs shadow-[3px_3px_0px_#000]">X</button>
                                 </div>
 
-                                {/* Custom Input Section */}
                                 <div className="mb-6 bg-white p-3 rounded-xl border-4 border-black shadow-[4px_4px_0px_#000] flex gap-2">
                                     <input 
                                         type="text" 
@@ -142,7 +146,7 @@
                                         <button key={item} 
                                             onClick={() => addActivity(item)}
                                             className="bg-white p-4 rounded-xl border-4 border-black shadow-[4px_4px_0px_#000] active:translate-y-1 active:shadow-none">
-                                            <div className="font-black uppercase text-sm text-black italic text-center">{item}</div>
+                                            <div className="font-black uppercase text-sm text-black italic text-center leading-none">{item}</div>
                                         </button>
                                     ))}
                                 </div>
