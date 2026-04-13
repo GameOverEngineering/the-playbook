@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import ReactDOM from "react-dom/client";
 import {
   Plus, Calendar, Archive, Settings, X, DollarSign, Globe, MapPin,
   Tag, Clock, RotateCcw, CheckCircle, ChevronLeft, Trophy,
@@ -1039,3 +1040,5 @@ export default function ThePlaybook() {
     </div>
   );
 }
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
