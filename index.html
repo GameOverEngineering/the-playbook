@@ -1,22 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>the playbook</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Playbook</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script type="importmap">
-      {
-        "imports": {
-          "react": "https://esm.sh/react@18.2.0",
-          "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-          "lucide-react": "https://esm.sh/lucide-react@0.263.1"
-        }
-      }
-    </script>
-  </head>
-  <body>
+    <style>
+        body { margin: 0; padding: 0; background: #2d5a27; overflow: hidden; }
+        #root { height: 100vh; width: 100vw; }
+    </style>
+</head>
+<body>
     <div id="root"></div>
-    <script type="module" src="theplaybook.js"></script>
-  </body>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- STYLES & CONSTANTS ---
+        const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+        const ACTIVITY_COLORS = [
+            { bg: "rgba(255,208,0,0.2)", border: "rgba(255,208,0,0.4)" },
+            { bg: "rgba(33,150,243,0.2)", border: "rgba(33,150,243,0.4)" },
+            { bg: "rgba(76,175,80,0.2)", border: "rgba(76,175,80,0.4)" },
+            { bg: "rgba(244,67,54,0.2)", border: "rgba(244,67,54,0.4)" },
+            { bg: "rgba(156,39,176,0.2)", border: "rgba(156,39,176,0.4)" }
+        ];
+
+        const App = () => {
+            return (
+                <div className="relative h-full w-full bg-[#2d5a27] font-sans text-white overflow-hidden">
+                    {/* Field Texture */}
+                    <div className="absolute inset-0 opacity-10 pointer-events-none" 
+                         style={{ backgroundImage: `url("https://www.transparenttextures.com/patterns/p6-mini.png")` }} />
+                    
+                    <main className="relative h-full flex flex-col p-6">
+                        <header className="mb-8">
+                            <h1 className="text-4xl font-black italic tracking-tighter uppercase leading-none">
+                                THE PLAYBOOK
+                            </h1>
+                            <p className="text-white/50 text-[10px] font-bold uppercase tracking-widest mt-2">
+                                MISSISSAUGA, ON • AUTO-SYNC ACTIVE
+                            </p>
+                        </header>
+
+                        <div className="flex-1 overflow-y-auto space-y-6 pb-24">
+                            {DAYS.map((day, i) => (
+                                <div key={day} className="space-y-3">
+                                    <div className="flex items-center gap-2">
+                                        <span className="bg-white text-black px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-tighter italic">
+                                            {day}
+                                        </span>
+                                        <div className="h-[1px] flex-1 bg-white/20" />
+                                    </div>
+                                    <div 
+                                        className="p-4 rounded-xl border-b-4 border-r-4 shadow-xl"
+                                        style={{ backgroundColor: ACTIVITY_COLORS[i].bg, borderColor: ACTIVITY_COLORS[i].border }}
+                                    >
+                                        <div className="text-[10px] font-bold text-white/40 uppercase mb-1">09:00 AM</div>
+                                        <div className="text-lg font-black uppercase italic">Session Loading...</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </main>
+
+                    {/* Bottom Nav */}
+                    <nav className="absolute bottom-0 left-0 right-0 bg-black/80 backdrop-blur-md border-t border-white/10 p-6 flex justify-around">
+                        <div className="w-6 h-6 border-2 border-white/20 rounded-md" />
+                        <div className="w-12 h-12 bg-yellow-400 rounded-full -mt-10 border-4 border-[#2d5a27]" />
+                        <div className="w-6 h-6 border-2 border-white/20 rounded-md" />
+                    </nav>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById("root"));
+        root.render(<App />);
+    </script>
+</body>
 </html>
