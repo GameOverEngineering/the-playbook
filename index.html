@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The Playbook</title>
     <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Rajdhani:wght@700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { margin: 0; padding: 0; background: #2d5a27; overflow-x: hidden; font-family: 'Rajdhani', sans-serif; }
+        body { margin: 0; background: #2d5a27; font-family: 'Rajdhani', sans-serif; color: white; }
+        .lego-title { font-family: 'Permanent Marker', cursive; text-shadow: 3px 3px 0px #d32f2f, 6px 6px 0px #000; }
+        .studs { background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .lego-title { font-family: 'Permanent Marker', cursive; text-shadow: 4px 4px 0px #d32f2f, 8px 8px 0px #000; color: #fff; }
-        .studs { background-image: radial-gradient(circle, rgba(255,255,255,0.1) 2px, transparent 2px); background-size: 20px 20px; }
     </style>
 </head>
 <body>
@@ -32,10 +32,7 @@
 
         const PREMADE = ["Park", "Swimming", "Gym Time", "Dog walk", "Sand box", "ROM", "Zoo", "Bike ride", "Reading", "Numbers/Math", "Art", "Geography/Maps", "Science", "Grocery Shopping", "Library", "Soccer", "Jiu Jitsu/Martial Arts", "Building", "Cars/Trucks/Trains", "Puzzles", "Card Games", "TV/Movie Time"];
 
-        const App = () => {
-            const [showLocker, setShowLocker] = useState(false);
-            const [activeDay, setActiveDay] = useState("Monday");
-            const [customText, setCustomText] = useState("");
+        function App() {
             const [schedule, setSchedule] = useState({
                 Monday: ["Morning Learning", "LUNCH", "Afternoon Learning"],
                 Tuesday: ["Morning Learning", "LUNCH", "Afternoon Learning"],
@@ -43,16 +40,77 @@
                 Thursday: ["Morning Learning", "LUNCH", "Afternoon Learning"],
                 Friday: ["Morning Learning", "LUNCH", "Afternoon Learning"]
             });
+            const [showLocker, setShowLocker] = useState(false);
+            const [activeDay, setActiveDay] = useState(null);
+            const [customText, setCustomText] = useState("");
 
-            const addActivity = (activity) => {
-                if (!activity) return;
-                setSchedule(prev => ({
-                    ...prev,
-                    [activeDay]: [...prev[activeDay], activity]
-                }));
+            const addAct = (item) => {
+                if (!item) return;
+                setSchedule(prev => ({ ...prev, [activeDay]: [...prev[activeDay], item] }));
                 setShowLocker(false);
                 setCustomText("");
             };
 
             return (
-                <div className="min-h-screen
+                <div className="min-h-screen studs p-6 pb-20">
+                    <h1 className="lego-title text-5xl text-center italic uppercase mb-10 tracking-tighter">THE PLAYBOOK</h1>
+                    
+                    <div className="space-y-12">
+                        {Object.keys(DAY_THEMES).map(day => (
+                            <div key={day} className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <span style={{backgroundColor: DAY_THEMES[day].label}} className="px-4 py-1 rounded font-black italic uppercase shadow-md text-sm">{day}</span>
+                                    <button 
+                                        onClick={() => { setActiveDay(day); setShowLocker(true); }}
+                                        className="bg-[#FFD000] text-black w-10 h-10 rounded-lg border-2 border-black shadow-[0_4px_0_#000] active:translate-y-1 font-black text-2xl">+</button>
+                                </div>
+                                <div className="flex flex-col items-start gap-3">
+                                    {schedule[day].map((act, i) => (
+                                        act === "LUNCH" ? (
+                                            <div key={i} className="w-full flex items-center gap-2 opacity-40 py-2">
+                                                <div className="h-px flex-1 bg-white"></div>
+                                                <span className="text-[10px] font-black tracking-widest uppercase">LUNCH BREAK</span>
+                                                <div className="h-px flex-1 bg-white"></div>
+                                            </div>
+                                        ) : (
+                                            <div key={i} 
+                                                className={`p-3 rounded-xl border-t-2 border-white/20 shadow-lg ${act.includes("Learning") ? 'w-auto px-6' : 'w-full p-4'}`}
+                                                style={{ 
+                                                    backgroundColor: act.includes("Learning") ? "#fff" : DAY_THEMES[day].bg,
+                                                    color: act.includes("Learning") ? "#000" : DAY_THEMES[day].text,
+                                                    boxShadow: `0 ${act.includes("Learning") ? '4px' : '8px'} 0 ${act.includes("Learning") ? '#999' : DAY_THEMES[day].shadow}`
+                                                }}>
+                                                <span className={`${act.includes("Learning") ? 'text-[10px]' : 'text-xl'} font-black uppercase italic tracking-tight`}>{act}</span>
+                                            </div>
+                                        )
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {showLocker && (
+                        <div className="fixed inset-0 z-50 flex flex-col justify-end">
+                            <div className="absolute inset-0 bg-black/80" onClick={() => setShowLocker(false)}></div>
+                            <div className="relative bg-[#E53935] rounded-t-[40px] p-6 border-t-8 border-[#b71c1c] max-h-[80vh] overflow-y-auto hide-scrollbar">
+                                <h2 className="lego-title text-3xl italic uppercase mb-6 text-center">LOCKER ROOM</h2>
+                                <div className="flex gap-2 mb-6 bg-white p-3 rounded-xl border-4 border-black">
+                                    <input type="text" value={customText} onChange={e => setCustomText(e.target.value)} placeholder="TYPE CUSTOM..." className="flex-1 outline-none text-black font-black uppercase" />
+                                    <button onClick={() => addAct(customText)} className="bg-[#1E88E5] px-4 py-1 rounded font-black italic shadow-md">ADD</button>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {PREMADE.map(p => (
+                                        <button key={p} onClick={() => addAct(p)} className="bg-white p-4 rounded-xl border-4 border-black shadow-[4px_4px_0_#000] text-black font-black uppercase italic text-sm">{p}</button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+</body>
+</html>
