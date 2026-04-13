@@ -24,6 +24,14 @@
         const { useState } = React;
 
         const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+        const PREMADE = [
+            "Park", "Swimming", "Gym Time", "Dog walk", "Sand box", "ROM", "Zoo", 
+            "Bike ride", "Reading", "Numbers/Math", "Art", "Geography/Maps", 
+            "Science", "Grocery Shopping", "Library", "Soccer", 
+            "Jiu Jitsu/Martial Arts", "Building", "Cars/Trucks/Trains", 
+            "Puzzles", "Card Games", "TV/Movie Time"
+        ];
+
         const BRICK_THEMES = [
             { bg: "#FFD000", shadow: "#f9a825", text: "#3e2723" },
             { bg: "#E53935", shadow: "#b71c1c", text: "#fff" },
@@ -34,6 +42,8 @@
 
         const App = () => {
             const [showArchive, setShowArchive] = useState(false);
+            const [activeDay, setActiveDay] = useState(null);
+            const [customText, setCustomText] = useState("");
             const [schedule, setSchedule] = useState({
                 Monday: ["Morning Learning"],
                 Tuesday: ["Morning Learning"],
@@ -42,61 +52,97 @@
                 Friday: ["Morning Learning"]
             });
 
+            const handleOpenLocker = (day) => {
+                setActiveDay(day);
+                setShowArchive(true);
+            };
+
             const addActivity = (activity) => {
-                // For this version, it adds to "Monday" as a test
+                if (!activity) return;
                 setSchedule(prev => ({
                     ...prev,
-                    Monday: [...prev.Monday, activity]
+                    [activeDay]: [...prev[activeDay], activity]
                 }));
                 setShowArchive(false);
+                setCustomText("");
             };
 
             return (
                 <div className="relative h-full w-full bg-[#2d5a27] text-white overflow-hidden studs">
                     <main className="relative h-full flex flex-col p-6">
-                        <header className="mb-10 pt-4">
-                            <h1 className="lego-title text-5xl text-center uppercase italic">THE PLAYBOOK</h1>
+                        <header className="mb-8 pt-4">
+                            <h1 className="lego-title text-5xl text-center uppercase italic leading-none">THE PLAYBOOK</h1>
                         </header>
 
-                        <div className="flex-1 overflow-y-auto space-y-8 pb-32 hide-scrollbar">
+                        <div className="flex-1 overflow-y-auto space-y-8 pb-10 hide-scrollbar">
                             {DAYS.map((day, i) => (
-                                <div key={day} className="space-y-3">
-                                    <div className="flex items-center gap-3">
-                                        <div className="bg-[#E53935] text-white px-4 py-1 rounded-md text-sm font-black uppercase italic shadow-[4px_4px_0px_#b71c1c]">{day}</div>
-                                        <div className="h-2 flex-1 bg-white/20 rounded-full shadow-inner" />
+                                <div key={day} className="space-y-4">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div className="bg-[#E53935] text-white px-4 py-1 rounded-md text-sm font-black uppercase italic shadow-[4px_4px_0px_#b71c1c]">
+                                            {day}
+                                        </div>
+                                        <div className="h-1 flex-1 bg-white/20 rounded-full" />
+                                        <button 
+                                            onClick={() => handleOpenLocker(day)}
+                                            className="bg-[#FFD000] text-black w-10 h-10 rounded-lg flex items-center justify-center border-2 border-black shadow-[0_4px_0_#000] active:translate-y-1 active:shadow-none transition-all"
+                                        >
+                                            <span className="text-2xl font-black">+</span>
+                                        </button>
                                     </div>
                                     
-                                    {schedule[day].map((act, idx) => (
-                                        <div key={idx} 
-                                            className="p-5 rounded-xl border-t-2 border-white/30 shadow-lg"
-                                            style={{ backgroundColor: BRICK_THEMES[i % 5].bg, color: BRICK_THEMES[i % 5].text, boxShadow: `0 8px 0 ${BRICK_THEMES[i % 5].shadow}` }}>
-                                            <div className="text-2xl font-black uppercase italic leading-tight">{act}</div>
-                                        </div>
-                                    ))}
+                                    <div className="space-y-3">
+                                        {schedule[day].map((act, idx) => (
+                                            <div key={idx} 
+                                                className="p-4 rounded-xl border-t-2 border-white/20 shadow-lg"
+                                                style={{ 
+                                                    backgroundColor: BRICK_THEMES[i % 5].bg, 
+                                                    color: BRICK_THEMES[i % 5].text, 
+                                                    boxShadow: `0 6px 0 ${BRICK_THEMES[i % 5].shadow}` 
+                                                }}>
+                                                <div className="text-xl font-black uppercase italic leading-tight">{act}</div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             ))}
                         </div>
                     </main>
 
-                    <nav className="absolute bottom-0 left-0 right-0 bg-[#1E88E5] border-t-8 border-[#1565c0] p-6 pb-10 flex justify-around items-center z-40">
-                        <div className="text-white font-black uppercase italic text-lg">Field</div>
-                        <button onClick={() => setShowArchive(true)} className="bg-[#FFD000] text-black w-20 h-16 rounded-xl border-4 border-black shadow-[0_8px_0_#000] active:translate-y-2 active:shadow-none transition-all">
-                            <span className="text-5xl font-black">+</span>
-                        </button>
-                        <div className="text-white font-black uppercase italic text-lg opacity-50">Gear</div>
-                    </nav>
-
+                    {/* Locker Room Drawer */}
                     {showArchive && (
                         <div className="fixed inset-0 z-50 flex flex-col justify-end">
-                            <div className="absolute inset-0 bg-black/60" onClick={() => setShowArchive(false)} />
-                            <div className="relative bg-[#E53935] rounded-t-[40px] p-8 pb-12 border-t-8 border-[#b71c1c]">
-                                <h2 className="lego-title text-3xl italic uppercase mb-8">LOCKER ROOM</h2>
-                                <div className="grid grid-cols-2 gap-6">
-                                    {['BJJ', 'Art', 'Piano', 'Film', 'Reading', 'Outdoor'].map((item) => (
+                            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowArchive(false)} />
+                            <div className="relative bg-[#E53935] rounded-t-[40px] p-6 pb-10 border-t-8 border-[#b71c1c] max-h-[85vh] flex flex-col">
+                                <div className="w-16 h-2 bg-black/20 rounded-full mx-auto mb-6" />
+                                
+                                <div className="flex justify-between items-center mb-6">
+                                    <h2 className="lego-title text-3xl italic uppercase tracking-tighter">LOCKER ROOM: {activeDay}</h2>
+                                    <button onClick={() => setShowArchive(false)} className="bg-white text-black px-3 py-1 rounded font-black text-xs shadow-[3px_3px_0px_#000]">X</button>
+                                </div>
+
+                                {/* Custom Input Section */}
+                                <div className="mb-6 bg-white p-3 rounded-xl border-4 border-black shadow-[4px_4px_0px_#000] flex gap-2">
+                                    <input 
+                                        type="text" 
+                                        value={customText}
+                                        onChange={(e) => setCustomText(e.target.value)}
+                                        placeholder="TYPE CUSTOM..."
+                                        className="flex-1 bg-transparent text-black font-black uppercase placeholder:text-gray-400 outline-none px-2"
+                                    />
+                                    <button 
+                                        onClick={() => addActivity(customText)}
+                                        className="bg-[#1E88E5] text-white px-4 py-1 rounded-lg font-black italic shadow-[2px_2px_0px_#1565c0]"
+                                    >
+                                        ADD
+                                    </button>
+                                </div>
+
+                                <div className="flex-1 overflow-y-auto grid grid-cols-2 gap-4 pb-4 hide-scrollbar">
+                                    {PREMADE.map((item) => (
                                         <button key={item} 
                                             onClick={() => addActivity(item)}
-                                            className="bg-white p-6 rounded-2xl border-4 border-black shadow-[6px_6px_0px_#000] active:translate-y-1 active:shadow-none">
-                                            <div className="font-black uppercase text-xl text-black italic">{item}</div>
+                                            className="bg-white p-4 rounded-xl border-4 border-black shadow-[4px_4px_0px_#000] active:translate-y-1 active:shadow-none">
+                                            <div className="font-black uppercase text-sm text-black italic text-center">{item}</div>
                                         </button>
                                     ))}
                                 </div>
