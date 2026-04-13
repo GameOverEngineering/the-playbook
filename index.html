@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The Playbook</title>
     <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Rajdhani:wght@700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { margin: 0; padding: 0; background: #2d5a27; overflow: hidden; font-family: 'Rajdhani', sans-serif; }
-        #root { height: 100vh; width: 100vw; }
+        body { margin: 0; padding: 0; background: #2d5a27; overflow-x: hidden; font-family: 'Rajdhani', sans-serif; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .lego-title { font-family: 'Permanent Marker', cursive; text-shadow: 4px 4px 0px #d32f2f, 8px 8px 0px #000; color: #fff; }
         .studs { background-image: radial-gradient(circle, rgba(255,255,255,0.1) 2px, transparent 2px); background-size: 20px 20px; }
@@ -23,8 +22,6 @@
     <script type="text/babel">
         const { useState } = React;
 
-        const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-        
         const DAY_THEMES = {
             Monday:    { bg: "#FFD000", shadow: "#f9a825", text: "#3e2723", label: "#E53935" },
             Tuesday:   { bg: "#1E88E5", shadow: "#1565c0", text: "#fff", label: "#FFD000" },
@@ -33,17 +30,11 @@
             Friday:    { bg: "#43A047", shadow: "#2e7d32", text: "#fff", label: "#FFD000" }
         };
 
-        const PREMADE = [
-            "Park", "Swimming", "Gym Time", "Dog walk", "Sand box", "ROM", "Zoo", 
-            "Bike ride", "Reading", "Numbers/Math", "Art", "Geography/Maps", 
-            "Science", "Grocery Shopping", "Library", "Soccer", 
-            "Jiu Jitsu/Martial Arts", "Building", "Cars/Trucks/Trains", 
-            "Puzzles", "Card Games", "TV/Movie Time"
-        ];
+        const PREMADE = ["Park", "Swimming", "Gym Time", "Dog walk", "Sand box", "ROM", "Zoo", "Bike ride", "Reading", "Numbers/Math", "Art", "Geography/Maps", "Science", "Grocery Shopping", "Library", "Soccer", "Jiu Jitsu/Martial Arts", "Building", "Cars/Trucks/Trains", "Puzzles", "Card Games", "TV/Movie Time"];
 
         const App = () => {
-            const [showArchive, setShowArchive] = useState(false);
-            const [activeDay, setActiveDay] = useState(null);
+            const [showLocker, setShowLocker] = useState(false);
+            const [activeDay, setActiveDay] = useState("Monday");
             const [customText, setCustomText] = useState("");
             const [schedule, setSchedule] = useState({
                 Monday: ["Morning Learning", "LUNCH", "Afternoon Learning"],
@@ -53,21 +44,15 @@
                 Friday: ["Morning Learning", "LUNCH", "Afternoon Learning"]
             });
 
-            const handleOpenLocker = (day) => {
-                setActiveDay(day);
-                setShowArchive(true);
-            };
-
             const addActivity = (activity) => {
                 if (!activity) return;
                 setSchedule(prev => ({
                     ...prev,
                     [activeDay]: [...prev[activeDay], activity]
                 }));
-                setShowArchive(false);
+                setShowLocker(false);
                 setCustomText("");
             };
 
             return (
-                <div className="relative h-full w-full bg-[#2d5a27] text-white overflow-hidden studs">
-                    <main className="relative h
+                <div className="min-h-screen
