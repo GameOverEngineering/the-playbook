@@ -14,7 +14,6 @@
         .lego-title { font-family: 'Permanent Marker', cursive; text-shadow: 3px 3px 0px #d32f2f, 6px 6px 0px #000; }
         .studs { background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .active-brick { transform: scale(0.98); opacity: 0.8; }
     </style>
 </head>
 <body>
@@ -31,46 +30,36 @@
             Friday:    { bg: "#43A047", shadow: "#2e7d32", text: "#fff", label: "#FFD000" }
         };
 
-        const PREMADE = ["Park", "Swimming", "Gym Time", "Dog walk", "Sand box", "ROM", "Zoo", "Bike ride", "Reading", "Numbers/Math", "Art", "Geography/Maps", "Science", "Grocery Shopping", "Library", "Soccer", "Jiu Jitsu/Martial Arts", "Building", "Cars/Trucks/Trains", "Puzzles", "Card Games", "TV/Movie Time"];
+        const PREMADE_ACTS = ["Park", "Swimming", "Gym Time", "Dog walk", "ROM", "Zoo", "Bike ride", "Reading", "Numbers/Math", "Art", "Science", "Library", "Soccer", "Jiu Jitsu", "Puzzles"];
+        const PREMADE_LUNCH = ["Pizza", "Sandwich", "Pasta", "Chicken & Rice", "Tacos", "Burger", "Salad", "Fruit Bowl"];
 
         function App() {
             const [schedule, setSchedule] = useState(() => {
-                const saved = localStorage.getItem('playbook_v2');
+                const saved = localStorage.getItem('playbook_v4');
                 return saved ? JSON.parse(saved) : {
-                    Monday: { morning: [], afternoon: [] },
-                    Tuesday: { morning: [], afternoon: [] },
-                    Wednesday: { morning: [], afternoon: [] },
-                    Thursday: { morning: [], afternoon: [] },
-                    Friday: { morning: [], afternoon: [] }
+                    Monday: { morning: [], lunch: [], afternoon: [] },
+                    Tuesday: { morning: [], lunch: [], afternoon: [] },
+                    Wednesday: { morning: [], lunch: [], afternoon: [] },
+                    Thursday: { morning: [], lunch: [], afternoon: [] },
+                    Friday: { morning: [], lunch: [], afternoon: [] }
                 };
             });
 
             const [showLocker, setShowLocker] = useState(false);
             const [context, setContext] = useState({ day: null, period: null });
             const [customText, setCustomText] = useState("");
-            const [movingItem, setMovingItem] = useState(null); // {day, period, index, name}
+            const [movingItem, setMovingItem] = useState(null);
 
-            // Persistence
-            useEffect(() => {
-                localStorage.setItem('playbook_v2', JSON.stringify(schedule));
-            }, [schedule]);
+            useEffect(() => { localStorage.setItem('playbook_v4', JSON.stringify(schedule)); }, [schedule]);
 
-            // Auto-Archive Logic (Checks every minute)
             useEffect(() => {
                 const checkArchive = () => {
                     const now = new Date();
-                    const dayNum = now.getDay(); // 5 = Friday
-                    const hour = now.getHours();
-                    
-                    if (dayNum === 5 && hour >= 18) {
-                        // Archive logic could go here (save to a history array)
-                        // For now, we clear the board for the new week
+                    if (now.getDay() === 5 && now.getHours() >= 18) {
                         setSchedule({
-                            Monday: { morning: [], afternoon: [] },
-                            Tuesday: { morning: [], afternoon: [] },
-                            Wednesday: { morning: [], afternoon: [] },
-                            Thursday: { morning: [], afternoon: [] },
-                            Friday: { morning: [], afternoon: [] }
+                            Monday: { morning: [], lunch: [], afternoon: [] }, Tuesday: { morning: [], lunch: [], afternoon: [] },
+                            Wednesday: { morning: [], lunch: [], afternoon: [] }, Thursday: { morning: [], lunch: [], afternoon: [] },
+                            Friday: { morning: [], lunch: [], afternoon: [] }
                         });
                     }
                 };
@@ -81,41 +70,39 @@
             const addAct = (item) => {
                 if (!item) return;
                 setSchedule(prev => ({
-                    ...prev,
-                    [context.day]: { ...prev[context.day], [context.period]: [...prev[context.day][context.period], item] }
+                    ...prev, [context.day]: { ...prev[context.day], [context.period]: [...prev[context.day][context.period], item] }
                 }));
                 setShowLocker(false);
                 setCustomText("");
             };
 
-            const startMove = (day, period, index, name) => {
-                setMovingItem({ day, period, index, name });
-            };
-
             const placeItem = (day, period) => {
                 if (!movingItem) return;
-                
                 const newSchedule = { ...schedule };
-                // Remove from old spot
                 newSchedule[movingItem.day][movingItem.period].splice(movingItem.index, 1);
-                // Add to new spot
                 newSchedule[day][period].push(movingItem.name);
-                
                 setSchedule(newSchedule);
                 setMovingItem(null);
             };
 
-            const deleteItem = (day, period, index) => {
+            const deleteItem = () => {
+                if (!movingItem) return;
                 const newSchedule = { ...schedule };
-                newSchedule[day][period].splice(index, 1);
+                newSchedule[movingItem.day][movingItem.period].splice(movingItem.index, 1);
                 setSchedule(newSchedule);
+                setMovingItem(null);
             };
 
             return (
                 <div className="min-h-screen studs p-6 pb-32">
                     <header className="flex justify-between items-center mb-8">
                         <h1 className="lego-title text-4xl italic uppercase tracking-tighter leading-none">THE PLAYBOOK</h1>
-                        {movingItem && <div className="bg-orange-500 text-white px-3 py-1 rounded-full animate-pulse text-xs font-bold">MOVING BRICK...</div>}
+                        {movingItem && (
+                            <div className="flex gap-2">
+                                <button onClick={deleteItem} className="bg-red-600 px-3 py-1 rounded-full text-[10px] font-black uppercase">Delete</button>
+                                <button onClick={() => setMovingItem(null)} className="bg-gray-500 px-3 py-1 rounded-full text-[10px] font-black uppercase">Cancel</button>
+                            </div>
+                        )}
                     </header>
                     
                     <div className="space-y-12">
@@ -126,31 +113,52 @@
                                     <div className="h-px flex-1 bg-white/20"></div>
                                 </div>
 
-                                {['morning', 'afternoon'].map(period => (
-                                    <div key={period} className="space-y-3">
-                                        <div className="flex items-center justify-between">
-                                            <div className="bg-white text-black px-4 py-1 rounded-lg shadow-[0_3px_0_#999] text-[10px] font-black uppercase italic">
-                                                {period} Learning
-                                            </div>
-                                            <div className="flex gap-2">
-                                                {movingItem && (
-                                                    <button onClick={() => placeItem(day, period)} className="bg-blue-500 text-white px-3 py-1 rounded text-[10px] font-black uppercase shadow-[0_3px_0_#1e3a8a]">Drop Here</button>
-                                                )}
-                                                <button onClick={() => { setContext({day, period}); setShowLocker(true); }} className="bg-[#FFD000] text-black w-7 h-7 rounded border-2 border-black shadow-[0_3px_0_#000] font-black text-lg">+</button>
-                                            </div>
+                                {/* MORNING */}
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <div className="bg-white text-black px-4 py-1 rounded-lg text-[10px] font-black uppercase italic">Morning Learning</div>
+                                        <div className="flex gap-2">
+                                            {movingItem && <button onClick={() => placeItem(day, 'morning')} className="bg-blue-500 text-white px-2 py-1 rounded text-[8px] font-black uppercase">Drop</button>}
+                                            <button onClick={() => { setContext({day, period: 'morning'}); setShowLocker(true); }} className="bg-[#FFD000] text-black w-6 h-6 rounded border border-black shadow-[0_2px_0_#000] font-black">+</button>
                                         </div>
+                                    </div>
+                                    {schedule[day].morning.map((act, i) => (
+                                        <div key={i} onClick={() => setMovingItem({day, period: 'morning', index: i, name: act})} className={`w-full p-4 rounded-xl border-t-2 border-white/20 shadow-lg ${movingItem?.name === act && movingItem?.day === day ? 'opacity-30' : ''}`} style={{ backgroundColor: DAY_THEMES[day].bg, color: DAY_THEMES[day].text, boxShadow: `0 8px 0 ${DAY_THEMES[day].shadow}` }}>
+                                            <span className="text-xl font-black uppercase italic tracking-tight">{act}</span>
+                                        </div>
+                                    ))}
+                                </div>
 
-                                        {schedule[day][period].map((act, i) => (
-                                            <div key={i} 
-                                                onClick={() => startMove(day, period, i, act)}
-                                                className={`relative w-full p-4 rounded-xl border-t-2 border-white/20 shadow-lg ${movingItem?.index === i && movingItem?.day === day && movingItem?.period === period ? 'opacity-30 border-dashed border-2' : ''}`} 
-                                                style={{ backgroundColor: DAY_THEMES[day].bg, color: DAY_THEMES[day].text, boxShadow: `0 8px 0 ${DAY_THEMES[day].shadow}` }}>
-                                                <span className="text-xl font-black uppercase italic tracking-tight">{act}</span>
-                                                <button onClick={(e) => { e.stopPropagation(); deleteItem(day, period, i); }} className="absolute right-2 top-2 opacity-30 text-xs">✕</button>
+                                {/* LUNCH BAR */}
+                                <div className="space-y-2">
+                                    <div className="w-full bg-black text-white px-4 py-2 flex justify-between items-center rounded border-2 border-white">
+                                        <span className="text-xs font-black italic tracking-widest uppercase">LUNCH TRACKER</span>
+                                        <button onClick={() => { setContext({day, period: 'lunch'}); setShowLocker(true); }} className="bg-white text-black w-5 h-5 rounded flex items-center justify-center font-black text-xs">+</button>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {schedule[day].lunch.map((food, i) => (
+                                            <div key={i} onClick={() => setMovingItem({day, period: 'lunch', index: i, name: food})} className="bg-white text-black px-3 py-1 rounded-full text-[10px] font-black uppercase border-2 border-black">
+                                                {food}
                                             </div>
                                         ))}
                                     </div>
-                                ))}
+                                </div>
+
+                                {/* AFTERNOON */}
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <div className="bg-white text-black px-4 py-1 rounded-lg text-[10px] font-black uppercase italic">Afternoon Learning</div>
+                                        <div className="flex gap-2">
+                                            {movingItem && <button onClick={() => placeItem(day, 'afternoon')} className="bg-blue-500 text-white px-2 py-1 rounded text-[8px] font-black uppercase">Drop</button>}
+                                            <button onClick={() => { setContext({day, period: 'afternoon'}); setShowLocker(true); }} className="bg-[#FFD000] text-black w-6 h-6 rounded border border-black shadow-[0_2px_0_#000] font-black">+</button>
+                                        </div>
+                                    </div>
+                                    {schedule[day].afternoon.map((act, i) => (
+                                        <div key={i} onClick={() => setMovingItem({day, period: 'afternoon', index: i, name: act})} className={`w-full p-4 rounded-xl border-t-2 border-white/20 shadow-lg ${movingItem?.name === act && movingItem?.day === day ? 'opacity-30' : ''}`} style={{ backgroundColor: DAY_THEMES[day].bg, color: DAY_THEMES[day].text, boxShadow: `0 8px 0 ${DAY_THEMES[day].shadow}` }}>
+                                            <span className="text-xl font-black uppercase italic tracking-tight">{act}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -159,13 +167,13 @@
                         <div className="fixed inset-0 z-50 flex flex-col justify-end">
                             <div className="absolute inset-0 bg-black/80" onClick={() => setShowLocker(false)}></div>
                             <div className="relative bg-[#E53935] rounded-t-[40px] p-6 border-t-8 border-[#b71c1c] max-h-[80vh] overflow-y-auto">
-                                <h2 className="lego-title text-2xl italic uppercase mb-4 text-center">LOCKER ROOM</h2>
+                                <h2 className="lego-title text-2xl italic uppercase mb-4 text-center">{context.period === 'lunch' ? 'LUNCH BOX' : 'LOCKER ROOM'}</h2>
                                 <div className="flex gap-2 mb-6 bg-white p-3 rounded-xl border-4 border-black">
-                                    <input type="text" value={customText} onChange={e => setCustomText(e.target.value)} placeholder="CUSTOM..." className="flex-1 outline-none text-black font-black uppercase" />
+                                    <input type="text" value={customText} onChange={e => setCustomText(e.target.value)} placeholder="TYPE CUSTOM..." className="flex-1 outline-none text-black font-black uppercase" />
                                     <button onClick={() => addAct(customText)} className="bg-[#1E88E5] px-4 py-1 rounded font-black italic">ADD</button>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
-                                    {PREMADE.map(p => (
+                                    {(context.period === 'lunch' ? PREMADE_LUNCH : PREMADE_ACTS).map(p => (
                                         <button key={p} onClick={() => addAct(p)} className="bg-white p-4 rounded-xl border-4 border-black shadow-[4px_4px_0_#000] text-black font-black uppercase italic text-sm">{p}</button>
                                     ))}
                                 </div>
