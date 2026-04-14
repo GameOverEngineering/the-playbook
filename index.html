@@ -10,17 +10,18 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { margin: 0; background: #2d5a27; font-family: 'Rajdhani', sans-serif; color: white; }
+        body { margin: 0; background: #2d5a27; font-family: 'Rajdhani', sans-serif; color: white; -webkit-tap-highlight-color: transparent; }
         .lego-title { font-family: 'Permanent Marker', cursive; text-shadow: 3px 3px 0px #d32f2f, 6px 6px 0px #000; }
         .studs { background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .active-brick { transform: scale(0.98); opacity: 0.8; }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState } = React;
+        const { useState, useEffect } = React;
 
         const DAY_THEMES = {
             Monday:    { bg: "#FFD000", shadow: "#f9a825", text: "#3e2723", label: "#E53935" },
@@ -33,36 +34,89 @@
         const PREMADE = ["Park", "Swimming", "Gym Time", "Dog walk", "Sand box", "ROM", "Zoo", "Bike ride", "Reading", "Numbers/Math", "Art", "Geography/Maps", "Science", "Grocery Shopping", "Library", "Soccer", "Jiu Jitsu/Martial Arts", "Building", "Cars/Trucks/Trains", "Puzzles", "Card Games", "TV/Movie Time"];
 
         function App() {
-            const [schedule, setSchedule] = useState({
-                Monday: { morning: [], afternoon: [] },
-                Tuesday: { morning: [], afternoon: [] },
-                Wednesday: { morning: [], afternoon: [] },
-                Thursday: { morning: [], afternoon: [] },
-                Friday: { morning: [], afternoon: [] }
+            const [schedule, setSchedule] = useState(() => {
+                const saved = localStorage.getItem('playbook_v2');
+                return saved ? JSON.parse(saved) : {
+                    Monday: { morning: [], afternoon: [] },
+                    Tuesday: { morning: [], afternoon: [] },
+                    Wednesday: { morning: [], afternoon: [] },
+                    Thursday: { morning: [], afternoon: [] },
+                    Friday: { morning: [], afternoon: [] }
+                };
             });
+
             const [showLocker, setShowLocker] = useState(false);
             const [context, setContext] = useState({ day: null, period: null });
             const [customText, setCustomText] = useState("");
+            const [movingItem, setMovingItem] = useState(null); // {day, period, index, name}
 
-            const openLocker = (day, period) => {
-                setContext({ day, period });
-                setShowLocker(true);
-            };
+            // Persistence
+            useEffect(() => {
+                localStorage.setItem('playbook_v2', JSON.stringify(schedule));
+            }, [schedule]);
+
+            // Auto-Archive Logic (Checks every minute)
+            useEffect(() => {
+                const checkArchive = () => {
+                    const now = new Date();
+                    const dayNum = now.getDay(); // 5 = Friday
+                    const hour = now.getHours();
+                    
+                    if (dayNum === 5 && hour >= 18) {
+                        // Archive logic could go here (save to a history array)
+                        // For now, we clear the board for the new week
+                        setSchedule({
+                            Monday: { morning: [], afternoon: [] },
+                            Tuesday: { morning: [], afternoon: [] },
+                            Wednesday: { morning: [], afternoon: [] },
+                            Thursday: { morning: [], afternoon: [] },
+                            Friday: { morning: [], afternoon: [] }
+                        });
+                    }
+                };
+                const timer = setInterval(checkArchive, 60000);
+                return () => clearInterval(timer);
+            }, []);
 
             const addAct = (item) => {
                 if (!item) return;
-                const { day, period } = context;
                 setSchedule(prev => ({
                     ...prev,
-                    [day]: { ...prev[day], [period]: [...prev[day][period], item] }
+                    [context.day]: { ...prev[context.day], [context.period]: [...prev[context.day][context.period], item] }
                 }));
                 setShowLocker(false);
                 setCustomText("");
             };
 
+            const startMove = (day, period, index, name) => {
+                setMovingItem({ day, period, index, name });
+            };
+
+            const placeItem = (day, period) => {
+                if (!movingItem) return;
+                
+                const newSchedule = { ...schedule };
+                // Remove from old spot
+                newSchedule[movingItem.day][movingItem.period].splice(movingItem.index, 1);
+                // Add to new spot
+                newSchedule[day][period].push(movingItem.name);
+                
+                setSchedule(newSchedule);
+                setMovingItem(null);
+            };
+
+            const deleteItem = (day, period, index) => {
+                const newSchedule = { ...schedule };
+                newSchedule[day][period].splice(index, 1);
+                setSchedule(newSchedule);
+            };
+
             return (
-                <div className="min-h-screen studs p-6 pb-20">
-                    <h1 className="lego-title text-5xl text-center italic uppercase mb-10 tracking-tighter">THE PLAYBOOK</h1>
+                <div className="min-h-screen studs p-6 pb-32">
+                    <header className="flex justify-between items-center mb-8">
+                        <h1 className="lego-title text-4xl italic uppercase tracking-tighter leading-none">THE PLAYBOOK</h1>
+                        {movingItem && <div className="bg-orange-500 text-white px-3 py-1 rounded-full animate-pulse text-xs font-bold">MOVING BRICK...</div>}
+                    </header>
                     
                     <div className="space-y-12">
                         {Object.keys(DAY_THEMES).map(day => (
@@ -72,38 +126,31 @@
                                     <div className="h-px flex-1 bg-white/20"></div>
                                 </div>
 
-                                {/* Morning Section */}
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-3">
-                                        <div className="bg-white text-black px-4 py-1 rounded-lg shadow-[0_3px_0_#999] text-[10px] font-black uppercase italic">Morning Learning</div>
-                                        <button onClick={() => openLocker(day, 'morning')} className="bg-[#FFD000] text-black w-7 h-7 rounded border-2 border-black shadow-[0_3px_0_#000] active:translate-y-1 font-black text-lg flex items-center justify-center">+</button>
-                                    </div>
-                                    {schedule[day].morning.map((act, i) => (
-                                        <div key={i} className="w-full p-4 rounded-xl border-t-2 border-white/20 shadow-lg" style={{ backgroundColor: DAY_THEMES[day].bg, color: DAY_THEMES[day].text, boxShadow: `0 8px 0 ${DAY_THEMES[day].shadow}` }}>
-                                            <span className="text-xl font-black uppercase italic tracking-tight">{act}</span>
+                                {['morning', 'afternoon'].map(period => (
+                                    <div key={period} className="space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <div className="bg-white text-black px-4 py-1 rounded-lg shadow-[0_3px_0_#999] text-[10px] font-black uppercase italic">
+                                                {period} Learning
+                                            </div>
+                                            <div className="flex gap-2">
+                                                {movingItem && (
+                                                    <button onClick={() => placeItem(day, period)} className="bg-blue-500 text-white px-3 py-1 rounded text-[10px] font-black uppercase shadow-[0_3px_0_#1e3a8a]">Drop Here</button>
+                                                )}
+                                                <button onClick={() => { setContext({day, period}); setShowLocker(true); }} className="bg-[#FFD000] text-black w-7 h-7 rounded border-2 border-black shadow-[0_3px_0_#000] font-black text-lg">+</button>
+                                            </div>
                                         </div>
-                                    ))}
-                                </div>
 
-                                {/* Lunch Break */}
-                                <div className="w-full flex items-center gap-2 opacity-40 py-2">
-                                    <div className="h-px flex-1 bg-white"></div>
-                                    <span className="text-[10px] font-black tracking-widest uppercase">LUNCH BREAK</span>
-                                    <div className="h-px flex-1 bg-white"></div>
-                                </div>
-
-                                {/* Afternoon Section */}
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-3">
-                                        <div className="bg-white text-black px-4 py-1 rounded-lg shadow-[0_3px_0_#999] text-[10px] font-black uppercase italic">Afternoon Learning</div>
-                                        <button onClick={() => openLocker(day, 'afternoon')} className="bg-[#FFD000] text-black w-7 h-7 rounded border-2 border-black shadow-[0_3px_0_#000] active:translate-y-1 font-black text-lg flex items-center justify-center">+</button>
+                                        {schedule[day][period].map((act, i) => (
+                                            <div key={i} 
+                                                onClick={() => startMove(day, period, i, act)}
+                                                className={`relative w-full p-4 rounded-xl border-t-2 border-white/20 shadow-lg ${movingItem?.index === i && movingItem?.day === day && movingItem?.period === period ? 'opacity-30 border-dashed border-2' : ''}`} 
+                                                style={{ backgroundColor: DAY_THEMES[day].bg, color: DAY_THEMES[day].text, boxShadow: `0 8px 0 ${DAY_THEMES[day].shadow}` }}>
+                                                <span className="text-xl font-black uppercase italic tracking-tight">{act}</span>
+                                                <button onClick={(e) => { e.stopPropagation(); deleteItem(day, period, i); }} className="absolute right-2 top-2 opacity-30 text-xs">✕</button>
+                                            </div>
+                                        ))}
                                     </div>
-                                    {schedule[day].afternoon.map((act, i) => (
-                                        <div key={i} className="w-full p-4 rounded-xl border-t-2 border-white/20 shadow-lg" style={{ backgroundColor: DAY_THEMES[day].bg, color: DAY_THEMES[day].text, boxShadow: `0 8px 0 ${DAY_THEMES[day].shadow}` }}>
-                                            <span className="text-xl font-black uppercase italic tracking-tight">{act}</span>
-                                        </div>
-                                    ))}
-                                </div>
+                                ))}
                             </div>
                         ))}
                     </div>
@@ -111,11 +158,11 @@
                     {showLocker && (
                         <div className="fixed inset-0 z-50 flex flex-col justify-end">
                             <div className="absolute inset-0 bg-black/80" onClick={() => setShowLocker(false)}></div>
-                            <div className="relative bg-[#E53935] rounded-t-[40px] p-6 border-t-8 border-[#b71c1c] max-h-[80vh] overflow-y-auto hide-scrollbar">
-                                <h2 className="lego-title text-2xl italic uppercase mb-4 text-center">ADDING TO {context.period}</h2>
+                            <div className="relative bg-[#E53935] rounded-t-[40px] p-6 border-t-8 border-[#b71c1c] max-h-[80vh] overflow-y-auto">
+                                <h2 className="lego-title text-2xl italic uppercase mb-4 text-center">LOCKER ROOM</h2>
                                 <div className="flex gap-2 mb-6 bg-white p-3 rounded-xl border-4 border-black">
-                                    <input type="text" value={customText} onChange={e => setCustomText(e.target.value)} placeholder="TYPE CUSTOM..." className="flex-1 outline-none text-black font-black uppercase" />
-                                    <button onClick={() => addAct(customText)} className="bg-[#1E88E5] px-4 py-1 rounded font-black italic shadow-md">ADD</button>
+                                    <input type="text" value={customText} onChange={e => setCustomText(e.target.value)} placeholder="CUSTOM..." className="flex-1 outline-none text-black font-black uppercase" />
+                                    <button onClick={() => addAct(customText)} className="bg-[#1E88E5] px-4 py-1 rounded font-black italic">ADD</button>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     {PREMADE.map(p => (
