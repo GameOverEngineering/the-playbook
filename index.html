@@ -32,7 +32,6 @@
             Friday:    { bg: "#43A047", shadow: "#2e7d32", text: "#fff", label: "#FFD000" }
         };
 
-        // Nutrition Dictionary (Estimates)
         const NUTRITION = {
             "Pizza": { cal: 300, sugar: 4 }, "Tacos": { cal: 200, sugar: 2 }, "Pasta": { cal: 350, sugar: 5 },
             "Sandwich": { cal: 250, sugar: 3 }, "Burger": { cal: 450, sugar: 7 }, "Chicken": { cal: 200, sugar: 0 },
@@ -45,7 +44,7 @@
 
         function App() {
             const [schedule, setSchedule] = useState(() => {
-                const saved = localStorage.getItem('playbook_v7');
+                const saved = localStorage.getItem('playbook_v8');
                 return saved ? JSON.parse(saved) : {
                     Monday: { morning: [], breakfast: [], lunch: [], afternoon: [] },
                     Tuesday: { morning: [], breakfast: [], lunch: [], afternoon: [] },
@@ -60,7 +59,7 @@
             const [customText, setCustomText] = useState("");
             const [movingItem, setMovingItem] = useState(null);
 
-            useEffect(() => { localStorage.setItem('playbook_v7', JSON.stringify(schedule)); }, [schedule]);
+            useEffect(() => { localStorage.setItem('playbook_v8', JSON.stringify(schedule)); }, [schedule]);
 
             const getStats = (day) => {
                 let cal = 0, sugar = 0;
@@ -98,12 +97,12 @@
                 setMovingItem(null);
             };
 
-            const SectionHeader = ({ day, period, title, color, isDark }) => (
-                <div className={`flex items-center justify-between p-2 rounded-xl border-2 border-black shadow-[4px_4px_0px_#000] ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
+            const SectionHeader = ({ day, period, title, btnColor, headerBg, textColor }) => (
+                <div className={`flex items-center justify-between p-2 rounded-xl border-2 border-black shadow-[4px_4px_0px_#000] ${headerBg} ${textColor}`}>
                     <span className="label-text uppercase italic ml-2">{title}</span>
                     <div className="flex gap-2">
                         {movingItem && <button onClick={() => placeItem(day, period)} className="bg-blue-500 text-white px-3 py-1 rounded font-black border-2 border-black text-xs">DROP</button>}
-                        <button onClick={() => { setContext({day, period}); setShowLocker(true); }} className={`${color} text-black w-10 h-10 rounded border-2 border-black shadow-[0_3px_0_#000] font-black text-3xl flex items-center justify-center active:translate-y-1`}>+</button>
+                        <button onClick={() => { setContext({day, period}); setShowLocker(true); }} className={`${btnColor} text-black w-10 h-10 rounded border-2 border-black shadow-[0_3px_0_#000] font-black text-3xl flex items-center justify-center active:translate-y-1`}>+</button>
                     </div>
                 </div>
             );
@@ -112,7 +111,6 @@
                 <div className="min-h-screen studs p-4 pb-32">
                     <header className="text-center mb-8">
                         <h1 className="lego-title text-6xl italic uppercase tracking-tighter leading-none">THE PLAYBOOK</h1>
-                        {movingItem && <div className="mt-4 bg-blue-500 text-white p-2 rounded-lg font-black animate-bounce tracking-widest uppercase">MOVE BRICK</div>}
                     </header>
                     
                     <div className="space-y-12">
@@ -127,9 +125,9 @@
                                         </div>
                                     </div>
 
-                                    {/* BREAKFAST - BLUE ZONE */}
-                                    <div className="bg-[#e3f2fd]/90 p-3 rounded-3xl border-2 border-black/20 space-y-3">
-                                        <SectionHeader day={day} period="breakfast" title="BREAKFAST BOX" color="bg-[#90caf9]" />
+                                    {/* BREAKFAST - ORANGE ZONE */}
+                                    <div className="bg-[#fff3e0]/95 p-3 rounded-3xl border-2 border-black/20 space-y-3">
+                                        <SectionHeader day={day} period="breakfast" title="BREAKFAST BOX" btnColor="bg-[#ffb74d]" headerBg="bg-white" textColor="text-black" />
                                         <div className="space-y-4 px-1">
                                             {schedule[day].breakfast.map((act, i) => (
                                                 <div key={i} onClick={() => setMovingItem({day, period: 'breakfast', index: i, name: act})} className="relative flex items-center justify-between p-5 rounded-2xl border-2 border-black bg-white text-black shadow-[0_10px_0_#999,0_10px_0_2px_#000]">
@@ -140,7 +138,7 @@
                                         </div>
                                     </div>
 
-                                    <SectionHeader day={day} period="morning" title="Morning Learning" color="bg-[#FFD000]" />
+                                    <SectionHeader day={day} period="morning" title="Morning Learning" btnColor="bg-[#FFD000]" headerBg="bg-white" textColor="text-black" />
                                     <div className="space-y-4">
                                         {schedule[day].morning.map((act, i) => (
                                             <div key={i} onClick={() => setMovingItem({day, period: 'morning', index: i, name: act})} className="relative flex items-center justify-between p-5 rounded-2xl border-2 border-black shadow-[0_10px_0_#999,0_10px_0_2px_#000]" style={{ backgroundColor: DAY_THEMES[day].bg, color: DAY_THEMES[day].text }}>
@@ -150,9 +148,9 @@
                                         ))}
                                     </div>
 
-                                    {/* LUNCH - GREEN ZONE */}
-                                    <div className="bg-[#e8f5e9]/90 p-3 rounded-3xl border-2 border-black/20 space-y-3">
-                                        <SectionHeader day={day} period="lunch" title="LUNCH BOX" color="bg-[#a5d6a7]" isDark />
+                                    {/* LUNCH - BROWN ZONE */}
+                                    <div className="bg-[#efebe9]/95 p-3 rounded-3xl border-2 border-black/20 space-y-3">
+                                        <SectionHeader day={day} period="lunch" title="LUNCH BOX" btnColor="bg-[#8d6e63]" headerBg="bg-[#5d4037]" textColor="text-white" />
                                         <div className="space-y-4 px-1">
                                             {schedule[day].lunch.map((act, i) => (
                                                 <div key={i} onClick={() => setMovingItem({day, period: 'lunch', index: i, name: act})} className="relative flex items-center justify-between p-5 rounded-2xl border-2 border-black bg-white text-black shadow-[0_10px_0_#999,0_10px_0_2px_#000]">
@@ -163,7 +161,7 @@
                                         </div>
                                     </div>
 
-                                    <SectionHeader day={day} period="afternoon" title="Afternoon Learning" color="bg-[#FFD000]" />
+                                    <SectionHeader day={day} period="afternoon" title="Afternoon Learning" btnColor="bg-[#FFD000]" headerBg="bg-white" textColor="text-black" />
                                     <div className="space-y-4">
                                         {schedule[day].afternoon.map((act, i) => (
                                             <div key={i} onClick={() => setMovingItem({day, period: 'afternoon', index: i, name: act})} className="relative flex items-center justify-between p-5 rounded-2xl border-2 border-black shadow-[0_10px_0_#999,0_10px_0_2px_#000]" style={{ backgroundColor: DAY_THEMES[day].bg, color: DAY_THEMES[day].text }}>
