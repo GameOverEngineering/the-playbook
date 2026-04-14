@@ -12,17 +12,23 @@
     <style>
         body { margin: 0; background: #2d5a27; font-family: 'Rajdhani', sans-serif; color: white; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
         
-        /* Marvel Comic Title Styling */
         .comic-title { 
             font-family: 'Bangers', cursive; 
             letter-spacing: 0.1em;
-            color: #E61E27; /* Classic Marvel Red */
+            color: #E61E27; 
             text-shadow: 4px 4px 0px #000, 8px 8px 0px #FFD000;
             transform: skew(-5deg) rotate(-2deg);
         }
+
+        /* Yellow Pop for the Modal Title */
+        .brick-modal-title {
+            font-family: 'Bangers', cursive; 
+            letter-spacing: 0.1em;
+            color: #FFD000; 
+            text-shadow: 3px 3px 0px #000;
+        }
         
         .studs { background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
         .big-text { font-size: 1.6rem; line-height: 1; letter-spacing: -0.02em; font-weight: 900; }
         .label-text { font-size: 1.1rem; font-weight: 900; }
     </style>
@@ -53,7 +59,7 @@
 
         function App() {
             const [schedule, setSchedule] = useState(() => {
-                const saved = localStorage.getItem('playbook_v9');
+                const saved = localStorage.getItem('playbook_v10');
                 return saved ? JSON.parse(saved) : {
                     Monday: { morning: [], breakfast: [], lunch: [], afternoon: [] },
                     Tuesday: { morning: [], breakfast: [], lunch: [], afternoon: [] },
@@ -68,7 +74,7 @@
             const [customText, setCustomText] = useState("");
             const [movingItem, setMovingItem] = useState(null);
 
-            useEffect(() => { localStorage.setItem('playbook_v9', JSON.stringify(schedule)); }, [schedule]);
+            useEffect(() => { localStorage.setItem('playbook_v10', JSON.stringify(schedule)); }, [schedule]);
 
             const getStats = (day) => {
                 let cal = 0, sugar = 0;
@@ -106,8 +112,8 @@
                 setMovingItem(null);
             };
 
-            const SectionHeader = ({ day, period, title, btnColor, headerBg, textColor }) => (
-                <div className={`flex items-center justify-between p-2 rounded-xl border-2 border-black shadow-[4px_4px_0px_#000] ${headerBg} ${textColor}`}>
+            const SectionHeader = ({ day, period, title, btnColor, headerBg, textColor, borderColor = 'border-black' }) => (
+                <div className={`flex items-center justify-between p-2 rounded-xl border-2 ${borderColor} shadow-[4px_4px_0px_#000] ${headerBg} ${textColor}`}>
                     <span className="label-text uppercase italic ml-2">{title}</span>
                     <div className="flex gap-2">
                         {movingItem && <button onClick={() => placeItem(day, period)} className="bg-blue-500 text-white px-3 py-1 rounded font-black border-2 border-black text-xs">DROP</button>}
@@ -119,8 +125,8 @@
             return (
                 <div className="min-h-screen studs p-4 pb-32">
                     <header className="flex justify-center mb-12 mt-4">
-                        <div className="border-4 border-black p-4 bg-black/30 rounded-lg">
-                            <h1 className="comic-title text-7xl uppercase">THE PLAYBOOK</h1>
+                        <div className="border-4 border-black p-4 bg-black/30 rounded-lg text-center">
+                            <h1 className="comic-title text-5xl md:text-7xl uppercase">THE PLAYBOOK</h1>
                         </div>
                     </header>
                     
@@ -136,9 +142,12 @@
                                         </div>
                                     </div>
 
-                                    {/* BREAKFAST - NEON ORANGE ZONE */}
-                                    <div className="bg-[#ffab40]/90 p-3 rounded-3xl border-2 border-black/20 space-y-3">
-                                        <SectionHeader day={day} period="breakfast" title="BREAKFAST BOX" btnColor="bg-[#FFD000]" headerBg="bg-[#ffab40]" textColor="text-black" />
+                                    {/* BREAKFAST BOX - GREY OUTER / NEON ORANGE INNER */}
+                                    <div className="bg-[#b0bec5]/90 p-3 rounded-3xl border-2 border-[#607d8b]/60 space-y-3">
+                                        <SectionHeader 
+                                            day={day} period="breakfast" title="BREAKFAST BOX" btnColor="bg-[#FFD000]" 
+                                            headerBg="bg-[#ffab40]" textColor="text-black" 
+                                            borderColor="border-black" />
                                         <div className="space-y-4 px-1">
                                             {schedule[day].breakfast.map((act, i) => (
                                                 <div key={i} onClick={() => setMovingItem({day, period: 'breakfast', index: i, name: act})} className="relative flex items-center justify-between p-5 rounded-2xl border-2 border-black bg-white text-black shadow-[0_10px_0_#999,0_10px_0_2px_#000]">
@@ -159,7 +168,7 @@
                                         ))}
                                     </div>
 
-                                    {/* LUNCH - BROWN ZONE */}
+                                    {/* LUNCH BOX - BROWN ZONE */}
                                     <div className="bg-[#efebe9]/95 p-3 rounded-3xl border-2 border-black/20 space-y-3">
                                         <SectionHeader day={day} period="lunch" title="LUNCH BOX" btnColor="bg-[#8d6e63]" headerBg="bg-[#5d4037]" textColor="text-white" />
                                         <div className="space-y-4 px-1">
@@ -186,12 +195,12 @@
                         })}
                     </div>
 
-                    {/* LOCKER ROOM */}
+                    {/* PICK A BRICK MODAL */}
                     {showLocker && (
                         <div className="fixed inset-0 z-50 flex flex-col justify-end">
                             <div className="absolute inset-0 bg-black/90" onClick={() => setShowLocker(false)}></div>
                             <div className="relative bg-[#E61E27] rounded-t-[40px] p-6 border-t-8 border-black max-h-[85vh] overflow-y-auto">
-                                <h2 className="comic-title text-5xl uppercase mb-6 text-center tracking-tight">PICK A BRICK</h2>
+                                <h2 className="brick-modal-title text-5xl uppercase mb-6 text-center tracking-tight">PICK A BRICK</h2>
                                 <div className="flex gap-2 mb-8 bg-white p-3 rounded-2xl border-4 border-black">
                                     <input type="text" value={customText} onChange={e => setCustomText(e.target.value)} placeholder="CUSTOM..." className="flex-1 outline-none text-black font-black uppercase text-xl" />
                                     <button onClick={() => addAct(customText)} className="bg-[#1E88E5] text-white px-6 py-2 rounded-xl border-2 border-black font-black italic">ADD</button>
