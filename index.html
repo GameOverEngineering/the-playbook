@@ -11,7 +11,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { margin: 0; background: #2d5a27; font-family: 'Rajdhani', sans-serif; color: white; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
-        
         .comic-title { 
             font-family: 'Bangers', cursive; 
             letter-spacing: 0.1em;
@@ -19,15 +18,12 @@
             text-shadow: 4px 4px 0px #000, 8px 8px 0px #FFD000;
             transform: skew(-5deg) rotate(-2deg);
         }
-
-        /* Yellow Pop for the Modal Title */
         .brick-modal-title {
             font-family: 'Bangers', cursive; 
             letter-spacing: 0.1em;
             color: #FFD000; 
             text-shadow: 3px 3px 0px #000;
         }
-        
         .studs { background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
         .big-text { font-size: 1.6rem; line-height: 1; letter-spacing: -0.02em; font-weight: 900; }
         .label-text { font-size: 1.1rem; font-weight: 900; }
@@ -59,7 +55,7 @@
 
         function App() {
             const [schedule, setSchedule] = useState(() => {
-                const saved = localStorage.getItem('playbook_v10');
+                const saved = localStorage.getItem('playbook_v11');
                 return saved ? JSON.parse(saved) : {
                     Monday: { morning: [], breakfast: [], lunch: [], afternoon: [] },
                     Tuesday: { morning: [], breakfast: [], lunch: [], afternoon: [] },
@@ -74,7 +70,7 @@
             const [customText, setCustomText] = useState("");
             const [movingItem, setMovingItem] = useState(null);
 
-            useEffect(() => { localStorage.setItem('playbook_v10', JSON.stringify(schedule)); }, [schedule]);
+            useEffect(() => { localStorage.setItem('playbook_v11', JSON.stringify(schedule)); }, [schedule]);
 
             const getStats = (day) => {
                 let cal = 0, sugar = 0;
@@ -168,9 +164,12 @@
                                         ))}
                                     </div>
 
-                                    {/* LUNCH BOX - BROWN ZONE */}
-                                    <div className="bg-[#efebe9]/95 p-3 rounded-3xl border-2 border-black/20 space-y-3">
-                                        <SectionHeader day={day} period="lunch" title="LUNCH BOX" btnColor="bg-[#8d6e63]" headerBg="bg-[#5d4037]" textColor="text-white" />
+                                    {/* LUNCH BOX - NEON LIGHT GREEN ZONE */}
+                                    <div className="bg-[#b0bec5]/90 p-3 rounded-3xl border-2 border-[#607d8b]/60 space-y-3">
+                                        <SectionHeader 
+                                            day={day} period="lunch" title="LUNCH BOX" btnColor="bg-[#ccff00]" 
+                                            headerBg="bg-[#a6ff00]" textColor="text-black" 
+                                            borderColor="border-black" />
                                         <div className="space-y-4 px-1">
                                             {schedule[day].lunch.map((act, i) => (
                                                 <div key={i} onClick={() => setMovingItem({day, period: 'lunch', index: i, name: act})} className="relative flex items-center justify-between p-5 rounded-2xl border-2 border-black bg-white text-black shadow-[0_10px_0_#999,0_10px_0_2px_#000]">
