@@ -55,7 +55,7 @@
 
         function App() {
             const [schedule, setSchedule] = useState(() => {
-                const saved = localStorage.getItem('playbook_v11');
+                const saved = localStorage.getItem('playbook_v12');
                 return saved ? JSON.parse(saved) : {
                     Monday: { morning: [], breakfast: [], lunch: [], afternoon: [] },
                     Tuesday: { morning: [], breakfast: [], lunch: [], afternoon: [] },
@@ -70,7 +70,7 @@
             const [customText, setCustomText] = useState("");
             const [movingItem, setMovingItem] = useState(null);
 
-            useEffect(() => { localStorage.setItem('playbook_v11', JSON.stringify(schedule)); }, [schedule]);
+            useEffect(() => { localStorage.setItem('playbook_v12', JSON.stringify(schedule)); }, [schedule]);
 
             const getStats = (day) => {
                 let cal = 0, sugar = 0;
@@ -138,11 +138,11 @@
                                         </div>
                                     </div>
 
-                                    {/* BREAKFAST BOX - GREY OUTER / NEON ORANGE INNER */}
+                                    {/* BREAKFAST BOX - GREY OUTER / MORE NEON ORANGE INNER */}
                                     <div className="bg-[#b0bec5]/90 p-3 rounded-3xl border-2 border-[#607d8b]/60 space-y-3">
                                         <SectionHeader 
                                             day={day} period="breakfast" title="BREAKFAST BOX" btnColor="bg-[#FFD000]" 
-                                            headerBg="bg-[#ffab40]" textColor="text-black" 
+                                            headerBg="bg-[#FF5F1F]" textColor="text-black" 
                                             borderColor="border-black" />
                                         <div className="space-y-4 px-1">
                                             {schedule[day].breakfast.map((act, i) => (
