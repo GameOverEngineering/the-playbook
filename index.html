@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Playbook: Ultimate Sovereign Library</title>
+    <title>The Playbook: Personalized Sovereign Build</title>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Rajdhani:wght@800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -15,10 +15,10 @@
         .studs { background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
         .btn-comic { transition: transform 0.1s; border: 3px solid black; box-shadow: 4px 4px 0px black; text-transform: uppercase; font-weight: 900; }
         .btn-comic:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0px black; }
+        .screen-fade { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .library-drawer { background: #f4f4f4; border-top: 6px solid black; box-shadow: 0 -15px 40px rgba(0,0,0,0.6); position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; }
         .brick-chip { background: white; color: black; border: 2px solid black; padding: 6px 10px; border-radius: 6px; font-weight: 900; font-size: 10px; box-shadow: 2px 2px 0px black; cursor: pointer; display: inline-block; margin: 3px; }
-        .brick-chip:active { transform: scale(0.9); }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="studs">
@@ -27,149 +27,148 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        const PACKS = {
-            "Trades & Tech": {
-                "Plumbing": ["Rough-in", "Stack Test", "Fixture Install", "Drain Snaking", "Sump Pump Check", "Client Quote", "Parts Run", "Site Cleanup", "Leak Detection", "Hot Water Tank", "Pipe Insulation", "Main Shut-off Check", "PEX Crimping", "Solder Joint Work", "Backflow Testing", "Mixing Valve Adjustment", "Toilet Augering", "Garbage Disposal Fix", "Laundry Tie-in", "Septic Inspection", "Grease Trap Clean", "Water Meter Install", "Shower Valve Swap", "Gas Line Pressure", "Vent Stack Clearing", "Emergency Call", "Blueprint Review", "ESA Coordination", "Invoice Generation", "Tool Sharpening"],
-                "Electrical": ["Panel Upgrade", "Wire Pulling", "Circuit Test", "Outlet Install", "Lighting Plan", "Code Inspection", "Conduit Bend", "Troubleshooting", "Service Call", "GFCI Install", "Dimmer Wiring", "Smart Home Hub", "EV Charger Install", "Breaker Swap", "Knob & Tube Removal", "Service Mast Repair", "Data/Low Voltage", "Generator Hookup", "Arc Fault Testing", "Outdoor Lighting", "Grounding Rod Drive", "Ballast Replacement", "Load Calculation", "Permit Filing", "Safety Tailgate", "Cable Management", "Thermal Imaging", "Voltage Drop Check", "Labeling Panel"],
-                "Construction": ["Site Size-up", "Framing", "Drywall", "Permit Check", "Sub-contractor Meet", "Dumpster Swap", "Tool Inventory", "Safety Walk", "Material Delivery", "Laser Leveling", "Insulation Blowing", "Vapour Barrier", "Mud & Tape", "Sanding Room", "Baseboard Trim", "Window Install", "Door Hanging", "Roofing Patch", "Siding Repair", "Demolition", "Scaffolding Build", "Floor Joist Reinforce", "Tile Layout", "Grout Seal", "Concrete Pour", "Compaction Test", "Stair Stringer Cut", "Cabinet Install", "Deck Pier Dig", "Fence Post Set"]
+        const DEFAULTS = {
+            "Homeschool": {
+                blocks: [
+                    { id: 'h1', label: 'Breakfast', color: '#FF5F1F', time: '08:00' },
+                    { id: 'h2', label: 'Morning Learning', color: '#FFFFFF', time: '09:00' },
+                    { id: 'h3', label: 'Lunch', color: '#a6ff00', time: '12:00' },
+                    { id: 'h4', label: 'Afternoon Learning', color: '#FFFFFF', time: '13:00' }
+                ]
             },
-            "Emergency Services": {
-                "Fire & Rescue": ["Rig Check", "Hydrant Flow Test", "Training Drill", "Shift Handover", "Station Chores", "Medical Bag Inventory", "Pre-plan Review", "Fitness Training", "Hazmat Review", "SCBA Inspection", "Nozzle Maintenance", "Ladder Throwing", "Forcible Entry Practice", "Extrication Drill", "High Angle Rope", "Wildland Gear Prep", "Fire Prev Inspection", "Public Demo", "NFPA Study", "Uniform Maintenance", "Dispatch Comms Check", "Generator Test", "Saw Maintenance", "Ventilation Theory", "Thermal Cam Battery", "Incident Critique", "Peer Support Chat", "Inventory Audit", "PPE Decon", "Foam System Flush"],
-                "Paramedic/EMS": ["Rig Restock", "Ambulance Inspection", "Protocol Review", "Documentation/PCRs", "Base Clean", "CME Training", "Supply Requisition", "Narcotics Count", "Monitor/Defib Check", "O2 Tank Swap", "Stretcher Lube", "Suction Unit Test", "Airway Bag Audit", "Pediatric Sizing Review", "Radio Signal Check", "Triage Tag Prep", "Shift Debrief", "ECG Strip Practice", "Pharmacology Study", "IV Start Practice", "Refusal Paperwork", "Trauma Bag Audit", "MCI Drill", "Station Log Entry", "Blood Glucose Check", "Defib Pad Expiry", "Suction Catheter Check", "Personal Bag Pack"],
-                "Police/Security": ["Patrol Briefing", "Equipment Check", "Court Appearance", "Report Writing", "Public Outreach", "Evidence Log", "Tactical Training", "Cruiser Maintenance", "Body Cam Sync", "Use of Force Review", "Statement Taking", "Witness Interview", "Case File Review", "Canine Unit Support", "Traffic Stop Drill", "Policy Update", "Fingerprint Kit Check", "Radar Calibration", "Community Meeting", "Narcotics Processing", "Booking Procedure", "Restraint Check", "Firearm Cleaning", "Range Qualification", "De-escalation Study", "Cyber Crime Basic", "Ethics Training", "Note-taking Audit"]
+            "First Responder": {
+                blocks: [
+                    { id: 'f1', label: 'Shift Start', color: '#E61E27', time: '07:00' },
+                    { id: 'f2', label: 'Station Ops', color: '#2196F3', time: '08:00' },
+                    { id: 'f3', label: 'Training', color: '#FFFFFF', time: '10:00' },
+                    { id: 'f4', label: 'Maintenance', color: '#FFD000', time: '13:00' },
+                    { id: 'f5', label: 'Reports', color: '#FFFFFF', time: '15:00' },
+                    { id: 'f6', label: 'Fitness', color: '#4CAF50', time: '16:30' },
+                    { id: 'f7', label: 'Handover', color: '#9C27B0', time: '18:30' }
+                ]
             },
-            "Homeschool/Edu": {
-                "Core Learning": ["STEM Lab", "Nature Walk", "Phonics", "Math Games", "Art Project", "History", "Science Lab", "Logic Puzzles", "BJJ Training", "Silent Reading", "Creative Writing", "Geography Map", "Music Theory", "Piano Practice", "Foreign Language", "Typing Club", "Anatomy Study", "Poetry Tea Time", "Copy Work", "Memory Work", "Shakespeare Reading", "Documentary Film", "Current Events", "Biblical Study", "Philosophy 101", "Financial Literacy", "Cooking Chemistry", "Coding/Scratch", "Electronics Kit", "Chess Tactics", "Bird ID", "Star Gazing", "Microscope Lab"],
-                "Teacher (ON)": ["Literacy Block", "Numeracy Block", "DPA/Gym", "IEP Work", "Planning", "Assessment", "Bell Work", "Dismissal", "Staff Meeting", "Duty (Recess)", "Ontario Curriculum", "Report Card Comments", "Guided Reading", "Writer's Workshop", "Math Manipulatives", "Anchor Charts", "Student Profiles", "Parent Teacher Prep", "Field Trip Logistics", "Grade Level Meeting", "Resource Prep", "Bulletin Board", "Classroom Reset", "Tech Support", "Equity Training", "Spec Ed Consultation", "LTO Planning", "Supply Plans", "Marking Rubric", "Health & PhysEd", "Drama/Dance"]
+            "Trades": {
+                blocks: [
+                    { id: 't1', label: 'Site Arrival', color: '#FF5F1F', time: '07:30' },
+                    { id: 't2', label: 'Core Job Ops', color: '#FFFFFF', time: '09:00' },
+                    { id: 't3', label: 'Lunch / Admin', color: '#a6ff00', time: '12:00' },
+                    { id: 't4', label: 'Afternoon Finish', color: '#FFFFFF', time: '13:30' },
+                    { id: 't5', label: 'Quotes & Prep', color: '#2196F3', time: '16:00' }
+                ]
+            }
+        };
+
+        const BRICK_LIBRARY = {
+            "Homeschool": {
+                "0-2.5": ["Sensory Bin", "Mirror Play", "Tummy Time", "Board Books", "Water Play", "Nursery Rhymes", "Stroller Walk", "Bubble Play"],
+                "2.5-4.5": ["Sorting Colors", "Sticker Art", "Playdough", "Counting Steps", "Alphabet Tracing", "Puzzle Time", "Fort Building", "Bird Watching"],
+                "4.5-8.5": ["Phonics", "Addition Games", "Nature Journal", "Bug Hotel", "Lego Build", "Baking (Measure)", "BJJ", "Piano", "Map Skills"],
+                "8.5-12.5": ["Algebra", "Novel Study", "Microscope", "Film Dissection", "Financial Literacy", "Coding", "Debate", "Science Experiment"]
             },
-            "Family & Legacy": {
-                "Parenting": ["Lunch Prep", "Backpack Check", "Homework Zone", "Bath/Bed Routine", "Chores", "Screen Time", "Martial Arts", "Hockey Practice", "Soccer Game", "Swimming Lesson", "Music Rehearsal", "Room Tidying", "Tooth Brushing", "Vitamin Time", "Laundry Sort", "Toy Rotation", "Evening Walk", "Bedtime Story", "Gratitude Chat", "Prayer", "Outfit Choice", "Shoe Finding", "Water Bottle Fill", "Device Charging", "Dentist/Doctor", "Barber Visit", "Playdate Sync", "Birthday Prep", "Bike Ride", "Dog Walk"],
-                "Retiree": ["Morning Walk", "Blood Pressure Check", "Physio Exercises", "Medication Organizer", "Hydration Goal", "Sauna Session", "Stretching", "Doctor Appointment", "Grandkids Visit", "Golf Tee Time", "Woodshop Project", "Garden Maintenance", "Community Meetup", "Volunteer Hours", "Bridge/Game Club", "Reading Time", "Estate Planning", "Genealogy Search", "Tech Help", "Grocery Run", "Library Trip", "Investment Check", "Travel Research", "Photo Organizing", "Rest & Reset", "Bird Watching", "News Catch-up", "Baking Time"]
+            "First Responder": {
+                "Standard": ["Rig Check", "Hydrant Test", "Drill", "Handover", "Station Chores", "Medical Bag", "Pre-plan", "Fitness", "SCBA Check", "Narcotics Count", "PPE Decon", "PCR Paperwork"]
+            },
+            "Trades": {
+                "Job Site": ["Rough-in", "Stack Test", "Fixture Install", "Drain Snaking", "Quote", "Parts Run", "ESA Inspection", "Safety Walk", "Material Delivery", "Panel Work"]
             }
         };
 
         function App() {
-            const [view, setView] = useState('playbook'); 
+            const [profile, setProfile] = useState(() => JSON.parse(localStorage.getItem('pb_profile')));
+            const [view, setView] = useState('playbook');
             const [libraryTarget, setLibraryTarget] = useState(null);
-            const [activeCategory, setActiveCategory] = useState("Trades & Tech");
-            const [activeSub, setActiveSub] = useState("Plumbing");
-            const [customInput, setCustomInput] = useState("");
+            const [schedule, setSchedule] = useState(() => JSON.parse(localStorage.getItem('pb_sched')) || { Monday: {}, Tuesday: {}, Wednesday: {}, Thursday: {}, Friday: {} });
 
-            const [config, setConfig] = useState(() => {
-                const saved = localStorage.getItem('pb_v50_config');
-                return saved ? JSON.parse(saved) : { hero: true, sections: [
-                    { id: 's1', label: 'Morning Box', color: '#FF5F1F', active: true, time: '07:00' },
-                    { id: 's2', label: 'Primary Focus', color: '#FFFFFF', active: true, time: '09:00' },
-                    { id: 's3', label: 'Fuel & Reset', color: '#a6ff00', active: true, time: '12:00' },
-                    { id: 's4', label: 'Secondary Ops', color: '#FFFFFF', active: true, time: '13:30' },
-                    { id: 's5', label: 'Activity/Sports', color: '#2196F3', active: true, time: '17:00' },
-                    { id: 's6', label: 'Night Routine', color: '#9C27B0', active: true, time: '19:30' }
-                ]};
-            });
+            useEffect(() => { localStorage.setItem('pb_profile', JSON.stringify(profile)); }, [profile]);
+            useEffect(() => { localStorage.setItem('pb_sched', JSON.stringify(schedule)); }, [schedule]);
 
-            const [schedule, setSchedule] = useState(() => {
-                const saved = localStorage.getItem('pb_v50_current');
-                return saved ? JSON.parse(saved) : { Monday: {s1:[], s2:[], s3:[], s4:[], s5:[], s6:[]}, Tuesday: {s1:[], s2:[], s3:[], s4:[], s5:[], s6:[]}, Wednesday: {s1:[], s2:[], s3:[], s4:[], s5:[], s6:[]}, Thursday: {s1:[], s2:[], s3:[], s4:[], s5:[], s6:[]}, Friday: {s1:[], s2:[], s3:[], s4:[], s5:[], s6:[]} };
-            });
+            // ONBOARDING SCREEN
+            if (!profile) {
+                return (
+                    <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center screen-fade">
+                        <h1 className="comic-title text-5xl mb-8">CHOOSE YOUR<br/>USE CASE</h1>
+                        <div className="grid grid-cols-1 gap-4 w-full max-w-xs">
+                            {["Homeschool", "First Responder", "Trades", "Retiree"].map(type => (
+                                <button key={type} onClick={() => {
+                                    if(type === "Homeschool") setProfile({ type, step: 'age' });
+                                    else setProfile({ type, blocks: DEFAULTS[type]?.blocks || [] });
+                                }} className="bg-white text-black py-4 btn-comic font-black text-xl italic uppercase">{type}</button>
+                            ))}
+                        </div>
+                    </div>
+                );
+            }
 
-            useEffect(() => { localStorage.setItem('pb_v50_config', JSON.stringify(config)); }, [config]);
-            useEffect(() => { localStorage.setItem('pb_v50_current', JSON.stringify(schedule)); }, [schedule]);
+            // AGE SELECTION SCREEN
+            if (profile.step === 'age') {
+                return (
+                    <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center screen-fade">
+                        <h1 className="comic-title text-4xl mb-8">AGE OF KIDS?</h1>
+                        <div className="grid grid-cols-1 gap-4 w-full max-w-xs">
+                            {["0-2.5", "2.5-4.5", "4.5-8.5", "8.5-12.5"].map(age => (
+                                <button key={age} onClick={() => {
+                                    setProfile({ ...profile, age, step: null, blocks: DEFAULTS.Homeschool.blocks });
+                                }} className="bg-white text-black py-4 btn-comic font-black text-xl italic uppercase">{age} RANGE</button>
+                            ))}
+                        </div>
+                    </div>
+                );
+            }
 
             const addBrick = (text) => {
-                if(!text) return;
                 const { day, sid } = libraryTarget;
                 const newSched = {...schedule};
-                newSched[day][sid] = [...newSched[day][sid], text];
+                if(!newSched[day][sid]) newSched[day][sid] = [];
+                newSched[day][sid].push(text);
                 setSchedule(newSched);
-                setCustomInput("");
+                setLibraryTarget(null);
             };
 
             return (
-                <div className="min-h-screen p-4 pb-64 relative">
+                <div className="min-h-screen p-4 pb-48 relative">
                     <header className="flex justify-between items-center mb-6">
-                        <h1 className="comic-title text-4xl">THE<br/>PLAYBOOK</h1>
-                        <button onClick={() => setView(view === 'settings' ? 'playbook' : 'settings')} className="bg-white text-black px-4 py-2 btn-comic text-[10px]">Settings</button>
+                        <div>
+                            <h1 className="comic-title text-4xl">THE PLAYBOOK</h1>
+                            <p className="text-[10px] font-black uppercase opacity-70 italic">{profile.type} {profile.age && `• ${profile.age}`}</p>
+                        </div>
+                        <button onClick={() => { if(confirm("Reset profile?")) setProfile(null); }} className="bg-white text-black px-2 py-1 btn-comic text-[10px]">RESET</button>
                     </header>
 
-                    {view === 'settings' ? (
-                        <div className="max-w-md mx-auto space-y-4">
-                            {config.sections.map((sec, i) => (
-                                <div key={sec.id} className="bg-white p-3 border-4 border-black text-black">
-                                    <input value={sec.label} onChange={(e) => {
-                                        const ns = [...config.sections]; ns[i].label = e.target.value; setConfig({...config, sections: ns});
-                                    }} className="w-full font-black uppercase border-b-2 border-black mb-2 focus:outline-none" />
-                                    <div className="flex justify-between">
-                                        <button onClick={() => {
-                                            const t = prompt("Time:", sec.time);
-                                            if(t) { const ns = [...config.sections]; ns[i].time = t; setConfig({...config, sections: ns}); }
-                                        }} className="text-[10px] font-black bg-black text-yellow-400 px-2 rounded uppercase italic">TIME: {sec.time}</button>
-                                        <button onClick={() => {
-                                            const ns = [...config.sections]; ns[i].active = !ns[i].active; setConfig({...config, sections: ns});
-                                        }} className={`px-2 py-1 font-black text-[10px] border-2 border-black ${sec.active ? 'bg-green-400' : 'bg-red-400'}`}>{sec.active ? 'ACTIVE' : 'HIDDEN'}</button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <main className="max-w-md mx-auto space-y-12">
-                            {Object.keys(schedule).map(day => (
-                                <div key={day} className="space-y-4">
-                                    <span className="bg-[#E61E27] px-4 py-1 border-2 border-black font-black uppercase italic shadow-[3px_3px_0px_black] text-sm">Game Day: {day}</span>
-                                    {config.sections.filter(s => s.active).map(sec => (
-                                        <div key={sec.id} className="bg-[#b0bec5]/90 p-3 rounded-2xl border-2 border-black space-y-2">
-                                            <div style={{backgroundColor: sec.color}} className="flex justify-between items-center p-2 rounded-lg border-2 border-black">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="bg-black text-yellow-400 text-[9px] px-2 py-0.5 rounded font-black italic">{sec.time}</span>
-                                                    <span className="font-black text-black uppercase text-[11px] italic tracking-tight">{sec.label}</span>
-                                                </div>
-                                                <button onClick={() => setLibraryTarget({day, sid: sec.id})} className="bg-white text-black w-7 h-7 rounded border-2 border-black font-black">+</button>
+                    <main className="max-w-md mx-auto space-y-10">
+                        {Object.keys(schedule).map(day => (
+                            <div key={day} className="space-y-4">
+                                <span className="bg-[#E61E27] px-4 py-1 border-2 border-black font-black uppercase italic shadow-[3px_3px_0px_black] text-sm">DAY: {day}</span>
+                                {profile.blocks.map(sec => (
+                                    <div key={sec.id} className="bg-[#b0bec5]/90 p-3 rounded-2xl border-2 border-black space-y-2">
+                                        <div style={{backgroundColor: sec.color}} className="flex justify-between items-center p-2 rounded-lg border-2 border-black">
+                                            <div className="flex items-center gap-2">
+                                                <span className="bg-black text-yellow-400 text-[9px] px-2 py-0.5 rounded font-black italic">{sec.time}</span>
+                                                <span className="font-black text-black uppercase text-[11px] italic tracking-tight">{sec.label}</span>
                                             </div>
-                                            {schedule[day][sec.id].map((item, idx) => (
-                                                <div key={idx} className="bg-white p-2.5 rounded border-2 border-black font-black uppercase text-black text-[10px] flex justify-between shadow-[2px_2px_0px_black] italic">
-                                                    <span>{item}</span>
-                                                    <button onClick={() => {
-                                                        const ns = {...schedule}; ns[day][sec.id].splice(idx, 1); setSchedule(ns);
-                                                    }} className="text-red-600 font-black">✕</button>
-                                                </div>
-                                            ))}
+                                            <button onClick={() => setLibraryTarget({day, sid: sec.id})} className="bg-white text-black w-7 h-7 rounded border-2 border-black font-black">+</button>
                                         </div>
-                                    ))}
-                                </div>
-                            ))}
-                        </main>
-                    )}
+                                        {(schedule[day][sec.id] || []).map((item, idx) => (
+                                            <div key={idx} className="bg-white p-2.5 rounded border-2 border-black font-black uppercase text-black text-[10px] flex justify-between shadow-[2px_2px_0px_black] italic">
+                                                <span>{item}</span>
+                                                <button onClick={() => {
+                                                    const ns = {...schedule}; ns[day][sec.id].splice(idx, 1); setSchedule(ns);
+                                                }} className="text-red-600 font-black px-1">✕</button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+                    </main>
 
                     {libraryTarget && (
-                        <div className="library-drawer p-4">
+                        <div className="library-drawer p-4 screen-fade">
                             <div className="flex justify-between items-center mb-4">
-                                <h3 className="comic-title text-xl text-black">SELECT YOUR BRICK</h3>
+                                <h3 className="comic-title text-xl text-black">YOUR BRICKS</h3>
                                 <button onClick={() => setLibraryTarget(null)} className="bg-black text-white px-3 py-1 font-black text-xs btn-comic">CLOSE</button>
                             </div>
-
-                            <div className="flex gap-2 mb-4">
-                                <input 
-                                    placeholder="TYPE CUSTOM BRICK..." 
-                                    className="flex-1 p-2 border-4 border-black font-black uppercase text-black italic text-xs bg-white"
-                                    value={customInput}
-                                    onChange={(e) => setCustomInput(e.target.value)}
-                                />
-                                <button onClick={() => addBrick(customInput)} className="bg-green-600 px-4 btn-comic font-black text-xs text-white">ADD</button>
-                            </div>
-
-                            <div className="flex gap-2 mb-2 overflow-x-auto pb-1 scrollbar-hide">
-                                {Object.keys(PACKS).map(cat => (
-                                    <button key={cat} onClick={() => {setActiveCategory(cat); setActiveSub(Object.keys(PACKS[cat])[0]);}} className={`whitespace-nowrap px-3 py-1 font-black text-[10px] border-2 border-black ${activeCategory === cat ? 'bg-red-600 text-white' : 'bg-white text-black'}`}>{cat}</button>
-                                ))}
-                            </div>
-
-                            <div className="flex gap-2 mb-4 overflow-x-auto pb-1 scrollbar-hide">
-                                {Object.keys(PACKS[activeCategory]).map(sub => (
-                                    <button key={sub} onClick={() => setActiveSub(sub)} className={`whitespace-nowrap px-3 py-1 font-black text-[9px] border border-black ${activeSub === sub ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}>{sub}</button>
-                                ))}
-                            </div>
-
-                            <div className="max-h-56 overflow-y-auto bg-white p-2 border-2 border-black flex flex-wrap content-start">
-                                {PACKS[activeCategory][activeSub].map(item => (
+                            <div className="max-h-64 overflow-y-auto bg-white p-2 border-2 border-black flex flex-wrap content-start">
+                                {(BRICK_LIBRARY[profile.type][profile.age || "Standard"] || []).map(item => (
                                     <div key={item} onClick={() => addBrick(item)} className="brick-chip">{item}</div>
                                 ))}
                             </div>
