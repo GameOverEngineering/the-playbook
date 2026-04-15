@@ -3,22 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Playbook: Pro</title>
+    <title>The Playbook: Sovereign 2026</title>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Rajdhani:wght@800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { margin: 0; background: #2d5a27; font-family: 'Rajdhani', sans-serif; color: white; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
+        body { margin: 0; background: #2d5a27; font-family: 'Rajdhani', sans-serif; color: white; overflow-x: hidden; }
         .comic-title { font-family: 'Bangers', cursive; color: #E61E27; text-shadow: 3px 3px 0px #000, 6px 6px 0px #FFD000; }
         .studs { background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
-        .hazard-border { border: 12px repeating-linear-gradient(45deg, #FFD000, #FFD000 15px, #000 15px, #000 30px); }
         .settings-card { background: white; color: black; border: 4px solid black; box-shadow: 8px 8px 0px black; }
         .btn-comic { transition: transform 0.1s; border: 3px solid black; box-shadow: 4px 4px 0px black; text-transform: uppercase; font-weight: 900; }
         .btn-comic:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0px black; }
-        .listening-pulse { animation: pulse 1.5s infinite; background: #E61E27 !important; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        .time-bubble { background: #000; color: #FFD000; padding: 2px 8px; font-size: 10px; border-radius: 5px; font-family: 'Rajdhani'; }
     </style>
 </head>
 <body class="studs">
@@ -27,132 +25,108 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // NICHE DEFINITIONS (The "Time Savers")
-        const NICHE_PRESETS = {
-            parent: { name: "Family/Pod", sections: [{id:'b', l:'Breakfast', c:'#FF5F1F'}, {id:'m', l:'Morning Learning', c:'#FFF'}, {id:'l', l:'Lunch', c:'#a6ff00'}, {id:'a', l:'Afternoon Fun', c:'#FFF'}] },
-            teacher: { name: "Teacher Pack", price: "$2.99", sections: [{id:'b', l:'Entry/Bell Work', c:'#FFD700'}, {id:'m', l:'Literacy/Math', c:'#FFF'}, {id:'l', l:'Recess/Lunch', c:'#4CAF50'}, {id:'a', l:'Planning/DPA', c:'#FFF'}] },
-            bjj: { name: "BJJ Academy", price: "$2.99", sections: [{id:'b', l:'Kids Class', c:'#E61E27'}, {id:'m', l:'Fundamentals', c:'#FFF'}, {id:'l', l:'Private Lessons', c:'#2196F3'}, {id:'a', l:'Advanced/Live', c:'#FFF'}] }
-        };
-
         function App() {
-            const [view, setView] = useState('playbook'); // playbook, settings, archives, onboarding
+            const [view, setView] = useState('playbook'); 
             const [selectedArchive, setSelectedArchive] = useState(null);
-            const [isListening, setIsListening] = useState(false);
 
-            // STATE: Config (Niche and Purchases)
             const [config, setConfig] = useState(() => {
-                const saved = localStorage.getItem('pb_pro_config');
-                return saved ? JSON.parse(saved) : { onboarding: false, niche: 'parent', sections: NICHE_PRESETS.parent.sections, hero: false, purchasedPacks: [] };
+                const saved = localStorage.getItem('pb_v26_config');
+                return saved ? JSON.parse(saved) : {
+                    hero: false,
+                    sections: [
+                        { id: 's1', label: 'Breakfast', color: '#FF5F1F', active: true, time: '08:00' },
+                        { id: 's2', label: 'Morning Learning', color: '#FFFFFF', active: true, time: '09:30' },
+                        { id: 's3', label: 'Lunch', color: '#a6ff00', active: true, time: '12:00' },
+                        { id: 's4', label: 'Afternoon Fun', color: '#FFFFFF', active: true, time: '13:30' },
+                        { id: 's5', label: 'Evening Activities', color: '#2196F3', active: false, time: '17:00' },
+                        { id: 's6', label: 'Bedtime Routine', color: '#9C27B0', active: false, time: '19:30' }
+                    ]
+                };
             });
 
-            // STATE: Weekly Schedule
             const [schedule, setSchedule] = useState(() => {
-                const saved = localStorage.getItem('pb_pro_current');
-                return saved ? JSON.parse(saved) : { Monday: {b:[], m:[], l:[], a:[]}, Tuesday: {b:[], m:[], l:[], a:[]}, Wednesday: {b:[], m:[], l:[], a:[]}, Thursday: {b:[], m:[], l:[], a:[]}, Friday: {b:[], m:[], l:[], a:[]} };
+                const saved = localStorage.getItem('pb_v26_current');
+                return saved ? JSON.parse(saved) : { Monday: {s1:[], s2:[], s3:[], s4:[], s5:[], s6:[]}, Tuesday: {s1:[], s2:[], s3:[], s4:[], s5:[], s6:[]}, Wednesday: {s1:[], s2:[], s3:[], s4:[], s5:[], s6:[]}, Thursday: {s1:[], s2:[], s3:[], s4:[], s5:[], s6:[]}, Friday: {s1:[], s2:[], s3:[], s4:[], s5:[], s6:[]} };
             });
 
-            // STATE: Archives
-            const [archives, setArchives] = useState(() => {
-                const saved = localStorage.getItem('pb_pro_archives');
-                return saved ? JSON.parse(saved) : [];
-            });
+            useEffect(() => { localStorage.setItem('pb_v26_config', JSON.stringify(config)); }, [config]);
+            useEffect(() => { localStorage.setItem('pb_v26_current', JSON.stringify(schedule)); }, [schedule]);
 
-            useEffect(() => { localStorage.setItem('pb_pro_config', JSON.stringify(config)); }, [config]);
-            useEffect(() => { localStorage.setItem('pb_pro_current', JSON.stringify(schedule)); }, [schedule]);
-            if (!config.onboarding && view !== 'onboarding') setView('onboarding');
-
-            const handleArchiveWeek = () => {
-                if (!config.hero) return alert("Archive is a HERO feature! Unlock it in Settings.");
-                if (!confirm("End the week and save to Time Machine?")) return;
-                const date = new Date().toLocaleDateString();
-                const newArchives = [{ date, data: schedule }, ...archives].slice(0, 52);
-                setArchives(newArchives);
-                localStorage.setItem('pb_pro_archives', JSON.stringify(newArchives));
-                setSchedule({ Monday: {b:[], m:[], l:[], a:[]}, Tuesday: {b:[], m:[], l:[], a:[]}, Wednesday: {b:[], m:[], l:[], a:[]}, Thursday: {b:[], m:[], l:[], a:[]}, Friday: {b:[], m:[], l:[], a:[]} });
+            const updateTime = (id) => {
+                const newTime = prompt("Set Start Time (e.g. 9:00 AM):");
+                if (newTime) {
+                    const ns = config.sections.map(s => s.id === id ? {...s, time: newTime} : s);
+                    setConfig({...config, sections: ns});
+                }
             };
 
-            // --- UI COMPONENTS ---
-
-            const Onboarding = () => (
-                <div className="fixed inset-0 z-[500] bg-black p-6 flex flex-col justify-center items-center text-center">
-                    <h1 className="comic-title text-5xl mb-4 text-white uppercase">Choose Your Path</h1>
-                    <p className="font-black text-yellow-400 italic mb-8 uppercase text-sm">Select your niche to auto-label your day</p>
-                    <div className="w-full space-y-4 max-w-xs">
-                        {Object.keys(NICHE_PRESETS).map(key => (
-                            <button key={key} onClick={() => {
-                                setConfig({...config, niche: key, sections: NICHE_PRESETS[key].sections, onboarding: true});
-                                setView('playbook');
-                            }} className="w-full p-4 bg-white text-black btn-comic text-xl">I'm a {NICHE_PRESETS[key].name}</button>
+            if (view === 'settings') return (
+                <div className="p-6 pb-24">
+                    <button onClick={() => setView('playbook')} className="bg-black text-white px-4 py-2 mb-6 btn-comic italic uppercase">← Back</button>
+                    <h1 className="comic-title text-5xl mb-6">HQ SETTINGS</h1>
+                    
+                    <div className="settings-card p-4 mb-8">
+                        <h2 className="font-black border-b-4 border-black mb-4 uppercase italic">Configure Blocks</h2>
+                        {config.sections.map((sec, i) => (
+                            <div key={sec.id} className="mb-6 p-2 border-b-2 border-gray-200">
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-xs font-black uppercase text-gray-400 italic">Block {i+1}</span>
+                                    <button onClick={() => {
+                                        const ns = [...config.sections];
+                                        ns[i].active = !ns[i].active;
+                                        setConfig({...config, sections: ns});
+                                    }} className={`px-3 py-1 text-[10px] font-black border-2 border-black ${sec.active ? 'bg-green-400' : 'bg-red-400'}`}>
+                                        {sec.active ? "ON" : "OFF"}
+                                    </button>
+                                </div>
+                                <input value={sec.label} onChange={(e) => {
+                                    const ns = [...config.sections]; ns[i].label = e.target.value; setConfig({...config, sections: ns});
+                                }} className="w-full border-2 border-black p-2 font-black uppercase mb-2" />
+                            </div>
                         ))}
                     </div>
-                </div>
-            );
 
-            const Store = () => (
-                <div className="p-6 pb-20">
-                    <button onClick={() => setView('playbook')} className="bg-black text-white px-4 py-2 mb-6 btn-comic">← Back</button>
-                    <h1 className="comic-title text-4xl mb-6">HERO STORE</h1>
-                    
-                    {/* HERO UNLOCK */}
-                    <div className="settings-card p-4 mb-6 border-[#FFD000] border-8">
-                        <h2 className="text-2xl font-black italic uppercase">Hero Upgrade</h2>
-                        <p className="text-xs font-bold mb-4">Unlocks: Archives (Time Machine), Voice Commands, and Email Backups.</p>
-                        <button onClick={() => setConfig({...config, hero: true})} className="w-full p-3 bg-yellow-400 font-black uppercase btn-comic">
-                            {config.hero ? "UNLOCKED ✓" : "Unlock Hero for $14.99"}
+                    <div className="settings-card p-6 border-red-600 border-8">
+                        <h2 className="text-2xl font-black italic uppercase">The Hero Unlock</h2>
+                        <p className="text-xs font-bold mb-4">Archives, Custom Voice, and Sovereignty Backup.</p>
+                        <button onClick={() => setConfig({...config, hero: !config.hero})} className="w-full p-4 bg-yellow-400 font-black btn-comic text-xl">
+                            {config.hero ? "HERO ACTIVE ✓" : "Unlock Hero ($9.99)"}
                         </button>
                     </div>
-
-                    {/* NICHE PACKS */}
-                    <h3 className="font-black text-yellow-400 uppercase mb-2">Time-Saver Packs</h3>
-                    {['teacher', 'bjj'].map(id => (
-                        <div key={id} className="settings-card p-4 mb-4">
-                            <h2 className="text-xl font-black uppercase">{NICHE_PRESETS[id].name}</h2>
-                            <p className="text-xs mb-4">Instantly sets your labels to {NICHE_PRESETS[id].sections.map(s => s.l).join(", ")}.</p>
-                            <button onClick={() => setConfig({...config, sections: NICHE_PRESETS[id].sections})} className="w-full p-2 bg-blue-500 text-white font-black uppercase btn-comic">
-                                Apply for {NICHE_PRESETS[id].price}
-                            </button>
-                        </div>
-                    ))}
                 </div>
             );
-
-            if (view === 'onboarding') return <Onboarding />;
-            if (view === 'settings') return <Store />;
 
             return (
                 <div className={`min-h-screen p-4 pb-32 relative ${selectedArchive ? 'hazard-border' : ''}`}>
-                    <header className="flex justify-between items-start mb-8 relative z-20">
-                        <div>
-                            <h1 className="comic-title text-4xl leading-none">THE<br/>PLAYBOOK</h1>
-                            {selectedArchive && <div className="bg-yellow-400 text-black px-2 py-1 font-black text-xs mt-1 uppercase italic">History Mode</div>}
-                        </div>
-                        <div className="flex gap-2">
-                            <button onClick={() => setView('settings')} className="bg-white text-black p-2 btn-comic text-[10px]">Store</button>
-                            <button onClick={() => {if(config.hero) { setSelectedArchive(archives[0]?.data); } else { alert("Hero feature!")}}} className="bg-white text-black p-2 btn-comic text-[10px]">Archives</button>
-                        </div>
+                    <header className="flex justify-between items-center mb-8 relative z-20">
+                        <h1 className="comic-title text-5xl">THE<br/>PLAYBOOK</h1>
+                        <button onClick={() => setView('settings')} className="bg-white text-black p-3 btn-comic text-xs uppercase">Settings</button>
                     </header>
 
                     <main className="max-w-md mx-auto space-y-12 relative z-10">
                         {Object.keys(schedule).map(day => (
                             <div key={day} className="space-y-4">
-                                <span className="bg-[#E61E27] px-4 py-1 border-2 border-black font-black uppercase text-white shadow-[3px_3px_0px_#000] italic">{day}</span>
-                                {config.sections.map(sec => (
-                                    <div key={sec.id} className="bg-[#b0bec5]/90 p-3 rounded-3xl border-2 border-black space-y-2">
-                                        <div style={{backgroundColor: sec.c}} className="flex justify-between items-center p-2 rounded-xl border-2 border-black">
-                                            <span className="font-black text-black uppercase text-[10px] italic">{sec.l}</span>
+                                <span className="bg-[#E61E27] px-6 py-1 border-2 border-black font-black uppercase text-white shadow-[4px_4px_0px_#000] italic">{day}</span>
+                                {config.sections.filter(s => s.active).map(sec => (
+                                    <div key={sec.id} className="bg-[#b0bec5]/90 p-4 rounded-3xl border-2 border-black space-y-3">
+                                        <div style={{backgroundColor: sec.color}} className="flex justify-between items-center p-2 rounded-xl border-2 border-black">
+                                            <div className="flex items-center gap-2">
+                                                <button onClick={() => updateTime(sec.id)} className="time-bubble">{sec.time}</button>
+                                                <span className="font-black text-black uppercase text-xs italic">{sec.label}</span>
+                                            </div>
                                             {!selectedArchive && (
                                                 <button onClick={() => {
-                                                    const task = prompt(`New task for ${sec.l}:`);
+                                                    const task = prompt(`Task for ${sec.label}:`);
                                                     if(task) setSchedule(prev => ({...prev, [day]: {...prev[day], [sec.id]: [...prev[day][sec.id], task]}}));
-                                                }} className="bg-white text-black w-6 h-6 rounded border border-black font-black">+</button>
+                                                }} className="bg-white text-black w-8 h-8 rounded border-2 border-black font-black">+</button>
                                             )}
                                         </div>
                                         {(selectedArchive || schedule)[day][sec.id].map((item, idx) => (
-                                            <div key={idx} className="bg-white p-3 rounded-lg border-2 border-black font-black uppercase text-black italic text-xs flex justify-between">
+                                            <div key={idx} className="bg-white p-4 rounded-xl border-2 border-black font-black uppercase text-black italic text-xs flex justify-between shadow-[4px_4px_0px_black]">
                                                 <span>{item}</span>
                                                 {!selectedArchive && <button onClick={() => {
                                                     const ns = {...schedule}; ns[day][sec.id].splice(idx, 1); setSchedule(ns);
-                                                }} className="text-red-600">✕</button>}
+                                                }} className="text-red-600 font-black">✕</button>}
                                             </div>
                                         ))}
                                     </div>
@@ -161,16 +135,8 @@
                         ))}
                     </main>
 
-                    {/* ACTION BUTTONS */}
-                    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 z-50">
-                        {!selectedArchive ? (
-                            <>
-                                <button onClick={handleArchiveWeek} className="bg-green-600 text-white px-6 py-4 btn-comic text-lg">Finish Week</button>
-                                <button onClick={() => {if(config.hero) {setIsListening(true); setTimeout(()=>setIsListening(false), 2000)} else {alert("Hero feature!")}}} className={`w-16 h-16 rounded-full border-4 border-black flex items-center justify-center text-3xl shadow-[4px_4px_0px_black] ${isListening ? 'listening-pulse' : 'bg-[#FFD000]'}`}>🎤</button>
-                            </>
-                        ) : (
-                            <button onClick={() => setSelectedArchive(null)} className="bg-black text-white px-10 py-5 border-4 border-[#FFD000] font-black uppercase text-xl">Close Time Machine</button>
-                        )}
+                    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+                        <button onClick={() => {if(config.hero) alert("Week Archived!"); else alert("Hero feature!")}} className="bg-green-600 text-white px-10 py-5 btn-comic text-xl">Archive Week</button>
                     </div>
                 </div>
             );
