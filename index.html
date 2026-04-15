@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Playbook: Professional Educator Edition</title>
+    <title>The Playbook: Sovereign Pro Build</title>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Rajdhani:wght@800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -15,10 +15,9 @@
         .studs { background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
         .btn-comic { transition: transform 0.1s; border: 3px solid black; box-shadow: 4px 4px 0px black; text-transform: uppercase; font-weight: 900; }
         .btn-comic:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0px black; }
-        .library-drawer { background: #f4f4f4; border-top: 6px solid black; box-shadow: 0 -15px 40px rgba(0,0,0,0.6); }
+        .library-drawer { background: #f4f4f4; border-top: 6px solid black; box-shadow: 0 -15px 40px rgba(0,0,0,0.6); position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; }
         .brick-chip { background: white; color: black; border: 2px solid black; padding: 6px 12px; border-radius: 6px; font-weight: 900; font-size: 11px; box-shadow: 2px 2px 0px black; cursor: pointer; display: inline-block; margin: 4px; }
         .brick-chip:active { transform: scale(0.9); }
-        .sub-selector { background: #ddd; border: 2px solid black; padding: 4px 8px; font-size: 10px; font-weight: 900; }
     </style>
 </head>
 <body class="studs">
@@ -27,61 +26,69 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // EXPANDED DATA LIBRARIES (25+ each)
         const PACKS = {
-            "Homeschool": {
-                "0-2.5yr": ["Sensory Bin", "Mirror Play", "Tummy Time", "Board Books", "Water Play", "Nursery Rhymes", "Object Permanence Games", "Stroller Walk", "Texture Exploration", "Soft Block Stacking", "Finger Painting (Edible)", "Bubble Play", "Musical Instruments", "Nature Sit", "Kitchen Band", "Animal Sounds", "Ball Rolling", "Mirror Mimic", "Peek-a-Boo", "Scent Smelling", "Laundry Basket Play", "Fabric Scraps", "Spout Pouring", "Flashcards (Faces)", "High Chair Art"],
-                "2.5-4.5yr": ["Sorting Colors", "Sticker Art", "Playdough Sculpting", "Counting Steps", "Leaf Rubbing", "Alphabet Tracing", "Puzzle Time", "Imaginary Kitchen", "Dress Up", "Sidewalk Chalk", "Fort Building", "Shadow Puppets", "Garden Digging", "Shape Hunt", "Memory Game", "Cutting Practice", "Bead Stringing", "Pattern Making", "Balance Beam (Tape)", "Sink or Float", "Magnet Play", "Button Sorting", "Simon Says", "Story Dictation", "Bird Watching"],
-                "4.5-6.5yr": ["Phonics Blending", "Addition Games", "Sight Word Hunt", "Nature Journal", "Bug Hotel Build", "Map Drawing", "Lego Engineering", "Science Experiment", "CVC Word Mats", "Money Math (Store)", "Telling Time (Analog)", "Daily Weather Chart", "Baking (Measuring)", "Family Tree", "Yoga for Kids", "Seed Germination", "Sink/Float Hypothesis", "Paper Airplanes", "Origami", "Self-Portrait", "Rhyming Riddles", "Scavenger Hunt", "Jump Rope", "Audiobook Listening", "Tangrams"],
-                "6.5-8.5yr": ["Multiplication Intro", "Creative Writing", "Geology (Rock Set)", "Chess Practice", "Coding (Scratch Jr)", "Bird ID", "History Timeline", "Solar System Model", "Reading Comprehension", "Subtraction War", "Dictionary Race", "Cursive Practice", "Fraction Pizza", "Electricity Circuit", "Typing Skills", "Animal Habitats", "Ocean Zones", "Poetry Writing", "Sudoku", "Botany Project", "Local Map Skills", "Logic Puzzles", "Art History Study", "Woodworking", "Gymnastics"],
-                "8.5-12.5yr": ["Algebraic Thinking", "Novel Study", "Microscope Lab", "Stop Motion Film", "Podcast Creation", "Financial Literacy", "Civilization Study", "Chemical Reactions", "Debate Prep", "Graphic Design", "Survival Skills", "Investment Game", "Advanced Coding", "Physics (Bridge Build)", "Anatomy Study", "Philosophy for Kids", "Foreign Language", "Current Events", "Creative Essay", "Ecosystem Diorama", "3D Modeling", "Rocketry", "Cooking (Full Meal)", "Community Service", "Public Speaking"]
+            "The Trades": {
+                "Plumber": ["Rough-in", "Stack Test", "Fixture Install", "Drain Snaking", "Sump Pump Check", "Client Quote", "Parts Run", "Site Cleanup", "Leak Detection", "Hot Water Tank", "Pipe Insulation"],
+                "Electrician": ["Panel Upgrade", "Wire Pulling", "Circuit Test", "Outlet Install", "Lighting Plan", "Code Inspection", "Conduit Bend", "Troubleshooting", "Service Call"],
+                "Construction": ["Site Size-up", "Framing", "Drywall", "Permit Check", "Sub-contractor Meet", "Dumpster Swap", "Tool Inventory", "Safety Walk", "Material Delivery"]
             },
-            "Teacher": {
-                "Kindergarten": ["Center Rotation", "Circle Time", "Fine Motor Play", "Play-Based Learning", "Shared Reading", "Calendar Routine", "Letter of the Week", "Number Sense", "Outdoor Inquiry", "Washroom Break", "Snack Time", "Guided Play", "Small Group Phonics", "Social Skills Lesson", "Art Studio", "Quiet Time", "Show and Tell", "Building Block Tech", "Drama Corner", "Sand/Water Table", "Science Observation", "Poem of the Week", "Class Meeting", "Dismissal Routine", "Transition Song"],
-                "Gr 1-3": ["Guided Reading", "Writer's Workshop", "Math Manipulatives", "Word Wall Games", "DPA (Gym)", "Social Studies", "Science Inquiry", "Mental Math", "Spelling Test", "Library Exchange", "Computer Lab", "Independent Reading", "Handwriting", "Character Ed", "Health & Wellness", "Anchor Chart Build", "Think-Pair-Share", "Exit Tickets", "French (FSL)", "Arts Integration", "Number Talks", "Literacy Centers", "Problem of the Day", "Agenda Check", "Recess"],
-                "Gr 4-6": ["Inquiry Project", "Math Centers", "Novel Study", "Current Events", "Science Lab", "Heritage/Citizenship", "Geometry", "Data Management", "Creative Writing", "PE / Team Sports", "Visual Arts", "Drama/Dance", "FSL (French)", "Google Classroom", "Independent Study", "Peer Feedback", "Conflict Resolution", "Financial Literacy", "Coding/Robotics", "Research Skills", "Environmental Ed", "Community Circle", "Presentation Prep", "Portfolio Update", "Health Education"],
-                "Gr 7-8": ["Subject Rotation", "Math (Algebra)", "History/Geography", "Science (Systems)", "Essay Drafting", "FSL (Core/Imm)", "Digital Literacy", "Career Studies", "Health & PhysEd", "Music/Band", "Visual Arts", "Leadership Prep", "Standardized Test Prep", "Collaborative Project", "Critical Thinking", "Social Justice Study", "Media Literacy", "STEM Challenge", "Debate/Seminar", "Homework Check", "Graduation Prep", "Lab Safety", "High School Transition", "Student Voice", "Assembly"]
+            "Emergency Services": {
+                "Fire/Rescue": ["Rig Check", "Hydrant Flow Test", "Training Drill", "Shift Handover", "Station Chores", "Medical Bag Inventory", "Pre-plan Review", "Fitness Training", "Hazmat Review"],
+                "Paramedic/EMS": ["Rig Restock", "Ambulance Inspection", "Protocol Review", "Documentation/PCRs", "Base Clean", "CME Training", "Supply Requisition", "Narcotics Count"],
+                "Police/Security": ["Patrol Briefing", "Equipment Check", "Court Appearance", "Report Writing", "Public Outreach", "Evidence Log", "Tactical Training", "Cruiser Maintenance"]
+            },
+            "Retiree / Legacy": {
+                "Health": ["Morning Walk", "Blood Pressure Check", "Physio Exercises", "Medication Organizer", "Hydration Goal", "Sauna Session", "Stretching", "Doctor Appointment"],
+                "Leisure": ["Grandkids Visit", "Golf Tee Time", "Woodshop Project", "Garden Maintenance", "Community Meetup", "Volunteer Hours", "Bridge/Game Club", "Reading Time"]
+            },
+            "Parent / Edu": {
+                "Standard Parent": ["Lunch Prep", "Backpack Check", "Homework Zone", "Bath/Bed Routine", "Chores", "Screen Time", "Martial Arts", "Hockey Practice", "Soccer Game"],
+                "Homeschool": ["STEM Lab", "Nature Walk", "Phonics", "Math Games", "Art Project", "History", "Science Lab", "Logic Puzzles", "BJJ Training"],
+                "Teacher": ["Literacy", "Numeracy", "DPA/Gym", "IEP Work", "Planning", "Assessment", "Bell Work", "Dismissal", "Staff Meeting"]
             }
         };
 
         function App() {
             const [view, setView] = useState('playbook'); 
-            const [libraryTarget, setLibraryTarget] = useState(null);
-            const [activeCategory, setActiveCategory] = useState("Homeschool");
-            const [activeSub, setActiveSub] = useState("0-2.5yr");
+            const [libraryTarget, setLibraryTarget] = useState(null); // {day, sid}
+            const [activeCategory, setActiveCategory] = useState("Parent / Edu");
+            const [activeSub, setActiveSub] = useState("Standard Parent");
+            const [customInput, setCustomInput] = useState("");
 
             const [config, setConfig] = useState(() => {
-                const saved = localStorage.getItem('pb_prof_config');
+                const saved = localStorage.getItem('pb_universal_config');
                 return saved ? JSON.parse(saved) : { hero: true, sections: [
-                    { id: 's1', label: 'Breakfast / Entry', color: '#FF5F1F', active: true, time: '08:00' },
-                    { id: 's2', label: 'Core Learning', color: '#FFFFFF', active: true, time: '09:00' },
-                    { id: 's3', label: 'Mid-Day Break', color: '#a6ff00', active: true, time: '12:00' },
-                    { id: 's4', label: 'Afternoon Focus', color: '#FFFFFF', active: true, time: '13:30' },
-                    { id: 's5', label: 'After School / Wrap', color: '#2196F3', active: true, time: '16:00' },
-                    { id: 's6', label: 'Evening Routine', color: '#9C27B0', active: true, time: '19:00' }
+                    { id: 's1', label: 'Morning Block', color: '#FF5F1F', active: true, time: '07:00' },
+                    { id: 's2', label: 'Work / Learning', color: '#FFFFFF', active: true, time: '09:00' },
+                    { id: 's3', label: 'Lunch / Mid-Day', color: '#a6ff00', active: true, time: '12:00' },
+                    { id: 's4', label: 'Afternoon Ops', color: '#FFFFFF', active: true, time: '13:30' },
+                    { id: 's5', label: 'Sports & Wrap', color: '#2196F3', active: true, time: '17:00' },
+                    { id: 's6', label: 'Evening Routine', color: '#9C27B0', active: true, time: '19:30' }
                 ]};
             });
 
             const [schedule, setSchedule] = useState(() => {
-                const saved = localStorage.getItem('pb_prof_current');
+                const saved = localStorage.getItem('pb_universal_current');
                 return saved ? JSON.parse(saved) : { Monday: {s1:[], s2:[], s3:[], s4:[], s5:[], s6:[]}, Tuesday: {s1:[], s2:[], s3:[], s4:[], s5:[], s6:[]}, Wednesday: {s1:[], s2:[], s3:[], s4:[], s5:[], s6:[]}, Thursday: {s1:[], s2:[], s3:[], s4:[], s5:[], s6:[]}, Friday: {s1:[], s2:[], s3:[], s4:[], s5:[], s6:[]} };
             });
 
-            useEffect(() => { localStorage.setItem('pb_prof_config', JSON.stringify(config)); }, [config]);
-            useEffect(() => { localStorage.setItem('pb_prof_current', JSON.stringify(schedule)); }, [schedule]);
+            useEffect(() => { localStorage.setItem('pb_universal_config', JSON.stringify(config)); }, [config]);
+            useEffect(() => { localStorage.setItem('pb_universal_current', JSON.stringify(schedule)); }, [schedule]);
 
             const addBrick = (text) => {
+                if(!text) return;
                 const { day, sid } = libraryTarget;
                 const newSched = {...schedule};
                 newSched[day][sid] = [...newSched[day][sid], text];
                 setSchedule(newSched);
+                setCustomInput("");
             };
 
             return (
                 <div className="min-h-screen p-4 pb-48 relative">
                     <header className="flex justify-between items-center mb-6">
                         <h1 className="comic-title text-4xl">THE<br/>PLAYBOOK</h1>
-                        <button onClick={() => setView(view === 'settings' ? 'playbook' : 'settings')} className="bg-white text-black px-3 py-2 btn-comic text-[10px]">Settings</button>
+                        <button onClick={() => setView(view === 'settings' ? 'playbook' : 'settings')} className="bg-white text-black px-4 py-2 btn-comic text-[10px]">Settings</button>
                     </header>
 
                     {view === 'settings' ? (
@@ -91,39 +98,39 @@
                                 <div key={sec.id} className="bg-white p-3 border-4 border-black text-black">
                                     <input value={sec.label} onChange={(e) => {
                                         const ns = [...config.sections]; ns[i].label = e.target.value; setConfig({...config, sections: ns});
-                                    }} className="w-full font-black uppercase border-b-2 border-black mb-2" />
+                                    }} className="w-full font-black uppercase border-b-2 border-black mb-2 focus:outline-none" />
                                     <div className="flex justify-between">
                                         <button onClick={() => {
                                             const t = prompt("Time:", sec.time);
                                             if(t) { const ns = [...config.sections]; ns[i].time = t; setConfig({...config, sections: ns}); }
-                                        }} className="text-[10px] font-black bg-black text-yellow-400 px-2 rounded">TIME: {sec.time}</button>
+                                        }} className="text-[10px] font-black bg-black text-yellow-400 px-2 rounded uppercase italic">TIME: {sec.time}</button>
                                         <button onClick={() => {
                                             const ns = [...config.sections]; ns[i].active = !ns[i].active; setConfig({...config, sections: ns});
-                                        }} className={`px-2 py-1 font-black text-[10px] ${sec.active ? 'bg-green-400' : 'bg-red-400'}`}>{sec.active ? 'ON' : 'OFF'}</button>
+                                        }} className={`px-2 py-1 font-black text-[10px] border-2 border-black ${sec.active ? 'bg-green-400' : 'bg-red-400'}`}>{sec.active ? 'ACTIVE' : 'HIDDEN'}</button>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <main className="max-w-md mx-auto space-y-8">
+                        <main className="max-w-md mx-auto space-y-10">
                             {Object.keys(schedule).map(day => (
                                 <div key={day} className="space-y-4">
-                                    <span className="bg-[#E61E27] px-4 py-1 border-2 border-black font-black uppercase italic shadow-[3px_3px_0px_black]">{day}</span>
+                                    <span className="bg-[#E61E27] px-4 py-1 border-2 border-black font-black uppercase italic shadow-[3px_3px_0px_black] text-sm">Game Day: {day}</span>
                                     {config.sections.filter(s => s.active).map(sec => (
-                                        <div key={sec.id} className="bg-[#b0bec5]/80 p-3 rounded-2xl border-2 border-black space-y-2">
+                                        <div key={sec.id} className="bg-[#b0bec5]/90 p-3 rounded-2xl border-2 border-black space-y-2">
                                             <div style={{backgroundColor: sec.color}} className="flex justify-between items-center p-2 rounded-lg border-2 border-black">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="bg-black text-yellow-400 text-[9px] px-1 rounded">{sec.time}</span>
-                                                    <span className="font-black text-black uppercase text-[10px] italic">{sec.label}</span>
+                                                    <span className="bg-black text-yellow-400 text-[9px] px-2 py-0.5 rounded font-black italic">{sec.time}</span>
+                                                    <span className="font-black text-black uppercase text-[11px] italic tracking-tight">{sec.label}</span>
                                                 </div>
-                                                <button onClick={() => setLibraryTarget({day, sid: sec.id})} className="bg-white text-black w-6 h-6 rounded border-2 border-black font-black">+</button>
+                                                <button onClick={() => setLibraryTarget({day, sid: sec.id})} className="bg-white text-black w-7 h-7 rounded border-2 border-black font-black">+</button>
                                             </div>
                                             {schedule[day][sec.id].map((item, idx) => (
-                                                <div key={idx} className="bg-white p-2 rounded border-2 border-black font-black uppercase text-black text-[10px] flex justify-between">
+                                                <div key={idx} className="bg-white p-2.5 rounded border-2 border-black font-black uppercase text-black text-[10px] flex justify-between shadow-[2px_2px_0px_black] italic">
                                                     <span>{item}</span>
                                                     <button onClick={() => {
                                                         const ns = {...schedule}; ns[day][sec.id].splice(idx, 1); setSchedule(ns);
-                                                    }} className="text-red-600">✕</button>
+                                                    }} className="text-red-600 font-black">✕</button>
                                                 </div>
                                             ))}
                                         </div>
@@ -134,32 +141,38 @@
                     )}
 
                     {libraryTarget && (
-                        <div className="fixed inset-x-0 bottom-0 z-[100] library-drawer p-4">
+                        <div className="library-drawer p-4">
                             <div className="flex justify-between items-center mb-4">
-                                <h3 className="comic-title text-xl text-black">IDEA GENERATOR</h3>
-                                <button onClick={() => setLibraryTarget(null)} className="bg-black text-white px-3 py-1 font-black text-xs">CLOSE</button>
+                                <h3 className="comic-title text-xl text-black uppercase tracking-tighter">Quick Add Bricks</h3>
+                                <button onClick={() => setLibraryTarget(null)} className="bg-black text-white px-3 py-1 font-black text-xs btn-comic">CLOSE</button>
                             </div>
 
-                            <div className="flex gap-2 mb-4 overflow-x-auto pb-1 scrollbar-hide">
+                            <div className="flex gap-2 mb-4">
+                                <input 
+                                    placeholder="TYPE CUSTOM BRICK..." 
+                                    className="flex-1 p-2 border-4 border-black font-black uppercase text-black italic text-xs bg-white"
+                                    value={customInput}
+                                    onChange={(e) => setCustomInput(e.target.value)}
+                                />
+                                <button onClick={() => addBrick(customInput)} className="bg-green-600 px-4 btn-comic font-black text-xs text-white">ADD</button>
+                            </div>
+
+                            <div className="flex gap-2 mb-2 overflow-x-auto pb-1 scrollbar-hide">
                                 {Object.keys(PACKS).map(cat => (
-                                    <button key={cat} onClick={() => {setActiveCategory(cat); setActiveSub(Object.keys(PACKS[cat])[0]);}} className={`px-3 py-1 font-black text-[10px] border-2 border-black ${activeCategory === cat ? 'bg-red-600 text-white' : 'bg-white text-black'}`}>{cat}</button>
+                                    <button key={cat} onClick={() => {setActiveCategory(cat); setActiveSub(Object.keys(PACKS[cat])[0]);}} className={`whitespace-nowrap px-3 py-1 font-black text-[10px] border-2 border-black ${activeCategory === cat ? 'bg-red-600 text-white' : 'bg-white text-black'}`}>{cat}</button>
                                 ))}
                             </div>
 
                             <div className="flex gap-2 mb-4 overflow-x-auto pb-1 scrollbar-hide">
                                 {Object.keys(PACKS[activeCategory]).map(sub => (
-                                    <button key={sub} onClick={() => setActiveSub(sub)} className={`sub-selector whitespace-nowrap ${activeSub === sub ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}>{sub}</button>
+                                    <button key={sub} onClick={() => setActiveSub(sub)} className={`whitespace-nowrap px-3 py-1 font-black text-[9px] border border-black ${activeSub === sub ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}>{sub}</button>
                                 ))}
                             </div>
 
-                            <div className="max-h-48 overflow-y-auto bg-white p-2 border-2 border-black">
+                            <div className="max-h-40 overflow-y-auto bg-white p-2 border-2 border-black flex flex-wrap">
                                 {PACKS[activeCategory][activeSub].map(item => (
                                     <div key={item} onClick={() => addBrick(item)} className="brick-chip">{item}</div>
                                 ))}
-                                <div className="mt-4 p-2 border-t-2 border-black flex gap-2">
-                                    <input id="manual" placeholder="CUSTOM..." className="flex-1 p-2 text-xs border border-black font-black uppercase text-black" />
-                                    <button onClick={() => {addBrick(document.getElementById('manual').value); document.getElementById('manual').value=''}} className="bg-green-600 text-white px-3 font-black text-xs">ADD</button>
-                                </div>
                             </div>
                         </div>
                     )}
