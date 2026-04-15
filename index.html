@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Playbook: Locked/Unlocked Build</title>
+    <title>The Playbook: All Ages Build</title>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Rajdhani:wght@800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -23,6 +23,7 @@
         .edit-time { background: #000; border: 1px dashed #FFD000; color: #FFD000; font-size: 10px; text-align: center; width: 60px; border-radius: 4px; }
         .view-label { font-weight: 900; text-transform: uppercase; color: black; font-style: italic; }
         .view-time { background: black; color: #FFD000; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 900; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="studs">
@@ -32,171 +33,21 @@
         const { useState, useEffect } = React;
 
         const FOOD_LIBRARY = {
-            "Breakfast": ["Oatmeal Bar", "Scrambled Eggs", "Pancakes", "Greek Yogurt", "Fruit Smoothie", "Breakfast Burrito", "French Toast", "Avocado Toast", "Hard Boiled Eggs", "Cereal", "Waffles", "Bacon & Eggs", "Omelet", "Bagel & Cream Cheese", "Muffins", "Quiche", "Protein Shake", "Cottage Cheese", "Breakfast Sandwich", "Hashbrowns", "Fruit Salad", "Breakfast Sausage", "Smoothie Bowl", "English Muffin", "Breakfast Pizza", "Tofu Scramble", "Steak & Eggs", "Poached Eggs", "Grits", "Breakfast Wrap"],
-            "Lunch": ["Chicken Wraps", "Turkey Sandwich", "Pasta Salad", "Quinoa Bowl", "Grilled Cheese", "Tomato Soup", "Leftovers", "Hummus & Pita", "Quesadilla", "Tuna Salad", "Chicken Nuggets", "Beef Stew", "Tacos", "Mac & Cheese", "Egg Salad", "Cold Cut Sub", "Stir Fry", "Pizza Bagels", "Fruit & Nut Plate", "Lentil Soup", "Baked Potato", "Couscous", "Sushi Rolls", "Chicken Caesar", "Burritos", "Lentil Salad", "Bento Box", "Ramen", "BLT Sandwich", "Poke Bowl"]
+            "Breakfast": ["Oatmeal Bar", "Scrambled Eggs", "Pancakes", "Greek Yogurt", "Fruit Smoothie", "Breakfast Burrito", "French Toast", "Avocado Toast", "Hard Boiled Eggs", "Cereal", "Waffles", "Bacon & Eggs", "Omelet", "Bagel & Cream Cheese", "Muffins", "Quiche", "Protein Shake", "Cottage Cheese", "Breakfast Sandwich", "Hashbrowns", "Smoothie Bowl", "English Muffin", "Breakfast Pizza", "Tofu Scramble", "Steak & Eggs", "Poached Eggs", "Breakfast Wrap"],
+            "Lunch": ["Chicken Wraps", "Turkey Sandwich", "Pasta Salad", "Quinoa Bowl", "Grilled Cheese", "Tomato Soup", "Leftovers", "Hummus & Pita", "Quesadilla", "Tuna Salad", "Chicken Nuggets", "Beef Stew", "Tacos", "Mac & Cheese", "Egg Salad", "Cold Cut Sub", "Stir Fry", "Pizza Bagels", "Fruit & Nut Plate", "Lentil Soup", "Baked Potato", "Sushi Rolls", "Chicken Caesar", "Burritos", "Bento Box", "Ramen", "BLT Sandwich"]
         };
 
         const LEARNING_PLAYBOOKS = {
-            "4.5-8.5": {
-                "Academic": ["Phonics Lesson", "Addition Games", "Subtraction War", "Money Math", "Cursive Practice", "Silent Reading", "Spelling Bee", "Clock Reading", "Geography Map", "History Video", "Creative Writing", "Logic Puzzles", "Typing Practice", "Journaling", "Book Report", "Multiplication", "Word Problems", "Grammar Check", "Poetry Reading", "Debate Intro", "Vocabulary Quiz", "Research Task", "Pen Pal Letter", "Sight Words", "Number Lines", "Flashcards", "Science Reading", "Fact Families", "Sentence Building", "Handwriting"],
-                "Active": ["BJJ Training", "Piano Practice", "Lego Engineering", "Baking (Measure)", "Chess Tactics", "Skating/Hockey", "Swimming", "Gymnastics", "Nature Hike", "Gardening", "Woodworking Basic", "Origami", "Team Sports", "Jump Rope", "Obstacle Course", "Bike Ride", "Yoga Flow", "Martial Arts", "Skateboarding", "Dance Class", "Target Practice", "Map Navigation", "Fire Safety", "Stretching", "Animal Movements", "Balance Board", "Hiking", "Soccer Drills", "Parkour Intro", "Tumbling"],
-                "Scientific": ["Volcano Build", "Microscope Lab", "Solar System", "Life Cycle Study", "Recycling Sort", "Weather Tracking", "Electricity Kit", "Diorama Build", "Magnets Experiment", "Bird ID", "Star Gazing", "Plant Growth Log", "Water Filtration", "Insect Collection", "Rock Tumbler", "Crystal Growing", "Anatomy Basics", "Space Travel", "Chemistry Intro", "Engineering Build", "Robot Coding", "Circuit Board", "Cloud Chart", "Soil Samples", "Leaf Anatomy", "Shadow Tracking", "Prism Play", "Density Tower", "Seed Sprouting", "Ant Farm Observation"]
+            "0-2.5": {
+                "Sensory": ["Water Play", "Sand Bin", "Ice Cube Melting", "Scent Jars", "Texture Board", "Flashlight Path", "Mirror Faces", "Shaving Cream Art", "Mud Kitchen", "Jello Dig", "Dry Noodle Bin", "Sponge Squeezing", "Feather Touch", "Rice Scooping", "Oobleck", "Colored Vinegar", "Soap Suds", "Edible Paint", "Nature Basket"],
+                "Motor": ["Crawl Tunnel", "Balloon Toss", "Stair Climbing", "Obstacle Course", "Sticker Peeling", "Block Stacking", "Finger Painting", "Kitchen Drumming", "Push Toy Walk", "Bubble Popping", "Ribbon Dancing", "Soft Ball Rolling", "Climbing Cushions", "Magnet Board", "Pom Pom Drop", "Zipping Fun", "Button Pushing", "Yoga Poses"],
+                "Language": ["Nursery Rhymes", "Puppet Story", "Animal Sounds", "Point & Name", "Board Books", "Sing-Along", "First Words Card", "Mirror Chat", "Nature Walk Sounds", "Peek-a-boo", "Action Songs", "Family Photos", "Flashcards", "Alphabet Songs", "Rhyming Books", "Hand Puppets", "Story Stones"]
             },
-            "8.5-12.5": {
-                "Core Mastery": ["Algebra Intro", "Novel Study", "Essay Drafting", "Critical Thinking", "Latin Roots", "Debate Prep", "Current Events", "Financial Literacy", "Budgeting Task", "Advanced Geography", "Ethics Study", "Civics", "Stock Market", "Psychology 101", "Philosophy", "Public Speaking", "Mediation", "Logic Gates", "Speed Reading", "Note Taking", "Memory Palace", "Goal Setting", "Time Management", "Editing Skills", "Persuasive Writing", "Mock Trial", "Ancient History", "World Religions", "Political Science", "Interviewing"],
-                "Technical": ["Coding Scratch", "Python Basic", "Graphic Design", "Video Editing", "Electronics Lab", "Robotics", "3D Modeling", "Animation", "Podcast Recording", "Photography", "Web Design", "App Design", "Unity Game Dev", "Digital Art", "Social Media", "AI Tools", "Hardware Build", "Linux Basics", "Cyber Security", "Video Production", "Sound Mixing", "Photoshop Basic", "CAD Intro", "Game Logic", "Soldering", "Drone Flight", "3D Printing", "Spreadsheets", "Networking", "Markdown Writing"],
-                "Life/Expert": ["BJJ Advanced", "Strength Training", "Survival Skills", "First Aid", "Cooking Skills", "Inventory Management", "Business Planning", "Public Speaking", "Architecture Study", "Music Theory", "Anatomy", "Geology", "Auto Basics", "Home Repair", "Taxes Intro", "Contract Law", "Marketing", "Event Planning", "Leadership", "Mental Health", "CPR Training", "Emergency Prep", "Navigation", "Self Defense", "Tool Proficiency", "Budget Planning", "Pitch Deck", "Small Biz Ops", "Tax Strategy", "Wilderness Survival"]
-            }
-        };
-
-        function App() {
-            const [profile, setProfile] = useState(() => JSON.parse(localStorage.getItem('pb_v8_profile')));
-            const [schedule, setSchedule] = useState(() => JSON.parse(localStorage.getItem('pb_v8_sched')) || { Monday: {}, Tuesday: {}, Wednesday: {}, Thursday: {}, Friday: {} });
-            const [customBricks, setCustomBricks] = useState(() => JSON.parse(localStorage.getItem('pb_v8_custom')) || { Learning: {}, Food: {} });
-            
-            const [isGlobalEdit, setIsGlobalEdit] = useState(false);
-            const [libraryTarget, setLibraryTarget] = useState(null); 
-            const [activeSubTab, setActiveSubTab] = useState("");
-
-            useEffect(() => { localStorage.setItem('pb_v8_profile', JSON.stringify(profile)); }, [profile]);
-            useEffect(() => { localStorage.setItem('pb_v8_sched', JSON.stringify(schedule)); }, [schedule]);
-            useEffect(() => { localStorage.setItem('pb_v8_custom', JSON.stringify(customBricks)); }, [customBricks]);
-
-            if (!profile) return (
-                <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
-                    <h1 className="comic-title text-6xl mb-10">THE PLAYBOOK</h1>
-                    <button onClick={() => setProfile({ type: 'Homeschool', step: 'age' })} className="bg-white text-black py-5 px-10 btn-comic font-black text-2xl shadow-[8px_8px_0px_black]">GO HOMESCHOOL</button>
-                </div>
-            );
-
-            if (profile.step === 'age') return (
-                <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
-                    <h1 className="comic-title text-5xl mb-10">AGE RANGE?</h1>
-                    <div className="grid grid-cols-1 gap-4 w-full max-w-xs">
-                        {["4.5-8.5", "8.5-12.5"].map(age => (
-                            <button key={age} onClick={() => setProfile({ ...profile, age, step: null, blocks: [
-                                { id: 'h1', label: 'Breakfast', type: 'Food', color: '#FF5F1F', time: '08:00' },
-                                { id: 'h2', label: 'Morning Learning', type: 'Learning', color: '#FFFFFF', time: '09:00' },
-                                { id: 'h3', label: 'Lunch', type: 'Food', color: '#a6ff00', time: '12:00' },
-                                { id: 'h4', label: 'Afternoon Learning', type: 'Learning', color: '#FFFFFF', time: '13:00' }
-                            ]})} className="bg-white text-black py-4 btn-comic font-black text-xl shadow-[8px_8px_0px_black]">{age}</button>
-                        ))}
-                    </div>
-                </div>
-            );
-
-            const handleBlockUpdate = (id, field, value) => {
-                const newBlocks = profile.blocks.map(b => b.id === id ? { ...b, [field]: value } : b);
-                setProfile({ ...profile, blocks: newBlocks });
-            };
-
-            const getLibraryData = () => {
-                if (!libraryTarget) return { items: [], categories: [] };
-                if (libraryTarget.type === 'Food') {
-                    const baseKey = libraryTarget.label.toLowerCase().includes("breakfast") ? "Breakfast" : "Lunch";
-                    const base = FOOD_LIBRARY[baseKey] || [];
-                    const custom = customBricks.Food[libraryTarget.sid] || [];
-                    return { items: [...base, ...custom], categories: [] };
-                } else {
-                    const playbook = LEARNING_PLAYBOOKS[profile.age];
-                    const categories = Object.keys(playbook);
-                    const activeCat = activeSubTab || categories[0];
-                    const base = playbook[activeCat] || [];
-                    const custom = customBricks.Learning[`${profile.age}-${activeCat}`] || [];
-                    return { items: [...base, ...custom], categories };
-                }
-            };
-
-            const { items, categories } = getLibraryData();
-
-            return (
-                <div className="min-h-screen p-4 pb-64 relative studs">
-                    <header className="flex justify-between items-start mb-8">
-                        <div>
-                            <h1 className="comic-title text-5xl leading-none">THE PLAYBOOK</h1>
-                            <div className="bg-black text-yellow-400 inline-block px-2 py-0.5 mt-1 text-[10px] font-black uppercase italic">AGE: {profile.age}</div>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                             <button onClick={() => setIsGlobalEdit(!isGlobalEdit)} className={`px-4 py-2 btn-comic text-[10px] ${isGlobalEdit ? 'bg-red-600 text-white' : 'bg-yellow-400 text-black'}`}>
-                                {isGlobalEdit ? 'SAVE LAYOUT' : 'EDIT BLOCKS'}
-                            </button>
-                            <button onClick={() => { if(confirm("RESET APP?")) { localStorage.clear(); window.location.reload(); } }} className="bg-white text-black px-3 py-1 btn-comic text-[8px] opacity-50">RESET</button>
-                        </div>
-                    </header>
-
-                    <main className="max-w-xl mx-auto space-y-12">
-                        {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map(day => (
-                            <div key={day} className="space-y-4">
-                                <span className="bg-[#E61E27] px-6 py-1.5 border-4 border-black font-black uppercase italic shadow-[6px_6px_0px_black] text-base">GAME DAY: {day}</span>
-                                {profile.blocks.map(sec => (
-                                    <div key={sec.id} className="bg-[#b0bec5]/95 p-5 rounded-3xl border-4 border-black space-y-4 shadow-xl">
-                                        <div style={{backgroundColor: sec.color}} className="flex justify-between items-center p-4 rounded-xl border-4 border-black shadow-[4px_4px_0px_black]">
-                                            <div className="flex items-center gap-4 flex-1">
-                                                {isGlobalEdit ? (
-                                                    <input type="text" value={sec.time} onChange={(e) => handleBlockUpdate(sec.id, 'time', e.target.value)} className="edit-time" />
-                                                ) : (
-                                                    <span className="view-time">{sec.time}</span>
-                                                )}
-                                                
-                                                {isGlobalEdit ? (
-                                                    <input type="text" value={sec.label} onChange={(e) => handleBlockUpdate(sec.id, 'label', e.target.value)} className="edit-input text-xs" />
-                                                ) : (
-                                                    <span className="view-label text-sm">{sec.label}</span>
-                                                )}
-                                            </div>
-                                            {!isGlobalEdit && (
-                                                <button onClick={() => { setLibraryTarget({day, sid: sec.id, type: sec.type, label: sec.label}); setActiveSubTab(""); }} className="bg-white text-black w-12 h-12 rounded-xl border-4 border-black font-black text-2xl ml-2">+</button>
-                                            )}
-                                        </div>
-                                        <div className="flex flex-wrap gap-2">
-                                            {(schedule[day][sec.id] || []).map((item, idx) => (
-                                                <div key={idx} className="bg-white p-2 px-4 rounded-lg border-2 border-black font-black uppercase text-black text-[11px] flex items-center shadow-[3px_3px_0px_black] italic">
-                                                    <span>{item}</span>
-                                                    <button onClick={() => { const ns = {...schedule}; ns[day][sec.id].splice(idx, 1); setSchedule(ns); }} className="text-red-600 font-black border-l-2 border-black/10 pl-3 ml-3">✕</button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ))}
-                    </main>
-
-                    {libraryTarget && (
-                        <div className="library-drawer p-6 shadow-2xl">
-                            <div className="flex justify-between items-center mb-6">
-                                <h3 className="comic-title text-4xl italic text-black uppercase">{libraryTarget.label}</h3>
-                                <button onClick={() => setLibraryTarget(null)} className="bg-black text-white px-5 py-2 btn-comic">CLOSE</button>
-                            </div>
-
-                            {categories.length > 0 && (
-                                <div className="flex overflow-x-auto pb-4 mb-4 gap-2 scrollbar-hide">
-                                    {categories.map(cat => (
-                                        <button key={cat} onClick={() => setActiveSubTab(cat)} className={`category-tab whitespace-nowrap ${ (activeSubTab || categories[0]) === cat ? 'bg-black text-white shadow-none' : 'bg-white text-black'}`}>{cat}</button>
-                                    ))}
-                                </div>
-                            )}
-
-                            <div className="flex-1 overflow-y-auto pb-20">
-                                <div className="flex flex-wrap content-start">
-                                    {items.map((item, i) => (
-                                        <div key={i} onClick={() => {
-                                            const ns = {...schedule};
-                                            if(!ns[libraryTarget.day][libraryTarget.sid]) ns[libraryTarget.day][libraryTarget.sid] = [];
-                                            ns[libraryTarget.day][libraryTarget.sid].push(item);
-                                            setSchedule(ns);
-                                            setLibraryTarget(null);
-                                        }} className="brick-chip">{item}</div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        }
-
-        ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-    </script>
-</body>
-</html>
+            "2.5-4.5": {
+                "Early Skills": ["Alphabet Tracing", "Color Sorting", "Shape Hunt", "Counting Steps", "Cutting Skills", "Glue Collage", "Pattern Blocks", "Sidewalk Chalk", "Name Writing", "I-Spy Letters", "Number Puzzles", "Rhyme Matching", "Phonics Sounds", "Sorting Laundry", "Button Sorting", "Bead Stringing", "Connect the Dots", "Letter Stamps", "Sticker Math", "Sight Words", "Tracing Sand", "Calendar Time", "Safety Rules"],
+                "Exploration": ["Bird Watching", "Bug Hotel", "Planting Seeds", "Sink or Float", "Magnet Fishing", "Color Mixing", "Nature Journal", "Cloud Watching", "Magnifying Glass", "Rock Sorting", "Leaf Rubbing", "Herb Garden", "Worm Farm", "Wind Chimes", "Sun Prints", "Dino Dig", "Volcano", "Snail Race", "Weather Chart", "Moon Phases", "Tide Pools", "Tree Bark Art"],
+                "Creative": ["Playdough Sculpt", "Dress Up", "Puppet Show", "Tea Party", "Lego Duplo", "Cardboard Box Fort", "Action Songs", "Yoga Kids", "Finger Puppets", "Story Mapping", "Dance Party", "Painting Play", "Recycled Art", "Clay Animals", "Mask Making", "Shadow Art", "Face Painting", "Drum Circle", "Costume Parade", "Paper Planes", "Origami Easy"]
+            },
+            "4.5-8.5": {
+                "Academic": ["Phonics Lesson", "Addition Games", "Subtraction War", "Money Math", "Cursive Practice", "Silent Reading", "Spelling Bee", "Clock Reading", "Geography Map", "History Video", "Creative Writing", "Logic Puzzles", "Typing Practice", "Journaling", "Book Report", "Multiplication", "Word Problems", "Grammar Check", "Poetry Reading", "Debate Intro", "Vocabulary Quiz", "Research Task", "Pen Pal Letter", "Sight Words", "Number Lines", "Flashcards"],
+                "Active": ["BJJ Training", "Piano Practice", "Lego Engineering", "Baking (Measure)", "Chess Tactics", "Skating/Hockey", "Swimming", "Gym
