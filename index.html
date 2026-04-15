@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Playbook: Sovereign Family Edition</title>
+    <title>The Playbook: Sovereign Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Rajdhani:wght@800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -14,8 +14,11 @@
         .comic-title { font-family: 'Bangers', cursive; color: #E61E27; text-shadow: 3px 3px 0px #000, 6px 6px 0px #FFD000; }
         .studs { background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
         .btn-comic { transition: transform 0.1s; border: 3px solid black; box-shadow: 4px 4px 0px black; text-transform: uppercase; font-weight: 900; }
-        .btn-comic:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0px black; }
-        .time-bubble { background: #000; color: #FFD000; padding: 2px 8px; font-size: 10px; border-radius: 5px; font-family: 'Rajdhani'; cursor: pointer; }
+        .btn-comic:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0px black; }
+        .library-drawer { background: #eee; border-top: 5px solid black; border-left: 5px solid black; border-right: 5px solid black; box-shadow: 0 -10px 30px rgba(0,0,0,0.5); }
+        .brick-chip { background: white; color: black; border: 2px solid black; padding: 4px 10px; border-radius: 8px; font-weight: 900; font-size: 12px; box-shadow: 2px 2px 0px black; cursor: pointer; }
+        .brick-chip:active { transform: scale(0.95); }
+        .time-bubble { background: #000; color: #FFD000; padding: 2px 6px; font-size: 10px; border-radius: 4px; }
     </style>
 </head>
 <body class="studs">
@@ -24,18 +27,28 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
+        // PREMADE PACK LIBRARIES
+        const PACK_DATA = {
+            "Homeschool": ["STEM Lab", "Nature Walk", "Phonics", "Math Games", "Silent Reading", "Art Project"],
+            "Teacher (ON)": ["Literacy Block", "Numeracy Block", "DPA / Gym", "IEP Check-in", "Planning Time", "Bell Work"],
+            "Parent (School Age)": ["Backpack Check", "Homework Zone", "Pack Lunch", "Library Books", "Sports Practice"],
+            "Baby/Toddler": ["Sensory Play", "Nap Window", "Outdoor Stroll", "Flash Cards", "Tummy Time"],
+            "Trades": ["Site Safety Check", "Material Run", "Client Briefing", "Tool Maintenance", "Quote Prep"]
+        };
+
         function App() {
             const [view, setView] = useState('playbook'); 
-            const [selectedArchive, setSelectedArchive] = useState(null);
+            const [libraryTarget, setLibraryTarget] = useState(null); // {day, sectionId}
+            const [customInput, setCustomInput] = useState("");
+            const [activePack, setActivePack] = useState("Homeschool");
 
-            // FORCE HERO MODE ON FOR FAMILY TESTING
             const [config, setConfig] = useState(() => {
                 const saved = localStorage.getItem('pb_v26_config');
                 return saved ? JSON.parse(saved) : {
-                    hero: true, // UNLOCKED for Chris/Family
+                    hero: true,
                     sections: [
                         { id: 's1', label: 'Breakfast Box', color: '#FF5F1F', active: true, time: '08:00' },
-                        { id: 's2', label: 'School Learning', color: '#FFFFFF', active: true, time: '09:00' },
+                        { id: 's2', label: 'Morning Learning', color: '#FFFFFF', active: true, time: '09:00' },
                         { id: 's3', label: 'Lunch & Recess', color: '#a6ff00', active: true, time: '12:00' },
                         { id: 's4', label: 'Afternoon Fun', color: '#FFFFFF', active: true, time: '13:30' },
                         { id: 's5', label: 'Evening Activities', color: '#2196F3', active: true, time: '17:00' },
@@ -52,38 +65,47 @@
             useEffect(() => { localStorage.setItem('pb_v26_config', JSON.stringify(config)); }, [config]);
             useEffect(() => { localStorage.setItem('pb_v26_current', JSON.stringify(schedule)); }, [schedule]);
 
+            const addBrick = (text) => {
+                if(!text) return;
+                const { day, sid } = libraryTarget;
+                const newSched = {...schedule};
+                newSched[day][sid] = [...newSched[day][sid], text];
+                setSchedule(newSched);
+                setCustomInput("");
+            };
+
             return (
-                <div className="min-h-screen p-4 pb-32 relative">
-                    <header className="flex justify-between items-center mb-8 relative z-20">
+                <div className="min-h-screen p-4 pb-48 relative">
+                    <header className="flex justify-between items-center mb-8">
                         <h1 className="comic-title text-5xl">THE<br/>PLAYBOOK</h1>
-                        <button onClick={() => setView(view === 'settings' ? 'playbook' : 'settings')} className="bg-white text-black p-3 btn-comic text-xs uppercase">Settings</button>
+                        <button onClick={() => setView(view === 'settings' ? 'playbook' : 'settings')} className="bg-white text-black px-4 py-2 btn-comic text-[10px]">Settings</button>
                     </header>
 
                     {view === 'settings' ? (
-                        <div className="max-w-md mx-auto space-y-8">
-                            <h2 className="comic-title text-4xl">HQ SETTINGS</h2>
+                        <div className="max-w-md mx-auto space-y-4">
+                            <h2 className="comic-title text-4xl mb-4 text-center">HQ SETTINGS</h2>
                             {config.sections.map((sec, i) => (
-                                <div key={sec.id} className="bg-white p-4 border-4 border-black shadow-[6px_6px_0px_black] text-black">
+                                <div key={sec.id} className="bg-white text-black p-4 border-4 border-black shadow-[4px_4px_0px_black]">
                                     <input value={sec.label} onChange={(e) => {
                                         const ns = [...config.sections]; ns[i].label = e.target.value; setConfig({...config, sections: ns});
-                                    }} className="w-full font-black uppercase text-xl border-b-2 border-black mb-2" />
-                                    <div className="flex justify-between items-center">
+                                    }} className="w-full font-black uppercase text-lg border-b-2 border-black mb-2 focus:outline-none" />
+                                    <div className="flex justify-between">
                                         <button onClick={() => {
-                                            const time = prompt("Enter Time (e.g. 9:00 AM):", sec.time);
-                                            if(time) { const ns = [...config.sections]; ns[i].time = time; setConfig({...config, sections: ns}); }
-                                        }} className="time-bubble">SET TIME: {sec.time}</button>
+                                            const t = prompt("Start Time:", sec.time);
+                                            if(t) { const ns = [...config.sections]; ns[i].time = t; setConfig({...config, sections: ns}); }
+                                        }} className="time-bubble">TIME: {sec.time}</button>
                                         <button onClick={() => {
                                             const ns = [...config.sections]; ns[i].active = !ns[i].active; setConfig({...config, sections: ns});
-                                        }} className={`px-2 py-1 font-black text-xs ${sec.active ? 'bg-green-400' : 'bg-red-400'}`}>{sec.active ? 'VISIBLE' : 'HIDDEN'}</button>
+                                        }} className={`px-2 py-1 font-black text-[10px] ${sec.active ? 'bg-green-400' : 'bg-red-400'}`}>{sec.active ? 'ON' : 'OFF'}</button>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <main className="max-w-md mx-auto space-y-12 relative z-10">
+                        <main className="max-w-md mx-auto space-y-12">
                             {Object.keys(schedule).map(day => (
                                 <div key={day} className="space-y-4">
-                                    <span className="bg-[#E61E27] px-6 py-1 border-2 border-black font-black uppercase text-white italic">{day}</span>
+                                    <span className="bg-[#E61E27] px-6 py-1 border-2 border-black font-black uppercase italic shadow-[3px_3px_0px_black]">{day}</span>
                                     {config.sections.filter(s => s.active).map(sec => (
                                         <div key={sec.id} className="bg-[#b0bec5]/90 p-4 rounded-3xl border-2 border-black space-y-3">
                                             <div style={{backgroundColor: sec.color}} className="flex justify-between items-center p-2 rounded-xl border-2 border-black">
@@ -91,17 +113,14 @@
                                                     <span className="time-bubble">{sec.time}</span>
                                                     <span className="font-black text-black uppercase text-xs italic">{sec.label}</span>
                                                 </div>
-                                                <button onClick={() => {
-                                                    const task = prompt(`New task for ${sec.label}:`);
-                                                    if(task) setSchedule(prev => ({...prev, [day]: {...prev[day], [sec.id]: [...prev[day][sec.id], task]}}));
-                                                }} className="bg-white text-black w-8 h-8 rounded border-2 border-black font-black">+</button>
+                                                <button onClick={() => setLibraryTarget({day, sid: sec.id})} className="bg-white text-black w-8 h-8 rounded border-2 border-black font-black">+</button>
                                             </div>
                                             {schedule[day][sec.id].map((item, idx) => (
-                                                <div key={idx} className="bg-white p-3 rounded-xl border-2 border-black font-black uppercase text-black italic text-xs flex justify-between shadow-[4px_4px_0px_black]">
+                                                <div key={idx} className="bg-white p-3 rounded-xl border-2 border-black font-black uppercase text-black italic text-[11px] flex justify-between shadow-[2px_2px_0px_black]">
                                                     <span>{item}</span>
                                                     <button onClick={() => {
                                                         const ns = {...schedule}; ns[day][sec.id].splice(idx, 1); setSchedule(ns);
-                                                    }} className="text-red-600 font-black ml-2">✕</button>
+                                                    }} className="text-red-600">✕</button>
                                                 </div>
                                             ))}
                                         </div>
@@ -109,6 +128,49 @@
                                 </div>
                             ))}
                         </main>
+                    )}
+
+                    {/* QUICK-ADD LIBRARY DRAWER */}
+                    {libraryTarget && (
+                        <div className="fixed inset-x-0 bottom-0 z-[100] library-drawer p-6 animate-bounce-in">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="comic-title text-2xl text-black">QUICK ADD</h3>
+                                <button onClick={() => setLibraryTarget(null)} className="bg-black text-white px-3 py-1 font-black text-xs">CLOSE</button>
+                            </div>
+
+                            {/* TYPE-IN BAR */}
+                            <div className="flex gap-2 mb-6">
+                                <input 
+                                    placeholder="TYPE NEW BRICK..." 
+                                    className="flex-1 p-3 border-4 border-black font-black uppercase text-black italic text-sm"
+                                    value={customInput}
+                                    onChange={(e) => setCustomInput(e.target.value)}
+                                />
+                                <button onClick={() => addBrick(customInput)} className="bg-green-600 px-4 btn-comic font-black">ADD</button>
+                            </div>
+
+                            {/* PACK SELECTOR */}
+                            <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
+                                {Object.keys(PACK_DATA).map(p => (
+                                    <button 
+                                        key={p} 
+                                        onClick={() => setActivePack(p)}
+                                        className={`whitespace-nowrap px-3 py-1 font-black text-[10px] border-2 border-black uppercase ${activePack === p ? 'bg-red-600 text-white' : 'bg-white text-black'}`}
+                                    >
+                                        {p}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* BRICK CHIPS */}
+                            <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-1">
+                                {PACK_DATA[activePack].map(brick => (
+                                    <div key={brick} onClick={() => addBrick(brick)} className="brick-chip">
+                                        {brick}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     )}
                 </div>
             );
