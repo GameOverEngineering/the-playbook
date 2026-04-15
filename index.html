@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Playbook: Stable Build</title>
+    <title>The Playbook</title>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Rajdhani:wght@800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { margin: 0; background: #2d5a27; font-family: 'Rajdhani', sans-serif; color: white; overflow-x: hidden; }
+        body { margin: 0; background: #2d5a27; font-family: 'Rajdhani', sans-serif; color: white; }
         .comic-title { font-family: 'Bangers', cursive; color: #E61E27; text-shadow: 2px 2px 0px #000, 4px 4px 0px #FFD000; }
         .studs { background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
-        .btn-comic { transition: transform 0.1s; border: 3px solid black; box-shadow: 4px 4px 0px black; text-transform: uppercase; font-weight: 900; }
+        .btn-comic { border: 3px solid black; box-shadow: 4px 4px 0px black; text-transform: uppercase; font-weight: 900; }
         .library-drawer { background: #f4f4f4; border-top: 8px solid black; position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; height: 80vh; display: flex; flex-direction: column; border-radius: 30px 30px 0 0; }
         .brick-chip { background: white; color: black; border: 2px solid black; padding: 6px 10px; border-radius: 6px; font-weight: 900; font-size: 11px; box-shadow: 2px 2px 0px black; cursor: pointer; display: inline-block; margin: 4px; }
-        .mic-btn { background: #E61E27; color: white; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 3px solid black; }
+        .mic-btn { background: #E61E27; color: white; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 3px solid black; }
         .mic-active { animation: pulse 1s infinite; background: #22c55e; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
@@ -27,33 +27,120 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        const BREAKFAST = ["Scrambled Eggs", "Oatmeal", "Pancakes", "Yogurt", "Smoothie", "Breakfast Burrito", "French Toast", "Avocado Toast", "Cereal", "Waffles", "Bacon & Eggs", "Omelet", "Bagel", "Muffins", "Fruit Salad", "Breakfast Sausage", "English Muffin"];
-        const LUNCH = ["Chicken Wrap", "Turkey Sandwich", "Pasta Salad", "Grilled Cheese", "Tomato Soup", "Leftovers", "Hummus & Pita", "Quesadilla", "Tuna Salad", "Chicken Nuggets", "Tacos", "Mac & Cheese", "Stir Fry", "Pizza Bagels", "Sushi Rolls", "Burritos", "Ramen", "BLT"];
-        
-        const AGES = {
-            "0-2.5": ["Water Play", "Sand Bin", "Ice Melting", "Scent Jars", "Texture Board", "Flashlight Path", "Mirror Faces", "Shaving Cream", "Mud Kitchen", "Jello Dig", "Rice Scoop", "Soap Suds", "Edible Paint", "Nature Basket", "Crawl Tunnel", "Balloon Toss", "Block Stack", "Finger Paint", "Bubble Pop", "Nursery Rhymes", "Puppet Story", "Sing-Along"],
-            "2.5-4.5": ["Alphabet Tracing", "Color Sorting", "Shape Hunt", "Counting", "Cutting Skills", "Glue Collage", "Sidewalk Chalk", "Name Writing", "Phonics Sounds", "Sorting Laundry", "Bead Stringing", "Sticker Math", "Sight Words", "Bird Watching", "Bug Hotel", "Planting Seeds", "Nature Journal", "Playdough", "Dress Up", "Fort Build", "Yoga Kids", "Dance Party"],
-            "4.5-8.5": ["Phonics", "Addition", "Subtraction", "Money Math", "Cursive", "Silent Reading", "Geography Map", "History Video", "Creative Writing", "Logic Puzzles", "Typing", "Journaling", "BJJ Training", "Piano Practice", "Lego Engineering", "Baking", "Chess", "Nature Hike", "Gardening", "Woodworking", "Origami", "Soccer Drills", "Parkour", "Tumbling", "Volcano Build", "Microscope Lab", "Solar System", "Life Cycles", "Weather Chart"],
-            "8.5-12.5": ["Algebra", "Novel Study", "Essay Draft", "Critical Thinking", "Debate Prep", "Financial Lit", "Budgeting", "Civics", "Stock Market", "Psychology", "Philosophy", "Public Speaking", "Logic Gates", "Coding Scratch", "Python", "Graphic Design", "Video Editing", "Robotics", "3D Modeling", "Photography", "App Design", "AI Tools", "BJJ Advanced", "Strength Train", "Survival Skills", "First Aid", "Business Plan"]
+        const DATA = {
+            BREAKFAST: ["Scrambled Eggs", "Oatmeal", "Pancakes", "Greek Yogurt", "Smoothie", "French Toast", "Avocado Toast", "Cereal", "Waffles", "Bacon & Eggs", "Omelet", "Bagel"],
+            LUNCH: ["Chicken Wrap", "Turkey Sandwich", "Pasta Salad", "Grilled Cheese", "Tomato Soup", "Quesadilla", "Tuna Salad", "Chicken Nuggets", "Tacos", "Mac & Cheese", "Sushi Rolls", "Bento Box"],
+            LEARN: ["Phonics", "Addition", "Subtraction", "Money Math", "Cursive", "Silent Reading", "Geography", "History Video", "Creative Writing", "Logic Puzzles", "Typing", "BJJ Training", "Piano Practice", "Lego Engineering", "Baking", "Chess", "Nature Hike", "Gardening", "Woodworking", "Soccer Drills", "Parkour", "Volcano Build", "Microscope Lab"]
         };
 
         function App() {
-            const [profile, setProfile] = useState(() => JSON.parse(localStorage.getItem('pb_v15_profile')));
-            const [schedule, setSchedule] = useState(() => JSON.parse(localStorage.getItem('pb_v15_sched')) || { Monday: {}, Tuesday: {}, Wednesday: {}, Thursday: {}, Friday: {} });
-            const [custom, setCustom] = useState(() => JSON.parse(localStorage.getItem('pb_v15_custom')) || { Learn: [], Breakfast: [], Lunch: [] });
+            const [profile, setProfile] = useState(() => JSON.parse(localStorage.getItem('pb_v16_profile')));
+            const [schedule, setSchedule] = useState(() => JSON.parse(localStorage.getItem('pb_v16_sched')) || { Monday: {}, Tuesday: {}, Wednesday: {}, Thursday: {}, Friday: {} });
+            const [custom, setCustom] = useState(() => JSON.parse(localStorage.getItem('pb_v16_custom')) || { LEARN: [], BREAKFAST: [], LUNCH: [] });
             const [isEdit, setIsEdit] = useState(false);
             const [lib, setLib] = useState(null);
             const [listening, setListening] = useState(false);
 
-            useEffect(() => { if(profile) localStorage.setItem('pb_v15_profile', JSON.stringify(profile)); }, [profile]);
-            useEffect(() => { localStorage.setItem('pb_v15_sched', JSON.stringify(schedule)); }, [schedule]);
-            useEffect(() => { localStorage.setItem('pb_v15_custom', JSON.stringify(custom)); }, [custom]);
+            useEffect(() => { if(profile) localStorage.setItem('pb_v16_profile', JSON.stringify(profile)); }, [profile]);
+            useEffect(() => { localStorage.setItem('pb_v16_sched', JSON.stringify(schedule)); }, [schedule]);
+            useEffect(() => { localStorage.setItem('pb_v16_custom', JSON.stringify(custom)); }, [custom]);
 
             const startVoice = () => {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                if (!SpeechRecognition) return alert("Browser not supported.");
-                const rec = new SpeechRecognition();
+                const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRec) return alert("Mic not supported.");
+                const rec = new SpeechRec();
                 rec.onstart = () => setListening(true);
                 rec.onend = () => setListening(false);
                 rec.onresult = (e) => {
-                    const raw = e.results[0][0].
+                    const raw = e.results[0][0].transcript;
+                    const formatted = raw.charAt(0).toUpperCase() + raw.slice(1);
+                    setCustom(prev => ({ ...prev, [lib.type]: [...(prev[lib.type] || []), formatted] }));
+                };
+                rec.start();
+            };
+
+            if (!profile) return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+                    <h1 className="comic-title text-6xl mb-10">THE PLAYBOOK</h1>
+                    <button onClick={() => setProfile({ age: 'Standard', blocks: [
+                        { id: 'b1', label: 'Breakfast', type: 'BREAKFAST', time: '08:00', color: '#FF5F1F' },
+                        { id: 'b2', label: 'Morning Learning', type: 'LEARN', time: '09:00', color: '#FFFFFF' },
+                        { id: 'b3', label: 'Lunch', type: 'LUNCH', time: '12:00', color: '#a6ff00' },
+                        { id: 'b4', label: 'Afternoon Learning', type: 'LEARN', time: '13:00', color: '#FFFFFF' }
+                    ]})} className="bg-white text-black py-6 px-10 btn-comic font-black text-2xl italic">START SYSTEM</button>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen p-4 pb-48 studs">
+                    <header className="flex justify-between items-start mb-8">
+                        <h1 className="comic-title text-4xl leading-none">THE<br/>PLAYBOOK</h1>
+                        <button onClick={() => setIsEdit(!isEdit)} className={`px-4 py-2 btn-comic text-xs ${isEdit ? 'bg-red-600 text-white' : 'bg-yellow-400 text-black'}`}>
+                            {isEdit ? 'SAVE' : 'EDIT'}
+                        </button>
+                    </header>
+
+                    <div className="max-w-md mx-auto space-y-10">
+                        {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map(day => (
+                            <div key={day} className="space-y-4">
+                                <h2 className="bg-[#E61E27] inline-block px-4 py-1 border-4 border-black font-black italic shadow-[4px_4px_0px_black]">{day}</h2>
+                                {profile.blocks.map(block => (
+                                    <div key={block.id} className="bg-gray-200/90 p-4 rounded-2xl border-4 border-black space-y-3">
+                                        <div style={{backgroundColor: block.color}} className="flex justify-between items-center p-3 rounded-xl border-2 border-black">
+                                            <div className="flex items-center gap-2">
+                                                <span className="bg-black text-yellow-400 px-2 py-0.5 rounded text-[10px] font-black">{block.time}</span>
+                                                <span className="text-black font-black italic text-xs uppercase">{block.label}</span>
+                                            </div>
+                                            {!isEdit && <button onClick={() => setLib({day, id: block.id, type: block.type, label: block.label})} className="bg-white text-black w-8 h-8 rounded border-2 border-black font-black shadow-[2px_2px_0px_black]">+</button>}
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {(schedule[day][block.id] || []).map((item, i) => (
+                                                <div key={i} className="bg-white px-2 py-1 rounded border border-black text-[10px] font-black text-black flex items-center">
+                                                    {item}
+                                                    <button onClick={() => {
+                                                        const ns = {...schedule}; ns[day][block.id].splice(i, 1); setSchedule(ns);
+                                                    }} className="ml-2 text-red-500">✕</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+
+                    {lib && (
+                        <div className="library-drawer p-6 shadow-2xl">
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="comic-title text-3xl">{lib.label}</h3>
+                                <button onClick={() => setLib(null)} className="bg-black text-white px-4 py-2 btn-comic text-xs font-black">CLOSE</button>
+                            </div>
+                            <div className="flex items-center gap-4 bg-white p-3 rounded-xl border-4 border-black mb-6">
+                                <button onClick={startVoice} className={`mic-btn ${listening ? 'mic-active' : ''}`}>
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                                </button>
+                                <span className="text-black font-black text-xs italic uppercase">{listening ? 'Listening...' : 'Tap Mic to Speak Button'}</span>
+                            </div>
+                            <div className="overflow-y-auto flex-1 pb-10">
+                                <div className="flex flex-wrap">
+                                    {[...(DATA[lib.type] || []), ...(custom[lib.type] || [])].map((item, i) => (
+                                        <div key={i} onClick={() => {
+                                            const ns = {...schedule};
+                                            if(!ns[lib.day][lib.id]) ns[lib.day][lib.id] = [];
+                                            ns[lib.day][lib.id].push(item);
+                                            setSchedule(ns); setLib(null);
+                                        }} className="brick-chip">{item}</div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
