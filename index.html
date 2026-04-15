@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Playbook</title>
+    <title>The Playbook: Nutrition Build</title>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Rajdhani:wght@800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -15,7 +15,7 @@
         .studs { background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
         .btn-comic { border: 3px solid black; box-shadow: 4px 4px 0px black; text-transform: uppercase; font-weight: 900; }
         .library-drawer { background: #f4f4f4; border-top: 8px solid black; position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; height: 80vh; display: flex; flex-direction: column; border-radius: 30px 30px 0 0; }
-        .brick-chip { background: white; color: black; border: 2px solid black; padding: 6px 10px; border-radius: 6px; font-weight: 900; font-size: 11px; box-shadow: 2px 2px 0px black; cursor: pointer; display: inline-block; margin: 4px; }
+        .brick-chip { background: white; color: black; border: 2px solid black; padding: 6px 10px; border-radius: 6px; font-weight: 900; font-size: 10px; box-shadow: 2px 2px 0px black; cursor: pointer; display: inline-block; margin: 3px; }
         .mic-btn { background: #E61E27; color: white; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 3px solid black; }
         .mic-active { animation: pulse 1s infinite; background: #22c55e; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
@@ -28,22 +28,45 @@
         const { useState, useEffect } = React;
 
         const DATA = {
-            BREAKFAST: ["Scrambled Eggs", "Oatmeal", "Pancakes", "Greek Yogurt", "Smoothie", "French Toast", "Avocado Toast", "Cereal", "Waffles", "Bacon & Eggs", "Omelet", "Bagel"],
-            LUNCH: ["Chicken Wrap", "Turkey Sandwich", "Pasta Salad", "Grilled Cheese", "Tomato Soup", "Quesadilla", "Tuna Salad", "Chicken Nuggets", "Tacos", "Mac & Cheese", "Sushi Rolls", "Bento Box"],
-            LEARN: ["Phonics", "Addition", "Subtraction", "Money Math", "Cursive", "Silent Reading", "Geography", "History Video", "Creative Writing", "Logic Puzzles", "Typing", "BJJ Training", "Piano Practice", "Lego Engineering", "Baking", "Chess", "Nature Hike", "Gardening", "Woodworking", "Soccer Drills", "Parkour", "Volcano Build", "Microscope Lab"]
+            BREAKFAST: [
+                "Scrambled Eggs", "Steel Cut Oatmeal", "Blueberry Pancakes", "Greek Yogurt Parfait", "Green Smoothie", 
+                "French Toast", "Avocado Toast", "Quinoa Breakfast Bowl", "Chia Seed Pudding", "Hard Boiled Eggs", 
+                "Whole Grain Cereal", "Buckwheat Waffles", "Bacon & Eggs", "Spinach Omelet", "Bagel & Lox", 
+                "Apple Cinnamon Muffins", "Cottage Cheese & Pineapple", "Breakfast Burrito", "Sweet Potato Hash", 
+                "Smoothie Bowl", "Nut Butter Toast", "Turkey Sausage", "Breakfast Frittata", "Bran Flakes", 
+                "English Muffin with Egg", "Shakshuka", "Tofu Scramble", "Banana Bread", "Ricotta & Honey Toast", 
+                "Poached Eggs", "Breakfast Fried Rice", "Baked Beans on Toast", "Muesli", "Overnight Oats"
+            ],
+            LUNCH: [
+                "Turkey & Cheese Wrap", "Grilled Chicken Salad", "Quinoa Salad", "Sunbutter & Jelly", "Hummus & Pita Plate", 
+                "Chicken Noodle Soup", "Lentil Soup", "Tuna Salad Sandwich", "Veggie Quesadilla", "Beef & Bean Chili", 
+                "Mac & Cheese with Peas", "Chicken Nuggets (Baked)", "Fish Tacos", "Egg Salad Sandwich", "Pasta Primavera", 
+                "Turkey Meatballs", "Roast Beef Roll-ups", "Caprese Salad", "Lentil Bolognese", "Teriyaki Chicken Bowl", 
+                "Black Bean Burgers", "Cold Peanut Noodles", "Cottage Cheese & Berries", "Veggie Sushi Rolls", "Minestrone", 
+                "Ham & Swiss sliders", "Zucchini Fritters", "Salmon Cakes", "Stuffed Bell Peppers", "Greek Salad", 
+                "Pesto Pasta", "Burrito Bowl", "Falafel Wrap", "Cucumber Sandwiches", "Bento Box (Protein Mix)"
+            ],
+            LEARN: [
+                "Phonics", "Addition Drills", "Subtraction War", "Money Math", "Cursive Practice", "Silent Reading", 
+                "World Geography", "History Documentary", "Creative Writing", "Logic Puzzles", "Typing Club", 
+                "BJJ Training", "Piano Practice", "Lego Engineering", "Kitchen Science", "Chess Strategy", 
+                "Nature Hike", "Gardening", "Woodworking Intro", "Soccer Skills", "Parkour Basics", "Volcano Project", 
+                "Microscope Exploration", "Solar System Map", "Plant Life Cycles", "Coding Scratch", "Python Basics", 
+                "Digital Art", "Film Dissection", "Martial Arts Drills", "Yoga Flow", "First Aid Basics"
+            ]
         };
 
         function App() {
-            const [profile, setProfile] = useState(() => JSON.parse(localStorage.getItem('pb_v16_profile')));
-            const [schedule, setSchedule] = useState(() => JSON.parse(localStorage.getItem('pb_v16_sched')) || { Monday: {}, Tuesday: {}, Wednesday: {}, Thursday: {}, Friday: {} });
-            const [custom, setCustom] = useState(() => JSON.parse(localStorage.getItem('pb_v16_custom')) || { LEARN: [], BREAKFAST: [], LUNCH: [] });
+            const [profile, setProfile] = useState(() => JSON.parse(localStorage.getItem('pb_v17_profile')));
+            const [schedule, setSchedule] = useState(() => JSON.parse(localStorage.getItem('pb_v17_sched')) || { Monday: {}, Tuesday: {}, Wednesday: {}, Thursday: {}, Friday: {} });
+            const [custom, setCustom] = useState(() => JSON.parse(localStorage.getItem('pb_v17_custom')) || { LEARN: [], BREAKFAST: [], LUNCH: [] });
             const [isEdit, setIsEdit] = useState(false);
             const [lib, setLib] = useState(null);
             const [listening, setListening] = useState(false);
 
-            useEffect(() => { if(profile) localStorage.setItem('pb_v16_profile', JSON.stringify(profile)); }, [profile]);
-            useEffect(() => { localStorage.setItem('pb_v16_sched', JSON.stringify(schedule)); }, [schedule]);
-            useEffect(() => { localStorage.setItem('pb_v16_custom', JSON.stringify(custom)); }, [custom]);
+            useEffect(() => { if(profile) localStorage.setItem('pb_v17_profile', JSON.stringify(profile)); }, [profile]);
+            useEffect(() => { localStorage.setItem('pb_v17_sched', JSON.stringify(schedule)); }, [schedule]);
+            useEffect(() => { localStorage.setItem('pb_v17_custom', JSON.stringify(custom)); }, [custom]);
 
             const startVoice = () => {
                 const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -74,7 +97,10 @@
             return (
                 <div className="min-h-screen p-4 pb-48 studs">
                     <header className="flex justify-between items-start mb-8">
-                        <h1 className="comic-title text-4xl leading-none">THE<br/>PLAYBOOK</h1>
+                        <div className="flex flex-col">
+                           <h1 className="comic-title text-4xl leading-none">THE</h1>
+                           <h1 className="comic-title text-4xl leading-none">PLAYBOOK</h1>
+                        </div>
                         <button onClick={() => setIsEdit(!isEdit)} className={`px-4 py-2 btn-comic text-xs ${isEdit ? 'bg-red-600 text-white' : 'bg-yellow-400 text-black'}`}>
                             {isEdit ? 'SAVE' : 'EDIT'}
                         </button>
@@ -111,18 +137,18 @@
 
                     {lib && (
                         <div className="library-drawer p-6 shadow-2xl">
-                            <div className="flex justify-between items-center mb-6">
-                                <h3 className="comic-title text-3xl">{lib.label}</h3>
-                                <button onClick={() => setLib(null)} className="bg-black text-white px-4 py-2 btn-comic text-xs font-black">CLOSE</button>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="comic-title text-2xl">{lib.label}</h3>
+                                <button onClick={() => setLib(null)} className="bg-black text-white px-3 py-1 btn-comic text-[10px] font-black">CLOSE</button>
                             </div>
-                            <div className="flex items-center gap-4 bg-white p-3 rounded-xl border-4 border-black mb-6">
+                            <div className="flex items-center gap-4 bg-white p-3 rounded-xl border-4 border-black mb-4">
                                 <button onClick={startVoice} className={`mic-btn ${listening ? 'mic-active' : ''}`}>
                                     <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
                                 </button>
-                                <span className="text-black font-black text-xs italic uppercase">{listening ? 'Listening...' : 'Tap Mic to Speak Button'}</span>
+                                <span className="text-black font-black text-[10px] italic uppercase">{listening ? 'Listening...' : 'Tap to Add by Voice'}</span>
                             </div>
                             <div className="overflow-y-auto flex-1 pb-10">
-                                <div className="flex flex-wrap">
+                                <div className="flex flex-wrap content-start">
                                     {[...(DATA[lib.type] || []), ...(custom[lib.type] || [])].map((item, i) => (
                                         <div key={i} onClick={() => {
                                             const ns = {...schedule};
