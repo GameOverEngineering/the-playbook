@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Playbook: Context-Aware Build</title>
+    <title>The Playbook: Developmental Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Rajdhani:wght@800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -15,10 +15,11 @@
         .studs { background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
         .btn-comic { transition: transform 0.1s; border: 3px solid black; box-shadow: 4px 4px 0px black; text-transform: uppercase; font-weight: 900; }
         .btn-comic:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0px black; }
-        .library-drawer { background: #f4f4f4; border-top: 8px solid black; box-shadow: 0 -15px 50px rgba(0,0,0,0.8); position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; height: 80vh; display: flex; flex-direction: column; }
+        .library-drawer { background: #f4f4f4; border-top: 8px solid black; box-shadow: 0 -15px 50px rgba(0,0,0,0.8); position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; height: 85vh; display: flex; flex-direction: column; }
         .brick-chip { background: white; color: black; border: 2px solid black; padding: 8px 12px; border-radius: 6px; font-weight: 900; font-size: 11px; box-shadow: 3px 3px 0px black; cursor: pointer; display: inline-block; margin: 5px; }
         .delete-mode .brick-chip { border-color: #E61E27; animation: shake 0.5s infinite; }
-        @keyframes shake { 0% { transform: rotate(0deg); } 25% { transform: rotate(1deg); } 75% { transform: rotate(-1deg); } 100% { transform: rotate(0deg); } }
+        @keyframes shake { 0% { transform: rotate(0deg); } 25% { transform: rotate(1.5deg); } 75% { transform: rotate(-1.5deg); } 100% { transform: rotate(0deg); } }
+        .category-tab { font-size: 10px; padding: 4px 8px; border: 2px solid black; font-weight: 900; margin-right: 4px; text-transform: uppercase; }
     </style>
 </head>
 <body class="studs">
@@ -28,45 +29,62 @@
         const { useState, useEffect } = React;
 
         const FOOD_LIBRARY = {
-            "Breakfast": ["Oatmeal", "Scrambled Eggs", "Pancakes", "Greek Yogurt", "Fruit Smoothie", "Breakfast Burrito", "French Toast", "Avocado Toast", "Hard Boiled Eggs", "Cereal", "Waffles", "Bacon & Eggs", "Omelet", "Bagel & Cream Cheese", "Muffins", "Quiche", "Protein Shake", "Cottage Cheese", "Breakfast Sandwich", "Hashbrowns"],
+            "Breakfast": ["Oatmeal Bar", "Scrambled Eggs", "Pancakes", "Greek Yogurt", "Fruit Smoothie", "Breakfast Burrito", "French Toast", "Avocado Toast", "Hard Boiled Eggs", "Cereal", "Waffles", "Bacon & Eggs", "Omelet", "Bagel & Cream Cheese", "Muffins", "Quiche", "Protein Shake", "Cottage Cheese", "Breakfast Sandwich", "Hashbrowns"],
             "Lunch": ["Chicken Wraps", "Turkey Sandwich", "Pasta Salad", "Quinoa Bowl", "Grilled Cheese", "Tomato Soup", "Leftovers", "Hummus & Pita", "Quesadilla", "Tuna Salad", "Chicken Nuggets", "Beef Stew", "Tacos", "Mac & Cheese", "Egg Salad", "Cold Cut Sub", "Stir Fry", "Pizza Bagels", "Fruit & Nut Plate", "Lentil Soup"]
         };
 
-        const INITIAL_LEARNING_BRICKS = {
-            "0-2.5": ["Sensory Bin", "Mirror Play", "Tummy Time", "Board Books", "Water Play", "Nursery Rhymes", "Stroller Walk", "Bubble Play", "Flashcards", "Texture Mat", "Soft Blocks", "Animal Sounds", "Finger Painting", "Kitchen Drumming", "Peek-a-boo", "Balloon Toss", "Nature Touch", "Bath Art", "Fruit Tasting", "Toy Sorting"],
-            "2.5-4.5": ["Sorting Colors", "Sticker Art", "Playdough", "Counting Steps", "Alphabet Tracing", "Puzzle Time", "Fort Building", "Bird Watching", "Cutting Skills", "Glue Collage", "Sidewalk Chalk", "Balance Beam", "Simon Says", "Action Songs", "Nature Hunt", "Bead Stringing", "Block City", "Tea Party", "Dress Up", "Puppet Show"],
-            "4.5-8.5": ["Phonics", "Addition Games", "Nature Journal", "Bug Hotel", "Lego Build", "Baking (Measure)", "BJJ Training", "Piano Practice", "Map Skills", "Library Trip", "Cursive Intro", "Silent Reading", "Chess Moves", "Drawing Unit", "Science Lab", "History Video", "Money Math", "Plant Life Cycle", "Logic Puzzles", "Spelling Bee"],
-            "8.5-12.5": ["Algebra", "Novel Study", "Microscope", "Film Dissection", "Financial Literacy", "Coding Project", "Debate Club", "Science Experiment", "BJJ Advanced", "Graphic Design", "History Timeline", "Latin Roots", "Chemistry Lab", "Geology Hunt", "Essay Draft", "Current Events", "Podcast Making", "Animation", "Business Idea", "Budget Planning"]
+        const LEARNING_PLAYBOOKS = {
+            "0-2.5": {
+                "Sensory": ["Water Play", "Sand Bin", "Ice Cube Melting", "Scent Jars", "Texture Board", "Flashlight Path", "Mirror Faces", "Shaving Cream Art", "Mud Kitchen", "Jello Dig", "Dry Noodle Bin", "Sponge Squeezing"],
+                "Motor": ["Crawl Tunnel", "Balloon Toss", "Stair Climbing", "Obstacle Course", "Sticker Peeling", "Block Stacking", "Finger Painting", "Kitchen Drumming", "Push Toy Walk", "Bubble Popping", "Ribbon Dancing", "Soft Ball Rolling"],
+                "Language": ["Nursery Rhymes", "Puppet Story", "Animal Sounds", "Point & Name", "Board Books", "Sing-Along", "First Words Card", "Mirror Chat", "Nature Walk Sounds", "Peek-a-boo", "Action Songs", "Family Photos"]
+            },
+            "2.5-4.5": {
+                "Early Skills": ["Alphabet Tracing", "Color Sorting", "Shape Hunt", "Counting Steps", "Cutting Skills", "Glue Collage", "Pattern Blocks", "Sidewalk Chalk", "Name Writing", "I-Spy Letters", "Number Puzzles", "Rhyme Matching"],
+                "Exploration": ["Bird Watching", "Bug Hotel", "Planting Seeds", "Sink or Float", "Magnet Fishing", "Color Mixing", "Nature Journal", "Cloud Watching", "Magnifying Glass", "Rock Sorting", "Leaf Rubbing", "Herb Garden"],
+                "Creative": ["Playdough Sculpt", "Dress Up", "Puppet Show", "Tea Party", "Lego Duplo", "Cardboard Box Fort", "Action Songs", "Yoga Kids", "Finger Puppets", "Story Mapping", "Dance Party", "Painting Play"]
+            },
+            "4.5-8.5": {
+                "Academic": ["Phonics Lesson", "Addition Games", "Subtraction War", "Money Math", "Cursive Practice", "Silent Reading", "Spelling Bee", "Clock Reading", "Geography Map", "History Video", "Creative Writing", "Logic Puzzles"],
+                "Active": ["BJJ Training", "Piano Practice", "Lego Engineering", "Baking (Measure)", "Chess Tactics", "Skating/Hockey", "Swimming", "Gymnastics", "Nature Hike", "Gardening", "Woodworking Basic", "Origami"],
+                "Scientific": ["Volcano Build", "Microscope Lab", "Solar System", "Life Cycle Study", "Recycling Sort", "Weather Tracking", "Electricity Kit", "Diorama Build", "Magnets Experiment", "Bird ID", "Star Gazing", "Plant Growth Log"]
+            },
+            "8.5-12.5": {
+                "Core Mastery": ["Algebra Intro", "Novel Study", "Essay Drafting", "Critical Thinking", "Latin Roots", "Debate Prep", "Current Events", "Financial Literacy", "Budgeting Task", "Advanced Geography", "Ethics Study", "Civics"],
+                "Technical": ["Coding Scratch", "Python Basic", "Graphic Design", "Video Editing", "Electronics Lab", "Robotics", "3D Modeling", "Animation", "Podcast Recording", "Photography", "Web Design", "App Design"],
+                "Life/Expert": ["BJJ Advanced", "Strength Training", "Survival Skills", "First Aid", "Cooking Skills", "Inventory Management", "Business Planning", "Public Speaking", "Architecture Study", "Music Theory", "Anatomy", "Geology"]
+            }
         };
 
         function App() {
-            const [profile, setProfile] = useState(() => JSON.parse(localStorage.getItem('pb_v4_profile')));
-            const [schedule, setSchedule] = useState(() => JSON.parse(localStorage.getItem('pb_v4_sched')) || { Monday: {}, Tuesday: {}, Wednesday: {}, Thursday: {}, Friday: {} });
-            const [customBricks, setCustomBricks] = useState(() => JSON.parse(localStorage.getItem('pb_v4_custom')) || { Learning: {}, Food: {} });
-            const [deletedBricks, setDeletedBricks] = useState(() => JSON.parse(localStorage.getItem('pb_v4_deleted')) || []);
+            const [profile, setProfile] = useState(() => JSON.parse(localStorage.getItem('pb_v5_profile')));
+            const [schedule, setSchedule] = useState(() => JSON.parse(localStorage.getItem('pb_v5_sched')) || { Monday: {}, Tuesday: {}, Wednesday: {}, Thursday: {}, Friday: {} });
+            const [customBricks, setCustomBricks] = useState(() => JSON.parse(localStorage.getItem('pb_v5_custom')) || { Learning: {}, Food: {} });
+            const [deletedBricks, setDeletedBricks] = useState(() => JSON.parse(localStorage.getItem('pb_v5_deleted')) || []);
             
-            const [libraryTarget, setLibraryTarget] = useState(null); // {day, sid, type: 'Food'|'Learning'}
+            const [libraryTarget, setLibraryTarget] = useState(null); 
             const [newBrickText, setNewBrickText] = useState("");
             const [isDeleteMode, setIsDeleteMode] = useState(false);
+            const [activeSubTab, setActiveSubTab] = useState("");
 
-            useEffect(() => { localStorage.setItem('pb_v4_profile', JSON.stringify(profile)); }, [profile]);
-            useEffect(() => { localStorage.setItem('pb_v4_sched', JSON.stringify(schedule)); }, [schedule]);
-            useEffect(() => { localStorage.setItem('pb_v4_custom', JSON.stringify(customBricks)); }, [customBricks]);
-            useEffect(() => { localStorage.setItem('pb_v4_deleted', JSON.stringify(deletedBricks)); }, [deletedBricks]);
+            useEffect(() => { localStorage.setItem('pb_v5_profile', JSON.stringify(profile)); }, [profile]);
+            useEffect(() => { localStorage.setItem('pb_v5_sched', JSON.stringify(schedule)); }, [schedule]);
+            useEffect(() => { localStorage.setItem('pb_v5_custom', JSON.stringify(customBricks)); }, [customBricks]);
+            useEffect(() => { localStorage.setItem('pb_v5_deleted', JSON.stringify(deletedBricks)); }, [deletedBricks]);
 
             if (!profile) {
                 return (
-                    <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center screen-fade">
-                        <h1 className="comic-title text-5xl mb-10">IDENTITY SELECTOR</h1>
-                        <button onClick={() => setProfile({ type: 'Homeschool', step: 'age' })} className="bg-white text-black py-5 px-10 btn-comic font-black text-2xl italic uppercase shadow-[8px_8px_0px_black]">Homeschool</button>
+                    <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+                        <h1 className="comic-title text-5xl mb-10">THE PLAYBOOK</h1>
+                        <button onClick={() => setProfile({ type: 'Homeschool', step: 'age' })} className="bg-white text-black py-5 px-10 btn-comic font-black text-2xl italic shadow-[8px_8px_0px_black]">START HOMESCHOOL</button>
                     </div>
                 );
             }
 
             if (profile.step === 'age') {
                 return (
-                    <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center screen-fade">
-                        <h1 className="comic-title text-5xl mb-10 tracking-tighter">TARGET AGE?</h1>
+                    <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+                        <h1 className="comic-title text-5xl mb-10">STUDENT AGE?</h1>
                         <div className="grid grid-cols-1 gap-6 w-full max-w-xs">
                             {["0-2.5", "2.5-4.5", "4.5-8.5", "8.5-12.5"].map(age => (
                                 <button key={age} onClick={() => {
@@ -76,63 +94,57 @@
                                         { id: 'h3', label: 'Lunch', type: 'Food', color: '#a6ff00', time: '12:00' },
                                         { id: 'h4', label: 'Afternoon Learning', type: 'Learning', color: '#FFFFFF', time: '13:00' }
                                     ]});
-                                }} className="bg-white text-black py-5 btn-comic font-black text-2xl italic uppercase shadow-[8px_8px_0px_black]">{age}</button>
+                                }} className="bg-white text-black py-5 btn-comic font-black text-2xl italic shadow-[8px_8px_0px_black]">{age}</button>
                             ))}
                         </div>
                     </div>
                 );
             }
 
-            const currentAge = profile.age;
-            
-            // Logic to determine which bricks to show based on the clicked block
-            const getBricks = () => {
-                if (!libraryTarget) return [];
-                const blockType = libraryTarget.type; // 'Food' or 'Learning'
-                const blockLabel = libraryTarget.label; // 'Breakfast' or 'Lunch'
-                
-                let base = [];
-                let custom = [];
-                let categoryId = "";
-
-                if (blockType === 'Food') {
-                    base = FOOD_LIBRARY[blockLabel] || [];
-                    custom = customBricks.Food[blockLabel] || [];
-                    categoryId = blockLabel;
+            const getLibraryData = () => {
+                if (!libraryTarget) return { items: [], categories: [] };
+                const age = profile.age;
+                if (libraryTarget.type === 'Food') {
+                    const base = FOOD_LIBRARY[libraryTarget.label] || [];
+                    const custom = customBricks.Food[libraryTarget.label] || [];
+                    return { items: [...base, ...custom], categories: [] };
                 } else {
-                    base = INITIAL_LEARNING_BRICKS[currentAge] || [];
-                    custom = customBricks.Learning[currentAge] || [];
-                    categoryId = currentAge;
+                    const playbook = LEARNING_PLAYBOOKS[age];
+                    const categories = Object.keys(playbook);
+                    const activeCat = activeSubTab || categories[0];
+                    const base = playbook[activeCat] || [];
+                    const custom = customBricks.Learning[`${age}-${activeCat}`] || [];
+                    return { items: [...base, ...custom], categories };
                 }
-
-                return [...base, ...custom].filter(b => !deletedBricks.includes(`${categoryId}-${b}`));
             };
 
-            const handleAddCustom = () => {
-                if(!newBrickText.trim() || !libraryTarget) return;
-                const updated = {...customBricks};
-                const blockType = libraryTarget.type;
-                const categoryId = blockType === 'Food' ? libraryTarget.label : currentAge;
+            const { items, categories } = getLibraryData();
+            const filteredItems = items.filter(i => !deletedBricks.includes(`${libraryTarget?.type === 'Food' ? libraryTarget.label : (activeSubTab || categories[0])}-${i}`));
 
-                if(!updated[blockType][categoryId]) updated[blockType][categoryId] = [];
-                updated[blockType][categoryId].push(newBrickText);
+            const handleAddCustom = () => {
+                if(!newBrickText.trim()) return;
+                const updated = {...customBricks};
+                if(libraryTarget.type === 'Food') {
+                    if(!updated.Food[libraryTarget.label]) updated.Food[libraryTarget.label] = [];
+                    updated.Food[libraryTarget.label].push(newBrickText);
+                } else {
+                    const cat = activeSubTab || categories[0];
+                    const key = `${profile.age}-${cat}`;
+                    if(!updated.Learning[key]) updated.Learning[key] = [];
+                    updated.Learning[key].push(newBrickText);
+                }
                 setCustomBricks(updated);
                 setNewBrickText("");
             };
 
-            const toggleDeleteBrick = (brick) => {
-                const categoryId = libraryTarget.type === 'Food' ? libraryTarget.label : currentAge;
-                setDeletedBricks([...deletedBricks, `${categoryId}-${brick}`]);
-            };
-
             return (
-                <div className="min-h-screen p-4 pb-48 relative screen-fade">
+                <div className="min-h-screen p-4 pb-48 relative">
                     <header className="flex justify-between items-start mb-8">
                         <div>
                             <h1 className="comic-title text-4xl leading-none">THE<br/>PLAYBOOK</h1>
-                            <div className="bg-black text-yellow-400 inline-block px-2 py-0.5 mt-1 text-[10px] font-black uppercase italic">HOMESCHOOL | {profile.age}</div>
+                            <div className="bg-black text-yellow-400 inline-block px-2 py-0.5 mt-1 text-[10px] font-black uppercase italic">AGE: {profile.age}</div>
                         </div>
-                        <button onClick={() => { if(confirm("Clear everything?")) { localStorage.clear(); window.location.reload(); } }} className="bg-white text-black px-3 py-2 btn-comic text-[10px]">RESET</button>
+                        <button onClick={() => { if(confirm("Reset?")) { localStorage.clear(); window.location.reload(); } }} className="bg-white text-black px-2 py-1 btn-comic text-[10px]">RESET</button>
                     </header>
 
                     <main className="max-w-md mx-auto space-y-12">
@@ -146,15 +158,15 @@
                                                 <span className="bg-black text-yellow-400 text-[10px] px-2 py-1 rounded font-black italic">{sec.time}</span>
                                                 <span className="font-black text-black uppercase text-xs italic tracking-tighter">{sec.label}</span>
                                             </div>
-                                            <button onClick={() => setLibraryTarget({day, sid: sec.id, type: sec.type, label: sec.label})} className="bg-white text-black w-10 h-10 rounded-lg border-3 border-black font-black text-xl">+</button>
+                                            <button onClick={() => { setLibraryTarget({day, sid: sec.id, type: sec.type, label: sec.label}); setActiveSubTab(""); }} className="bg-white text-black w-10 h-10 rounded-lg border-3 border-black font-black text-xl">+</button>
                                         </div>
                                         <div className="flex flex-wrap gap-2">
                                             {(schedule[day][sec.id] || []).map((item, idx) => (
-                                                <div key={idx} className="bg-white p-2 px-3 rounded-lg border-2 border-black font-black uppercase text-black text-[10px] flex items-center gap-2 shadow-[2px_2px_0px_black] italic">
+                                                <div key={idx} className="bg-white p-2 px-3 rounded-lg border-2 border-black font-black uppercase text-black text-[10px] flex items-center shadow-[2px_2px_0px_black] italic">
                                                     <span>{item}</span>
                                                     <button onClick={() => {
                                                         const ns = {...schedule}; ns[day][sec.id].splice(idx, 1); setSchedule(ns);
-                                                    }} className="text-red-600 font-black border-l border-black/20 pl-2 ml-1">✕</button>
+                                                    }} className="text-red-600 font-black border-l border-black/20 pl-2 ml-2">✕</button>
                                                 </div>
                                             ))}
                                         </div>
@@ -165,36 +177,38 @@
                     </main>
 
                     {libraryTarget && (
-                        <div className="library-drawer p-6 screen-fade">
-                            <div className="flex justify-between items-center mb-6">
-                                <h3 className="comic-title text-4xl tracking-tighter text-black italic">
-                                    {libraryTarget.type === 'Food' ? `${libraryTarget.label} MENU` : 'IDEA ENGINE'}
-                                </h3>
+                        <div className="library-drawer p-6 shadow-2xl">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="comic-title text-4xl italic">{libraryTarget.type === 'Food' ? 'MENU' : 'IDEAS'}</h3>
                                 <div className="flex gap-2">
-                                    <button onClick={() => setIsDeleteMode(!isDeleteMode)} className={`px-4 py-2 font-black text-[10px] btn-comic ${isDeleteMode ? 'bg-red-600 text-white' : 'bg-yellow-400 text-black'}`}>{isDeleteMode ? 'FINISH' : 'EDIT'}</button>
-                                    <button onClick={() => setLibraryTarget(null)} className="bg-black text-white px-4 py-2 font-black text-[10px] btn-comic">CLOSE</button>
+                                    <button onClick={() => setIsDeleteMode(!isDeleteMode)} className={`px-4 py-2 font-black text-[10px] btn-comic ${isDeleteMode ? 'bg-red-600' : 'bg-yellow-400'}`}>{isDeleteMode ? 'DONE' : 'EDIT'}</button>
+                                    <button onClick={() => setLibraryTarget(null)} className="bg-black text-white px-4 py-2 btn-comic text-[10px]">X</button>
                                 </div>
                             </div>
 
-                            <div className="flex gap-3 mb-6">
-                                <input value={newBrickText} onChange={(e) => setNewBrickText(e.target.value)} placeholder={`ADD CUSTOM ${libraryTarget.type === 'Food' ? 'FOOD' : 'ACTIVITY'}...`} className="flex-1 bg-white border-4 border-black p-3 font-black uppercase text-black italic text-xs focus:outline-none" />
-                                <button onClick={handleAddCustom} className="bg-green-500 text-black px-6 btn-comic font-black italic text-xs">ADD</button>
+                            {categories.length > 0 && (
+                                <div className="flex overflow-x-auto pb-4 mb-4">
+                                    {categories.map(cat => (
+                                        <button key={cat} onClick={() => setActiveSubTab(cat)} className={`category-tab whitespace-nowrap ${ (activeSubTab || categories[0]) === cat ? 'bg-black text-white' : 'bg-white text-black'}`}>{cat}</button>
+                                    ))}
+                                </div>
+                            )}
+
+                            <div className="flex gap-2 mb-6">
+                                <input value={newBrickText} onChange={(e) => setNewBrickText(e.target.value)} placeholder="ADD CUSTOM..." className="flex-1 border-4 border-black p-3 font-black uppercase text-black italic text-xs" />
+                                <button onClick={handleAddCustom} className="bg-green-500 text-black px-6 btn-comic font-black italic">ADD</button>
                             </div>
 
                             <div className={`flex-1 overflow-y-auto pb-10 ${isDeleteMode ? 'delete-mode' : ''}`}>
-                                <div className="flex flex-wrap content-start">
-                                    {getBricks().map((item, i) => (
-                                        <div key={i} onClick={() => isDeleteMode ? toggleDeleteBrick(item) : (()=>{
-                                            const { day, sid } = libraryTarget;
-                                            const newSched = {...schedule};
-                                            if(!newSched[day][sid]) newSched[day][sid] = [];
-                                            newSched[day][sid].push(item);
-                                            setSchedule(newSched);
+                                <div className="flex flex-wrap">
+                                    {filteredItems.map((item, i) => (
+                                        <div key={i} onClick={() => isDeleteMode ? setDeletedBricks([...deletedBricks, `${libraryTarget.type === 'Food' ? libraryTarget.label : (activeSubTab || categories[0])}-${item}`]) : (()=>{
+                                            const ns = {...schedule};
+                                            if(!ns[libraryTarget.day][libraryTarget.sid]) ns[libraryTarget.day][libraryTarget.sid] = [];
+                                            ns[libraryTarget.day][libraryTarget.sid].push(item);
+                                            setSchedule(ns);
                                             setLibraryTarget(null);
-                                        })()} className="brick-chip">
-                                            {item}
-                                            {isDeleteMode && <span className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] border-2 border-black">✕</span>}
-                                        </div>
+                                        })()} className="brick-chip">{item}</div>
                                     ))}
                                 </div>
                             </div>
