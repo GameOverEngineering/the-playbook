@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Playbook: Sovereign Pro Build</title>
+    <title>The Playbook: Ultimate Sovereign Library</title>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Rajdhani:wght@800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -16,8 +16,9 @@
         .btn-comic { transition: transform 0.1s; border: 3px solid black; box-shadow: 4px 4px 0px black; text-transform: uppercase; font-weight: 900; }
         .btn-comic:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0px black; }
         .library-drawer { background: #f4f4f4; border-top: 6px solid black; box-shadow: 0 -15px 40px rgba(0,0,0,0.6); position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; }
-        .brick-chip { background: white; color: black; border: 2px solid black; padding: 6px 12px; border-radius: 6px; font-weight: 900; font-size: 11px; box-shadow: 2px 2px 0px black; cursor: pointer; display: inline-block; margin: 4px; }
+        .brick-chip { background: white; color: black; border: 2px solid black; padding: 6px 10px; border-radius: 6px; font-weight: 900; font-size: 10px; box-shadow: 2px 2px 0px black; cursor: pointer; display: inline-block; margin: 3px; }
         .brick-chip:active { transform: scale(0.9); }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="studs">
@@ -27,53 +28,52 @@
         const { useState, useEffect } = React;
 
         const PACKS = {
-            "The Trades": {
-                "Plumber": ["Rough-in", "Stack Test", "Fixture Install", "Drain Snaking", "Sump Pump Check", "Client Quote", "Parts Run", "Site Cleanup", "Leak Detection", "Hot Water Tank", "Pipe Insulation"],
-                "Electrician": ["Panel Upgrade", "Wire Pulling", "Circuit Test", "Outlet Install", "Lighting Plan", "Code Inspection", "Conduit Bend", "Troubleshooting", "Service Call"],
-                "Construction": ["Site Size-up", "Framing", "Drywall", "Permit Check", "Sub-contractor Meet", "Dumpster Swap", "Tool Inventory", "Safety Walk", "Material Delivery"]
+            "Trades & Tech": {
+                "Plumbing": ["Rough-in", "Stack Test", "Fixture Install", "Drain Snaking", "Sump Pump Check", "Client Quote", "Parts Run", "Site Cleanup", "Leak Detection", "Hot Water Tank", "Pipe Insulation", "Main Shut-off Check", "PEX Crimping", "Solder Joint Work", "Backflow Testing", "Mixing Valve Adjustment", "Toilet Augering", "Garbage Disposal Fix", "Laundry Tie-in", "Septic Inspection", "Grease Trap Clean", "Water Meter Install", "Shower Valve Swap", "Gas Line Pressure", "Vent Stack Clearing", "Emergency Call", "Blueprint Review", "ESA Coordination", "Invoice Generation", "Tool Sharpening"],
+                "Electrical": ["Panel Upgrade", "Wire Pulling", "Circuit Test", "Outlet Install", "Lighting Plan", "Code Inspection", "Conduit Bend", "Troubleshooting", "Service Call", "GFCI Install", "Dimmer Wiring", "Smart Home Hub", "EV Charger Install", "Breaker Swap", "Knob & Tube Removal", "Service Mast Repair", "Data/Low Voltage", "Generator Hookup", "Arc Fault Testing", "Outdoor Lighting", "Grounding Rod Drive", "Ballast Replacement", "Load Calculation", "Permit Filing", "Safety Tailgate", "Cable Management", "Thermal Imaging", "Voltage Drop Check", "Labeling Panel"],
+                "Construction": ["Site Size-up", "Framing", "Drywall", "Permit Check", "Sub-contractor Meet", "Dumpster Swap", "Tool Inventory", "Safety Walk", "Material Delivery", "Laser Leveling", "Insulation Blowing", "Vapour Barrier", "Mud & Tape", "Sanding Room", "Baseboard Trim", "Window Install", "Door Hanging", "Roofing Patch", "Siding Repair", "Demolition", "Scaffolding Build", "Floor Joist Reinforce", "Tile Layout", "Grout Seal", "Concrete Pour", "Compaction Test", "Stair Stringer Cut", "Cabinet Install", "Deck Pier Dig", "Fence Post Set"]
             },
             "Emergency Services": {
-                "Fire/Rescue": ["Rig Check", "Hydrant Flow Test", "Training Drill", "Shift Handover", "Station Chores", "Medical Bag Inventory", "Pre-plan Review", "Fitness Training", "Hazmat Review"],
-                "Paramedic/EMS": ["Rig Restock", "Ambulance Inspection", "Protocol Review", "Documentation/PCRs", "Base Clean", "CME Training", "Supply Requisition", "Narcotics Count"],
-                "Police/Security": ["Patrol Briefing", "Equipment Check", "Court Appearance", "Report Writing", "Public Outreach", "Evidence Log", "Tactical Training", "Cruiser Maintenance"]
+                "Fire & Rescue": ["Rig Check", "Hydrant Flow Test", "Training Drill", "Shift Handover", "Station Chores", "Medical Bag Inventory", "Pre-plan Review", "Fitness Training", "Hazmat Review", "SCBA Inspection", "Nozzle Maintenance", "Ladder Throwing", "Forcible Entry Practice", "Extrication Drill", "High Angle Rope", "Wildland Gear Prep", "Fire Prev Inspection", "Public Demo", "NFPA Study", "Uniform Maintenance", "Dispatch Comms Check", "Generator Test", "Saw Maintenance", "Ventilation Theory", "Thermal Cam Battery", "Incident Critique", "Peer Support Chat", "Inventory Audit", "PPE Decon", "Foam System Flush"],
+                "Paramedic/EMS": ["Rig Restock", "Ambulance Inspection", "Protocol Review", "Documentation/PCRs", "Base Clean", "CME Training", "Supply Requisition", "Narcotics Count", "Monitor/Defib Check", "O2 Tank Swap", "Stretcher Lube", "Suction Unit Test", "Airway Bag Audit", "Pediatric Sizing Review", "Radio Signal Check", "Triage Tag Prep", "Shift Debrief", "ECG Strip Practice", "Pharmacology Study", "IV Start Practice", "Refusal Paperwork", "Trauma Bag Audit", "MCI Drill", "Station Log Entry", "Blood Glucose Check", "Defib Pad Expiry", "Suction Catheter Check", "Personal Bag Pack"],
+                "Police/Security": ["Patrol Briefing", "Equipment Check", "Court Appearance", "Report Writing", "Public Outreach", "Evidence Log", "Tactical Training", "Cruiser Maintenance", "Body Cam Sync", "Use of Force Review", "Statement Taking", "Witness Interview", "Case File Review", "Canine Unit Support", "Traffic Stop Drill", "Policy Update", "Fingerprint Kit Check", "Radar Calibration", "Community Meeting", "Narcotics Processing", "Booking Procedure", "Restraint Check", "Firearm Cleaning", "Range Qualification", "De-escalation Study", "Cyber Crime Basic", "Ethics Training", "Note-taking Audit"]
             },
-            "Retiree / Legacy": {
-                "Health": ["Morning Walk", "Blood Pressure Check", "Physio Exercises", "Medication Organizer", "Hydration Goal", "Sauna Session", "Stretching", "Doctor Appointment"],
-                "Leisure": ["Grandkids Visit", "Golf Tee Time", "Woodshop Project", "Garden Maintenance", "Community Meetup", "Volunteer Hours", "Bridge/Game Club", "Reading Time"]
+            "Homeschool/Edu": {
+                "Core Learning": ["STEM Lab", "Nature Walk", "Phonics", "Math Games", "Art Project", "History", "Science Lab", "Logic Puzzles", "BJJ Training", "Silent Reading", "Creative Writing", "Geography Map", "Music Theory", "Piano Practice", "Foreign Language", "Typing Club", "Anatomy Study", "Poetry Tea Time", "Copy Work", "Memory Work", "Shakespeare Reading", "Documentary Film", "Current Events", "Biblical Study", "Philosophy 101", "Financial Literacy", "Cooking Chemistry", "Coding/Scratch", "Electronics Kit", "Chess Tactics", "Bird ID", "Star Gazing", "Microscope Lab"],
+                "Teacher (ON)": ["Literacy Block", "Numeracy Block", "DPA/Gym", "IEP Work", "Planning", "Assessment", "Bell Work", "Dismissal", "Staff Meeting", "Duty (Recess)", "Ontario Curriculum", "Report Card Comments", "Guided Reading", "Writer's Workshop", "Math Manipulatives", "Anchor Charts", "Student Profiles", "Parent Teacher Prep", "Field Trip Logistics", "Grade Level Meeting", "Resource Prep", "Bulletin Board", "Classroom Reset", "Tech Support", "Equity Training", "Spec Ed Consultation", "LTO Planning", "Supply Plans", "Marking Rubric", "Health & PhysEd", "Drama/Dance"]
             },
-            "Parent / Edu": {
-                "Standard Parent": ["Lunch Prep", "Backpack Check", "Homework Zone", "Bath/Bed Routine", "Chores", "Screen Time", "Martial Arts", "Hockey Practice", "Soccer Game"],
-                "Homeschool": ["STEM Lab", "Nature Walk", "Phonics", "Math Games", "Art Project", "History", "Science Lab", "Logic Puzzles", "BJJ Training"],
-                "Teacher": ["Literacy", "Numeracy", "DPA/Gym", "IEP Work", "Planning", "Assessment", "Bell Work", "Dismissal", "Staff Meeting"]
+            "Family & Legacy": {
+                "Parenting": ["Lunch Prep", "Backpack Check", "Homework Zone", "Bath/Bed Routine", "Chores", "Screen Time", "Martial Arts", "Hockey Practice", "Soccer Game", "Swimming Lesson", "Music Rehearsal", "Room Tidying", "Tooth Brushing", "Vitamin Time", "Laundry Sort", "Toy Rotation", "Evening Walk", "Bedtime Story", "Gratitude Chat", "Prayer", "Outfit Choice", "Shoe Finding", "Water Bottle Fill", "Device Charging", "Dentist/Doctor", "Barber Visit", "Playdate Sync", "Birthday Prep", "Bike Ride", "Dog Walk"],
+                "Retiree": ["Morning Walk", "Blood Pressure Check", "Physio Exercises", "Medication Organizer", "Hydration Goal", "Sauna Session", "Stretching", "Doctor Appointment", "Grandkids Visit", "Golf Tee Time", "Woodshop Project", "Garden Maintenance", "Community Meetup", "Volunteer Hours", "Bridge/Game Club", "Reading Time", "Estate Planning", "Genealogy Search", "Tech Help", "Grocery Run", "Library Trip", "Investment Check", "Travel Research", "Photo Organizing", "Rest & Reset", "Bird Watching", "News Catch-up", "Baking Time"]
             }
         };
 
         function App() {
             const [view, setView] = useState('playbook'); 
-            const [libraryTarget, setLibraryTarget] = useState(null); // {day, sid}
-            const [activeCategory, setActiveCategory] = useState("Parent / Edu");
-            const [activeSub, setActiveSub] = useState("Standard Parent");
+            const [libraryTarget, setLibraryTarget] = useState(null);
+            const [activeCategory, setActiveCategory] = useState("Trades & Tech");
+            const [activeSub, setActiveSub] = useState("Plumbing");
             const [customInput, setCustomInput] = useState("");
 
             const [config, setConfig] = useState(() => {
-                const saved = localStorage.getItem('pb_universal_config');
+                const saved = localStorage.getItem('pb_v50_config');
                 return saved ? JSON.parse(saved) : { hero: true, sections: [
-                    { id: 's1', label: 'Morning Block', color: '#FF5F1F', active: true, time: '07:00' },
-                    { id: 's2', label: 'Work / Learning', color: '#FFFFFF', active: true, time: '09:00' },
-                    { id: 's3', label: 'Lunch / Mid-Day', color: '#a6ff00', active: true, time: '12:00' },
-                    { id: 's4', label: 'Afternoon Ops', color: '#FFFFFF', active: true, time: '13:30' },
-                    { id: 's5', label: 'Sports & Wrap', color: '#2196F3', active: true, time: '17:00' },
-                    { id: 's6', label: 'Evening Routine', color: '#9C27B0', active: true, time: '19:30' }
+                    { id: 's1', label: 'Morning Box', color: '#FF5F1F', active: true, time: '07:00' },
+                    { id: 's2', label: 'Primary Focus', color: '#FFFFFF', active: true, time: '09:00' },
+                    { id: 's3', label: 'Fuel & Reset', color: '#a6ff00', active: true, time: '12:00' },
+                    { id: 's4', label: 'Secondary Ops', color: '#FFFFFF', active: true, time: '13:30' },
+                    { id: 's5', label: 'Activity/Sports', color: '#2196F3', active: true, time: '17:00' },
+                    { id: 's6', label: 'Night Routine', color: '#9C27B0', active: true, time: '19:30' }
                 ]};
             });
 
             const [schedule, setSchedule] = useState(() => {
-                const saved = localStorage.getItem('pb_universal_current');
+                const saved = localStorage.getItem('pb_v50_current');
                 return saved ? JSON.parse(saved) : { Monday: {s1:[], s2:[], s3:[], s4:[], s5:[], s6:[]}, Tuesday: {s1:[], s2:[], s3:[], s4:[], s5:[], s6:[]}, Wednesday: {s1:[], s2:[], s3:[], s4:[], s5:[], s6:[]}, Thursday: {s1:[], s2:[], s3:[], s4:[], s5:[], s6:[]}, Friday: {s1:[], s2:[], s3:[], s4:[], s5:[], s6:[]} };
             });
 
-            useEffect(() => { localStorage.setItem('pb_universal_config', JSON.stringify(config)); }, [config]);
-            useEffect(() => { localStorage.setItem('pb_universal_current', JSON.stringify(schedule)); }, [schedule]);
+            useEffect(() => { localStorage.setItem('pb_v50_config', JSON.stringify(config)); }, [config]);
+            useEffect(() => { localStorage.setItem('pb_v50_current', JSON.stringify(schedule)); }, [schedule]);
 
             const addBrick = (text) => {
                 if(!text) return;
@@ -85,7 +85,7 @@
             };
 
             return (
-                <div className="min-h-screen p-4 pb-48 relative">
+                <div className="min-h-screen p-4 pb-64 relative">
                     <header className="flex justify-between items-center mb-6">
                         <h1 className="comic-title text-4xl">THE<br/>PLAYBOOK</h1>
                         <button onClick={() => setView(view === 'settings' ? 'playbook' : 'settings')} className="bg-white text-black px-4 py-2 btn-comic text-[10px]">Settings</button>
@@ -93,7 +93,6 @@
 
                     {view === 'settings' ? (
                         <div className="max-w-md mx-auto space-y-4">
-                            <h2 className="comic-title text-3xl text-center">Settings</h2>
                             {config.sections.map((sec, i) => (
                                 <div key={sec.id} className="bg-white p-3 border-4 border-black text-black">
                                     <input value={sec.label} onChange={(e) => {
@@ -112,7 +111,7 @@
                             ))}
                         </div>
                     ) : (
-                        <main className="max-w-md mx-auto space-y-10">
+                        <main className="max-w-md mx-auto space-y-12">
                             {Object.keys(schedule).map(day => (
                                 <div key={day} className="space-y-4">
                                     <span className="bg-[#E61E27] px-4 py-1 border-2 border-black font-black uppercase italic shadow-[3px_3px_0px_black] text-sm">Game Day: {day}</span>
@@ -143,7 +142,7 @@
                     {libraryTarget && (
                         <div className="library-drawer p-4">
                             <div className="flex justify-between items-center mb-4">
-                                <h3 className="comic-title text-xl text-black uppercase tracking-tighter">Quick Add Bricks</h3>
+                                <h3 className="comic-title text-xl text-black">SELECT YOUR BRICK</h3>
                                 <button onClick={() => setLibraryTarget(null)} className="bg-black text-white px-3 py-1 font-black text-xs btn-comic">CLOSE</button>
                             </div>
 
@@ -169,7 +168,7 @@
                                 ))}
                             </div>
 
-                            <div className="max-h-40 overflow-y-auto bg-white p-2 border-2 border-black flex flex-wrap">
+                            <div className="max-h-56 overflow-y-auto bg-white p-2 border-2 border-black flex flex-wrap content-start">
                                 {PACKS[activeCategory][activeSub].map(item => (
                                     <div key={item} onClick={() => addBrick(item)} className="brick-chip">{item}</div>
                                 ))}
