@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Playbook: Developmental Edition</title>
+    <title>The Playbook: Fully Editable Build</title>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Rajdhani:wght@800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -15,11 +15,10 @@
         .studs { background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
         .btn-comic { transition: transform 0.1s; border: 3px solid black; box-shadow: 4px 4px 0px black; text-transform: uppercase; font-weight: 900; }
         .btn-comic:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0px black; }
-        .library-drawer { background: #f4f4f4; border-top: 8px solid black; box-shadow: 0 -15px 50px rgba(0,0,0,0.8); position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; height: 85vh; display: flex; flex-direction: column; }
-        .brick-chip { background: white; color: black; border: 2px solid black; padding: 8px 12px; border-radius: 6px; font-weight: 900; font-size: 11px; box-shadow: 3px 3px 0px black; cursor: pointer; display: inline-block; margin: 5px; }
-        .delete-mode .brick-chip { border-color: #E61E27; animation: shake 0.5s infinite; }
-        @keyframes shake { 0% { transform: rotate(0deg); } 25% { transform: rotate(1.5deg); } 75% { transform: rotate(-1.5deg); } 100% { transform: rotate(0deg); } }
-        .category-tab { font-size: 10px; padding: 4px 8px; border: 2px solid black; font-weight: 900; margin-right: 4px; text-transform: uppercase; }
+        .library-drawer { background: #f4f4f4; border-top: 8px solid black; box-shadow: 0 -15px 50px rgba(0,0,0,0.8); position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; height: 90vh; display: flex; flex-direction: column; }
+        .brick-chip { background: white; color: black; border: 2px solid black; padding: 6px 10px; border-radius: 6px; font-weight: 900; font-size: 10px; box-shadow: 2px 2px 0px black; cursor: pointer; display: inline-block; margin: 4px; }
+        .editable-input { background: transparent; border: none; font-weight: 900; text-transform: uppercase; color: black; font-style: italic; outline: none; width: 100%; }
+        .time-pill { background: black; color: #FFD000; border-radius: 4px; padding: 2px 6px; font-size: 10px; font-weight: 900; border: none; outline: none; width: 50px; text-align: center; }
     </style>
 </head>
 <body class="studs">
@@ -30,143 +29,109 @@
 
         const FOOD_LIBRARY = {
             "Breakfast": ["Oatmeal Bar", "Scrambled Eggs", "Pancakes", "Greek Yogurt", "Fruit Smoothie", "Breakfast Burrito", "French Toast", "Avocado Toast", "Hard Boiled Eggs", "Cereal", "Waffles", "Bacon & Eggs", "Omelet", "Bagel & Cream Cheese", "Muffins", "Quiche", "Protein Shake", "Cottage Cheese", "Breakfast Sandwich", "Hashbrowns"],
-            "Lunch": ["Chicken Wraps", "Turkey Sandwich", "Pasta Salad", "Quinoa Bowl", "Grilled Cheese", "Tomato Soup", "Leftovers", "Hummus & Pita", "Quesadilla", "Tuna Salad", "Chicken Nuggets", "Beef Stew", "Tacos", "Mac & Cheese", "Egg Salad", "Cold Cut Sub", "Stir Fry", "Pizza Bagels", "Fruit & Nut Plate", "Lentil Soup"]
+            "Lunch": ["Chicken Wraps", "Turkey Sandwich", "Pasta Salad", "Quinoa Bowl", "Grilled Cheese", "Tomato Soup", "Leftovers", "Hummus & Pita", "Quesadilla", "Tuna Salad", "Chicken Nuggets", "Beef Stew", "Tacos", "Mac & Cheese", "Egg Salad", "Cold Cut Sub", "Stir Fry", "Pizza Bagels"]
         };
 
         const LEARNING_PLAYBOOKS = {
-            "0-2.5": {
-                "Sensory": ["Water Play", "Sand Bin", "Ice Cube Melting", "Scent Jars", "Texture Board", "Flashlight Path", "Mirror Faces", "Shaving Cream Art", "Mud Kitchen", "Jello Dig", "Dry Noodle Bin", "Sponge Squeezing"],
-                "Motor": ["Crawl Tunnel", "Balloon Toss", "Stair Climbing", "Obstacle Course", "Sticker Peeling", "Block Stacking", "Finger Painting", "Kitchen Drumming", "Push Toy Walk", "Bubble Popping", "Ribbon Dancing", "Soft Ball Rolling"],
-                "Language": ["Nursery Rhymes", "Puppet Story", "Animal Sounds", "Point & Name", "Board Books", "Sing-Along", "First Words Card", "Mirror Chat", "Nature Walk Sounds", "Peek-a-boo", "Action Songs", "Family Photos"]
-            },
-            "2.5-4.5": {
-                "Early Skills": ["Alphabet Tracing", "Color Sorting", "Shape Hunt", "Counting Steps", "Cutting Skills", "Glue Collage", "Pattern Blocks", "Sidewalk Chalk", "Name Writing", "I-Spy Letters", "Number Puzzles", "Rhyme Matching"],
-                "Exploration": ["Bird Watching", "Bug Hotel", "Planting Seeds", "Sink or Float", "Magnet Fishing", "Color Mixing", "Nature Journal", "Cloud Watching", "Magnifying Glass", "Rock Sorting", "Leaf Rubbing", "Herb Garden"],
-                "Creative": ["Playdough Sculpt", "Dress Up", "Puppet Show", "Tea Party", "Lego Duplo", "Cardboard Box Fort", "Action Songs", "Yoga Kids", "Finger Puppets", "Story Mapping", "Dance Party", "Painting Play"]
-            },
-            "4.5-8.5": {
-                "Academic": ["Phonics Lesson", "Addition Games", "Subtraction War", "Money Math", "Cursive Practice", "Silent Reading", "Spelling Bee", "Clock Reading", "Geography Map", "History Video", "Creative Writing", "Logic Puzzles"],
-                "Active": ["BJJ Training", "Piano Practice", "Lego Engineering", "Baking (Measure)", "Chess Tactics", "Skating/Hockey", "Swimming", "Gymnastics", "Nature Hike", "Gardening", "Woodworking Basic", "Origami"],
-                "Scientific": ["Volcano Build", "Microscope Lab", "Solar System", "Life Cycle Study", "Recycling Sort", "Weather Tracking", "Electricity Kit", "Diorama Build", "Magnets Experiment", "Bird ID", "Star Gazing", "Plant Growth Log"]
-            },
-            "8.5-12.5": {
-                "Core Mastery": ["Algebra Intro", "Novel Study", "Essay Drafting", "Critical Thinking", "Latin Roots", "Debate Prep", "Current Events", "Financial Literacy", "Budgeting Task", "Advanced Geography", "Ethics Study", "Civics"],
-                "Technical": ["Coding Scratch", "Python Basic", "Graphic Design", "Video Editing", "Electronics Lab", "Robotics", "3D Modeling", "Animation", "Podcast Recording", "Photography", "Web Design", "App Design"],
-                "Life/Expert": ["BJJ Advanced", "Strength Training", "Survival Skills", "First Aid", "Cooking Skills", "Inventory Management", "Business Planning", "Public Speaking", "Architecture Study", "Music Theory", "Anatomy", "Geology"]
-            }
+            "0-2.5": { "Sensory": ["Water Play", "Sand Bin", "Ice Cube Melting", "Scent Jars", "Texture Board", "Flashlight Path", "Mirror Faces", "Shaving Cream Art", "Mud Kitchen"], "Motor": ["Crawl Tunnel", "Balloon Toss", "Stair Climbing", "Obstacle Course", "Sticker Peeling", "Block Stacking", "Finger Painting"], "Language": ["Nursery Rhymes", "Puppet Story", "Animal Sounds", "Point & Name", "Board Books", "Sing-Along"] },
+            "2.5-4.5": { "Early Skills": ["Alphabet Tracing", "Color Sorting", "Shape Hunt", "Counting Steps", "Cutting Skills", "Glue Collage", "Pattern Blocks", "Sidewalk Chalk", "Name Writing"], "Exploration": ["Bird Watching", "Bug Hotel", "Planting Seeds", "Sink or Float", "Magnet Fishing", "Color Mixing", "Nature Journal"], "Creative": ["Playdough Sculpt", "Dress Up", "Puppet Show", "Tea Party", "Lego Duplo", "Cardboard Box Fort", "Yoga Kids"] },
+            "4.5-8.5": { "Academic": ["Phonics Lesson", "Addition Games", "Subtraction War", "Money Math", "Cursive Practice", "Silent Reading", "Spelling Bee", "Clock Reading"], "Active": ["BJJ Training", "Piano Practice", "Lego Engineering", "Baking (Measure)", "Chess Tactics", "Skating/Hockey", "Swimming"], "Scientific": ["Volcano Build", "Microscope Lab", "Solar System", "Life Cycle Study", "Recycling Sort", "Weather Tracking"] },
+            "8.5-12.5": { "Core Mastery": ["Algebra Intro", "Novel Study", "Essay Drafting", "Critical Thinking", "Latin Roots", "Debate Prep", "Current Events", "Financial Literacy"], "Technical": ["Coding Scratch", "Python Basic", "Graphic Design", "Video Editing", "Electronics Lab", "Robotics", "3D Modeling"], "Life/Expert": ["BJJ Advanced", "Strength Training", "Survival Skills", "First Aid", "Cooking Skills", "Business Planning"] }
         };
 
         function App() {
-            const [profile, setProfile] = useState(() => JSON.parse(localStorage.getItem('pb_v5_profile')));
-            const [schedule, setSchedule] = useState(() => JSON.parse(localStorage.getItem('pb_v5_sched')) || { Monday: {}, Tuesday: {}, Wednesday: {}, Thursday: {}, Friday: {} });
-            const [customBricks, setCustomBricks] = useState(() => JSON.parse(localStorage.getItem('pb_v5_custom')) || { Learning: {}, Food: {} });
-            const [deletedBricks, setDeletedBricks] = useState(() => JSON.parse(localStorage.getItem('pb_v5_deleted')) || []);
+            const [profile, setProfile] = useState(() => JSON.parse(localStorage.getItem('pb_v7_profile')));
+            const [schedule, setSchedule] = useState(() => JSON.parse(localStorage.getItem('pb_v7_sched')) || { Monday: {}, Tuesday: {}, Wednesday: {}, Thursday: {}, Friday: {} });
+            const [customBlocks, setCustomBlocks] = useState(() => JSON.parse(localStorage.getItem('pb_v7_blocks')) || {}); 
+            const [customBricks, setCustomBricks] = useState(() => JSON.parse(localStorage.getItem('pb_v7_custom')) || { Learning: {}, Food: {} });
+            const [deletedBricks, setDeletedBricks] = useState(() => JSON.parse(localStorage.getItem('pb_v7_deleted')) || []);
             
             const [libraryTarget, setLibraryTarget] = useState(null); 
             const [newBrickText, setNewBrickText] = useState("");
             const [isDeleteMode, setIsDeleteMode] = useState(false);
             const [activeSubTab, setActiveSubTab] = useState("");
 
-            useEffect(() => { localStorage.setItem('pb_v5_profile', JSON.stringify(profile)); }, [profile]);
-            useEffect(() => { localStorage.setItem('pb_v5_sched', JSON.stringify(schedule)); }, [schedule]);
-            useEffect(() => { localStorage.setItem('pb_v5_custom', JSON.stringify(customBricks)); }, [customBricks]);
-            useEffect(() => { localStorage.setItem('pb_v5_deleted', JSON.stringify(deletedBricks)); }, [deletedBricks]);
+            useEffect(() => { localStorage.setItem('pb_v7_profile', JSON.stringify(profile)); }, [profile]);
+            useEffect(() => { localStorage.setItem('pb_v7_sched', JSON.stringify(schedule)); }, [schedule]);
+            useEffect(() => { localStorage.setItem('pb_v7_blocks', JSON.stringify(customBlocks)); }, [customBlocks]);
+            useEffect(() => { localStorage.setItem('pb_v7_custom', JSON.stringify(customBricks)); }, [customBricks]);
+            useEffect(() => { localStorage.setItem('pb_v7_deleted', JSON.stringify(deletedBricks)); }, [deletedBricks]);
 
-            if (!profile) {
-                return (
-                    <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
-                        <h1 className="comic-title text-5xl mb-10">THE PLAYBOOK</h1>
-                        <button onClick={() => setProfile({ type: 'Homeschool', step: 'age' })} className="bg-white text-black py-5 px-10 btn-comic font-black text-2xl italic shadow-[8px_8px_0px_black]">START HOMESCHOOL</button>
-                    </div>
-                );
-            }
+            if (!profile) return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+                    <h1 className="comic-title text-6xl mb-10">THE PLAYBOOK</h1>
+                    <button onClick={() => setProfile({ type: 'Homeschool', step: 'age' })} className="bg-white text-black py-5 px-10 btn-comic font-black text-2xl italic shadow-[8px_8px_0px_black]">GO HOMESCHOOL</button>
+                </div>
+            );
 
-            if (profile.step === 'age') {
-                return (
-                    <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
-                        <h1 className="comic-title text-5xl mb-10">STUDENT AGE?</h1>
-                        <div className="grid grid-cols-1 gap-6 w-full max-w-xs">
-                            {["0-2.5", "2.5-4.5", "4.5-8.5", "8.5-12.5"].map(age => (
-                                <button key={age} onClick={() => {
-                                    setProfile({ ...profile, age, step: null, blocks: [
-                                        { id: 'h1', label: 'Breakfast', type: 'Food', color: '#FF5F1F', time: '08:00' },
-                                        { id: 'h2', label: 'Morning Learning', type: 'Learning', color: '#FFFFFF', time: '09:00' },
-                                        { id: 'h3', label: 'Lunch', type: 'Food', color: '#a6ff00', time: '12:00' },
-                                        { id: 'h4', label: 'Afternoon Learning', type: 'Learning', color: '#FFFFFF', time: '13:00' }
-                                    ]});
-                                }} className="bg-white text-black py-5 btn-comic font-black text-2xl italic shadow-[8px_8px_0px_black]">{age}</button>
-                            ))}
-                        </div>
+            if (profile.step === 'age') return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+                    <h1 className="comic-title text-5xl mb-10">AGE RANGE?</h1>
+                    <div className="grid grid-cols-1 gap-4 w-full max-w-xs">
+                        {["0-2.5", "2.5-4.5", "4.5-8.5", "8.5-12.5"].map(age => (
+                            <button key={age} onClick={() => setProfile({ ...profile, age, step: null, blocks: [
+                                { id: 'h1', label: 'Breakfast', type: 'Food', color: '#FF5F1F', time: '08:00' },
+                                { id: 'h2', label: 'Morning Learning', type: 'Learning', color: '#FFFFFF', time: '09:00' },
+                                { id: 'h3', label: 'Lunch', type: 'Food', color: '#a6ff00', time: '12:00' },
+                                { id: 'h4', label: 'Afternoon Learning', type: 'Learning', color: '#FFFFFF', time: '13:00' }
+                            ]})} className="bg-white text-black py-4 btn-comic font-black text-xl italic shadow-[8px_8px_0px_black]">{age}</button>
+                        ))}
                     </div>
-                );
-            }
+                </div>
+            );
+
+            const handleBlockUpdate = (id, field, value) => {
+                const newBlocks = profile.blocks.map(b => b.id === id ? { ...b, [field]: value } : b);
+                setProfile({ ...profile, blocks: newBlocks });
+            };
 
             const getLibraryData = () => {
                 if (!libraryTarget) return { items: [], categories: [] };
-                const age = profile.age;
                 if (libraryTarget.type === 'Food') {
-                    const base = FOOD_LIBRARY[libraryTarget.label] || [];
-                    const custom = customBricks.Food[libraryTarget.label] || [];
+                    const baseKey = libraryTarget.label.includes("Breakfast") ? "Breakfast" : "Lunch";
+                    const base = FOOD_LIBRARY[baseKey] || [];
+                    const custom = customBricks.Food[libraryTarget.sid] || [];
                     return { items: [...base, ...custom], categories: [] };
                 } else {
-                    const playbook = LEARNING_PLAYBOOKS[age];
+                    const playbook = LEARNING_PLAYBOOKS[profile.age];
                     const categories = Object.keys(playbook);
                     const activeCat = activeSubTab || categories[0];
                     const base = playbook[activeCat] || [];
-                    const custom = customBricks.Learning[`${age}-${activeCat}`] || [];
+                    const custom = customBricks.Learning[`${profile.age}-${activeCat}`] || [];
                     return { items: [...base, ...custom], categories };
                 }
             };
 
             const { items, categories } = getLibraryData();
-            const filteredItems = items.filter(i => !deletedBricks.includes(`${libraryTarget?.type === 'Food' ? libraryTarget.label : (activeSubTab || categories[0])}-${i}`));
-
-            const handleAddCustom = () => {
-                if(!newBrickText.trim()) return;
-                const updated = {...customBricks};
-                if(libraryTarget.type === 'Food') {
-                    if(!updated.Food[libraryTarget.label]) updated.Food[libraryTarget.label] = [];
-                    updated.Food[libraryTarget.label].push(newBrickText);
-                } else {
-                    const cat = activeSubTab || categories[0];
-                    const key = `${profile.age}-${cat}`;
-                    if(!updated.Learning[key]) updated.Learning[key] = [];
-                    updated.Learning[key].push(newBrickText);
-                }
-                setCustomBricks(updated);
-                setNewBrickText("");
-            };
 
             return (
-                <div className="min-h-screen p-4 pb-48 relative">
+                <div className="min-h-screen p-4 pb-64 relative studs">
                     <header className="flex justify-between items-start mb-8">
                         <div>
-                            <h1 className="comic-title text-4xl leading-none">THE<br/>PLAYBOOK</h1>
-                            <div className="bg-black text-yellow-400 inline-block px-2 py-0.5 mt-1 text-[10px] font-black uppercase italic">AGE: {profile.age}</div>
+                            <h1 className="comic-title text-5xl leading-none">THE PLAYBOOK</h1>
+                            <div className="bg-black text-yellow-400 inline-block px-2 py-0.5 mt-1 text-[10px] font-black uppercase italic tracking-widest">EDITABLE MODE</div>
                         </div>
-                        <button onClick={() => { if(confirm("Reset?")) { localStorage.clear(); window.location.reload(); } }} className="bg-white text-black px-2 py-1 btn-comic text-[10px]">RESET</button>
+                        <button onClick={() => { if(confirm("RESET?")) { localStorage.clear(); window.location.reload(); } }} className="bg-white text-black px-3 py-1 btn-comic text-[10px]">RESET</button>
                     </header>
 
-                    <main className="max-w-md mx-auto space-y-12">
-                        {Object.keys(schedule).map(day => (
+                    <main className="max-w-xl mx-auto space-y-12">
+                        {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map(day => (
                             <div key={day} className="space-y-4">
-                                <span className="bg-[#E61E27] px-5 py-1.5 border-4 border-black font-black uppercase italic shadow-[4px_4px_0px_black] text-sm">DAY: {day}</span>
+                                <span className="bg-[#E61E27] px-6 py-1.5 border-4 border-black font-black uppercase italic shadow-[6px_6px_0px_black] text-base">DAY: {day}</span>
                                 {profile.blocks.map(sec => (
-                                    <div key={sec.id} className="bg-[#b0bec5]/90 p-4 rounded-3xl border-4 border-black space-y-3">
-                                        <div style={{backgroundColor: sec.color}} className="flex justify-between items-center p-3 rounded-xl border-3 border-black shadow-[3px_3px_0px_black]">
-                                            <div className="flex items-center gap-3">
-                                                <span className="bg-black text-yellow-400 text-[10px] px-2 py-1 rounded font-black italic">{sec.time}</span>
-                                                <span className="font-black text-black uppercase text-xs italic tracking-tighter">{sec.label}</span>
+                                    <div key={sec.id} className="bg-[#b0bec5]/95 p-5 rounded-3xl border-4 border-black space-y-4 shadow-xl">
+                                        <div style={{backgroundColor: sec.color}} className="flex justify-between items-center p-4 rounded-xl border-4 border-black shadow-[4px_4px_0px_black]">
+                                            <div className="flex items-center gap-4 flex-1">
+                                                <input type="text" value={sec.time} onChange={(e) => handleBlockUpdate(sec.id, 'time', e.target.value)} className="time-pill" />
+                                                <input type="text" value={sec.label} onChange={(e) => handleBlockUpdate(sec.id, 'label', e.target.value)} className="editable-input text-sm" />
                                             </div>
-                                            <button onClick={() => { setLibraryTarget({day, sid: sec.id, type: sec.type, label: sec.label}); setActiveSubTab(""); }} className="bg-white text-black w-10 h-10 rounded-lg border-3 border-black font-black text-xl">+</button>
+                                            <button onClick={() => { setLibraryTarget({day, sid: sec.id, type: sec.type, label: sec.label}); setActiveSubTab(""); }} className="bg-white text-black w-12 h-12 rounded-xl border-4 border-black font-black text-2xl ml-2">+</button>
                                         </div>
                                         <div className="flex flex-wrap gap-2">
                                             {(schedule[day][sec.id] || []).map((item, idx) => (
-                                                <div key={idx} className="bg-white p-2 px-3 rounded-lg border-2 border-black font-black uppercase text-black text-[10px] flex items-center shadow-[2px_2px_0px_black] italic">
+                                                <div key={idx} className="bg-white p-2 px-4 rounded-lg border-2 border-black font-black uppercase text-black text-[11px] flex items-center shadow-[3px_3px_0px_black] italic">
                                                     <span>{item}</span>
-                                                    <button onClick={() => {
-                                                        const ns = {...schedule}; ns[day][sec.id].splice(idx, 1); setSchedule(ns);
-                                                    }} className="text-red-600 font-black border-l border-black/20 pl-2 ml-2">✕</button>
+                                                    <button onClick={() => { const ns = {...schedule}; ns[day][sec.id].splice(idx, 1); setSchedule(ns); }} className="text-red-600 font-black border-l-2 border-black/10 pl-3 ml-3">✕</button>
                                                 </div>
                                             ))}
                                         </div>
@@ -178,37 +143,48 @@
 
                     {libraryTarget && (
                         <div className="library-drawer p-6 shadow-2xl">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="comic-title text-4xl italic">{libraryTarget.type === 'Food' ? 'MENU' : 'IDEAS'}</h3>
-                                <div className="flex gap-2">
-                                    <button onClick={() => setIsDeleteMode(!isDeleteMode)} className={`px-4 py-2 font-black text-[10px] btn-comic ${isDeleteMode ? 'bg-red-600' : 'bg-yellow-400'}`}>{isDeleteMode ? 'DONE' : 'EDIT'}</button>
-                                    <button onClick={() => setLibraryTarget(null)} className="bg-black text-white px-4 py-2 btn-comic text-[10px]">X</button>
-                                </div>
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="comic-title text-4xl italic text-black uppercase">{libraryTarget.label}</h3>
+                                <button onClick={() => setLibraryTarget(null)} className="bg-black text-white px-5 py-2 btn-comic">X</button>
                             </div>
 
                             {categories.length > 0 && (
-                                <div className="flex overflow-x-auto pb-4 mb-4">
+                                <div className="flex overflow-x-auto pb-4 mb-4 gap-2">
                                     {categories.map(cat => (
                                         <button key={cat} onClick={() => setActiveSubTab(cat)} className={`category-tab whitespace-nowrap ${ (activeSubTab || categories[0]) === cat ? 'bg-black text-white' : 'bg-white text-black'}`}>{cat}</button>
                                     ))}
                                 </div>
                             )}
 
-                            <div className="flex gap-2 mb-6">
-                                <input value={newBrickText} onChange={(e) => setNewBrickText(e.target.value)} placeholder="ADD CUSTOM..." className="flex-1 border-4 border-black p-3 font-black uppercase text-black italic text-xs" />
-                                <button onClick={handleAddCustom} className="bg-green-500 text-black px-6 btn-comic font-black italic">ADD</button>
+                            <div className="flex gap-3 mb-6">
+                                <input value={newBrickText} onChange={(e) => setNewBrickText(e.target.value)} placeholder="ADD CUSTOM..." className="flex-1 border-4 border-black p-4 font-black text-xs" />
+                                <button onClick={() => {
+                                    if(!newBrickText.trim()) return;
+                                    const updated = {...customBricks};
+                                    if(libraryTarget.type === 'Food') {
+                                        if(!updated.Food[libraryTarget.sid]) updated.Food[libraryTarget.sid] = [];
+                                        updated.Food[libraryTarget.sid].push(newBrickText);
+                                    } else {
+                                        const cat = activeSubTab || categories[0];
+                                        const key = `${profile.age}-${cat}`;
+                                        if(!updated.Learning[key]) updated.Learning[key] = [];
+                                        updated.Learning[key].push(newBrickText);
+                                    }
+                                    setCustomBricks(updated);
+                                    setNewBrickText("");
+                                }} className="bg-green-500 text-black px-8 btn-comic font-black">ADD</button>
                             </div>
 
-                            <div className={`flex-1 overflow-y-auto pb-10 ${isDeleteMode ? 'delete-mode' : ''}`}>
+                            <div className="flex-1 overflow-y-auto pb-20">
                                 <div className="flex flex-wrap">
-                                    {filteredItems.map((item, i) => (
-                                        <div key={i} onClick={() => isDeleteMode ? setDeletedBricks([...deletedBricks, `${libraryTarget.type === 'Food' ? libraryTarget.label : (activeSubTab || categories[0])}-${item}`]) : (()=>{
+                                    {items.filter(i => !deletedBricks.includes(`${libraryTarget.label}-${i}`)).map((item, i) => (
+                                        <div key={i} onClick={() => {
                                             const ns = {...schedule};
                                             if(!ns[libraryTarget.day][libraryTarget.sid]) ns[libraryTarget.day][libraryTarget.sid] = [];
                                             ns[libraryTarget.day][libraryTarget.sid].push(item);
                                             setSchedule(ns);
                                             setLibraryTarget(null);
-                                        })()} className="brick-chip">{item}</div>
+                                        }} className="brick-chip">{item}</div>
                                     ))}
                                 </div>
                             </div>
