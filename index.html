@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Playbook: Capitalized Voice Build</title>
+    <title>The Playbook: Stable Build</title>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Rajdhani:wght@800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { margin: 0; background: #2d5a27; font-family: 'Rajdhani', sans-serif; color: white; }
-        .comic-title { font-family: 'Bangers', cursive; color: #E61E27; text-shadow: 3px 3px 0px #000, 5px 5px 0px #FFD000; }
+        body { margin: 0; background: #2d5a27; font-family: 'Rajdhani', sans-serif; color: white; overflow-x: hidden; }
+        .comic-title { font-family: 'Bangers', cursive; color: #E61E27; text-shadow: 2px 2px 0px #000, 4px 4px 0px #FFD000; }
         .studs { background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
         .btn-comic { transition: transform 0.1s; border: 3px solid black; box-shadow: 4px 4px 0px black; text-transform: uppercase; font-weight: 900; }
-        .library-drawer { background: #f4f4f4; border-top: 8px solid black; position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; height: 85vh; display: flex; flex-direction: column; border-radius: 30px 30px 0 0; }
-        .brick-chip { background: white; color: black; border: 2px solid black; padding: 6px 10px; border-radius: 6px; font-weight: 900; font-size: 10px; box-shadow: 2px 2px 0px black; cursor: pointer; display: inline-block; margin: 4px; }
-        .mic-btn { background: #E61E27; color: white; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 3px solid black; box-shadow: 3px 3px 0px black; }
+        .library-drawer { background: #f4f4f4; border-top: 8px solid black; position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; height: 80vh; display: flex; flex-direction: column; border-radius: 30px 30px 0 0; }
+        .brick-chip { background: white; color: black; border: 2px solid black; padding: 6px 10px; border-radius: 6px; font-weight: 900; font-size: 11px; box-shadow: 2px 2px 0px black; cursor: pointer; display: inline-block; margin: 4px; }
+        .mic-btn { background: #E61E27; color: white; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 3px solid black; }
         .mic-active { animation: pulse 1s infinite; background: #22c55e; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
@@ -27,85 +27,33 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        const BREAKFAST_ITEMS = ["Scrambled Eggs", "Oatmeal", "Blueberry Pancakes", "Greek Yogurt", "Fruit Smoothie", "Breakfast Burrito", "French Toast", "Avocado Toast", "Hard Boiled Eggs", "Cereal", "Waffles", "Bacon & Eggs", "Omelet", "Bagel & Cream Cheese", "Muffins", "Quiche", "Protein Shake", "Cottage Cheese", "Breakfast Sandwich", "Hashbrowns", "Fruit Salad", "Breakfast Sausage", "Smoothie Bowl", "English Muffin"];
-        const LUNCH_ITEMS = ["Chicken Wraps", "Turkey Sandwich", "Pasta Salad", "Quinoa Bowl", "Grilled Cheese", "Tomato Soup", "Leftovers", "Hummus & Pita", "Quesadilla", "Tuna Salad", "Chicken Nuggets", "Beef Stew", "Tacos", "Mac & Cheese", "Egg Salad", "Cold Cut Sub", "Stir Fry", "Pizza Bagels", "Fruit & Nut Plate", "Lentil Soup", "Baked Potato", "Sushi Rolls", "Chicken Caesar", "Burritos", "Bento Box", "Ramen", "BLT Sandwich"];
-        const PLAYBOOKS = {
-            "0-2.5": ["Water Play", "Sand Bin", "Ice Melting", "Scent Jars", "Texture Board", "Flashlight Path", "Mirror Faces", "Shaving Cream", "Mud Kitchen", "Jello Dig", "Dry Noodles", "Sponge Squeeze", "Feather Touch", "Rice Scoop", "Oobleck", "Soap Suds", "Edible Paint", "Nature Basket", "Crawl Tunnel", "Balloon Toss", "Sticker Peel", "Block Stack", "Finger Paint", "Bubble Pop", "Ribbon Dance", "Soft Ball", "Climbing", "Magnet Board", "Pom Pom Drop", "Zipping Fun", "Animal Crawls", "Nursery Rhymes", "Puppet Story", "Board Books", "Sing-Along", "First Words", "Story Stones"],
-            "2.5-4.5": ["Alphabet Tracing", "Color Sorting", "Shape Hunt", "Counting Steps", "Cutting Skills", "Glue Collage", "Pattern Blocks", "Sidewalk Chalk", "Name Writing", "I-Spy Letters", "Number Puzzles", "Rhyme Match", "Phonics Sounds", "Sorting Laundry", "Button Sorting", "Bead Stringing", "Letter Stamps", "Sticker Math", "Sight Words", "Tracing Sand", "Calendar Time", "Bird Watching", "Bug Hotel", "Planting Seeds", "Sink or Float", "Magnet Fish", "Nature Journal", "Cloud Watch", "Magnifying Glass", "Rock Sort", "Leaf Rub", "Herb Garden", "Worm Farm", "Sun Prints", "Dino Dig", "Volcano", "Snail Race", "Weather Chart", "Moon Phases", "Playdough", "Dress Up", "Fort Build", "Yoga Kids", "Dance Party", "Recycled Art", "Clay Animals", "Mask Making", "Shadow Art", "Paper Planes", "Origami Easy"],
-            "4.5-8.5": ["Phonics", "Addition Games", "Subtraction War", "Money Math", "Cursive", "Silent Reading", "Spelling Bee", "Clock Reading", "Geography Map", "History Video", "Creative Writing", "Logic Puzzles", "Typing", "Journaling", "Book Report", "Multiplication", "Word Problems", "Grammar", "Poetry", "Vocabulary", "Research Task", "Pen Pal", "Number Lines", "Science Reading", "BJJ Training", "Piano Practice", "Lego Engineering", "Baking", "Chess", "Skating", "Swimming", "Gymnastics", "Nature Hike", "Gardening", "Woodworking", "Origami", "Team Sports", "Jump Rope", "Obstacle Course", "Yoga Flow", "Martial Arts", "Skateboarding", "Dance Class", "Target Practice", "Navigation", "Fire Safety", "Stretching", "Animal Moves", "Soccer Drills", "Parkour", "Tumbling", "Volcano", "Microscope", "Solar System", "Life Cycles", "Recycling", "Weather", "Electricity Kit", "Diorama", "Magnets", "Bird ID", "Star Gazing", "Growth Log", "Water Filter", "Insect Collection", "Rock Tumbler", "Crystals", "Anatomy", "Chemistry", "Robot Coding", "Circuits"],
-            "8.5-12.5": ["Algebra", "Novel Study", "Essay Draft", "Critical Thinking", "Latin Roots", "Debate Prep", "Current Events", "Financial Lit", "Budgeting", "Geography", "Ethics", "Civics", "Stock Market", "Psychology", "Philosophy", "Public Speaking", "Mediation", "Logic Gates", "Speed Reading", "Note Taking", "Memory Palace", "Goal Setting", "Time Management", "Editing", "Persuasive Writing", "Mock Trial", "Ancient History", "World Religions", "Political Science", "Coding Scratch", "Python", "Graphic Design", "Video Editing", "Electronics", "Robotics", "3D Modeling", "Animation", "Podcast", "Photography", "Web Design", "App Design", "Unity Game Dev", "Digital Art", "AI Tools", "Hardware Build", "Linux", "Cyber Security", "Sound Mixing", "Photoshop", "CAD Intro", "BJJ Advanced", "Strength Train", "Survival Skills", "First Aid", "Cooking", "Inventory Mgmt", "Business Plan", "Architecture", "Music Theory", "Anatomy", "Geology", "Auto Basics", "Home Repair", "Taxes", "Contract Law", "Marketing", "Event Plan", "Leadership", "Mental Health", "CPR", "Emergency Prep", "Self Defense", "Tool Prof", "Pitch Deck"]
+        const BREAKFAST = ["Scrambled Eggs", "Oatmeal", "Pancakes", "Yogurt", "Smoothie", "Breakfast Burrito", "French Toast", "Avocado Toast", "Cereal", "Waffles", "Bacon & Eggs", "Omelet", "Bagel", "Muffins", "Fruit Salad", "Breakfast Sausage", "English Muffin"];
+        const LUNCH = ["Chicken Wrap", "Turkey Sandwich", "Pasta Salad", "Grilled Cheese", "Tomato Soup", "Leftovers", "Hummus & Pita", "Quesadilla", "Tuna Salad", "Chicken Nuggets", "Tacos", "Mac & Cheese", "Stir Fry", "Pizza Bagels", "Sushi Rolls", "Burritos", "Ramen", "BLT"];
+        
+        const AGES = {
+            "0-2.5": ["Water Play", "Sand Bin", "Ice Melting", "Scent Jars", "Texture Board", "Flashlight Path", "Mirror Faces", "Shaving Cream", "Mud Kitchen", "Jello Dig", "Rice Scoop", "Soap Suds", "Edible Paint", "Nature Basket", "Crawl Tunnel", "Balloon Toss", "Block Stack", "Finger Paint", "Bubble Pop", "Nursery Rhymes", "Puppet Story", "Sing-Along"],
+            "2.5-4.5": ["Alphabet Tracing", "Color Sorting", "Shape Hunt", "Counting", "Cutting Skills", "Glue Collage", "Sidewalk Chalk", "Name Writing", "Phonics Sounds", "Sorting Laundry", "Bead Stringing", "Sticker Math", "Sight Words", "Bird Watching", "Bug Hotel", "Planting Seeds", "Nature Journal", "Playdough", "Dress Up", "Fort Build", "Yoga Kids", "Dance Party"],
+            "4.5-8.5": ["Phonics", "Addition", "Subtraction", "Money Math", "Cursive", "Silent Reading", "Geography Map", "History Video", "Creative Writing", "Logic Puzzles", "Typing", "Journaling", "BJJ Training", "Piano Practice", "Lego Engineering", "Baking", "Chess", "Nature Hike", "Gardening", "Woodworking", "Origami", "Soccer Drills", "Parkour", "Tumbling", "Volcano Build", "Microscope Lab", "Solar System", "Life Cycles", "Weather Chart"],
+            "8.5-12.5": ["Algebra", "Novel Study", "Essay Draft", "Critical Thinking", "Debate Prep", "Financial Lit", "Budgeting", "Civics", "Stock Market", "Psychology", "Philosophy", "Public Speaking", "Logic Gates", "Coding Scratch", "Python", "Graphic Design", "Video Editing", "Robotics", "3D Modeling", "Photography", "App Design", "AI Tools", "BJJ Advanced", "Strength Train", "Survival Skills", "First Aid", "Business Plan"]
         };
 
         function App() {
-            const [profile, setProfile] = useState(() => JSON.parse(localStorage.getItem('pb_v14_profile')));
-            const [schedule, setSchedule] = useState(() => JSON.parse(localStorage.getItem('pb_v14_sched')) || { Monday: {}, Tuesday: {}, Wednesday: {}, Thursday: {}, Friday: {} });
-            const [customButtons, setCustomButtons] = useState(() => JSON.parse(localStorage.getItem('pb_v14_custom')) || { Learn: [], Breakfast: [], Lunch: [] });
-            const [isEditMode, setIsEditMode] = useState(false);
-            const [libraryTarget, setLibraryTarget] = useState(null);
-            const [isListening, setIsListening] = useState(false);
+            const [profile, setProfile] = useState(() => JSON.parse(localStorage.getItem('pb_v15_profile')));
+            const [schedule, setSchedule] = useState(() => JSON.parse(localStorage.getItem('pb_v15_sched')) || { Monday: {}, Tuesday: {}, Wednesday: {}, Thursday: {}, Friday: {} });
+            const [custom, setCustom] = useState(() => JSON.parse(localStorage.getItem('pb_v15_custom')) || { Learn: [], Breakfast: [], Lunch: [] });
+            const [isEdit, setIsEdit] = useState(false);
+            const [lib, setLib] = useState(null);
+            const [listening, setListening] = useState(false);
 
-            useEffect(() => { if(profile) localStorage.setItem('pb_v14_profile', JSON.stringify(profile)); }, [profile]);
-            useEffect(() => { localStorage.setItem('pb_v14_sched', JSON.stringify(schedule)); }, [schedule]);
-            useEffect(() => { localStorage.setItem('pb_v14_custom', JSON.stringify(customButtons)); }, [customButtons]);
+            useEffect(() => { if(profile) localStorage.setItem('pb_v15_profile', JSON.stringify(profile)); }, [profile]);
+            useEffect(() => { localStorage.setItem('pb_v15_sched', JSON.stringify(schedule)); }, [schedule]);
+            useEffect(() => { localStorage.setItem('pb_v15_custom', JSON.stringify(custom)); }, [custom]);
 
             const startVoice = () => {
                 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                if (!SpeechRecognition) return alert("Voice not supported on this browser.");
+                if (!SpeechRecognition) return alert("Browser not supported.");
                 const rec = new SpeechRecognition();
-                rec.onstart = () => setIsListening(true);
-                rec.onend = () => setIsListening(false);
+                rec.onstart = () => setListening(true);
+                rec.onend = () => setListening(false);
                 rec.onresult = (e) => {
-                    const rawText = e.results[0][0].transcript;
-                    // AUTO-CAPITALIZE FIRST LETTER
-                    const formattedText = rawText.charAt(0).toUpperCase() + rawText.slice(1);
-                    const type = libraryTarget.type;
-                    setCustomButtons(prev => ({...prev, [type]: [...(prev[type] || []), formattedText]}));
-                };
-                rec.start();
-            };
-
-            const updateBlock = (id, field, val) => {
-                setProfile(prev => ({ ...prev, blocks: prev.blocks.map(b => b.id === id ? {...b, [field]: val} : b)}));
-            };
-
-            if (!profile) return (
-                <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
-                    <h1 className="comic-title text-6xl mb-10">THE PLAYBOOK</h1>
-                    <div className="grid grid-cols-1 gap-4 w-full max-w-xs">
-                        {Object.keys(PLAYBOOKS).map(age => (
-                            <button key={age} onClick={() => setProfile({ age, blocks: [
-                                { id: 'b1', label: 'Breakfast', type: 'Breakfast', time: '08:00', color: '#FF5F1F' },
-                                { id: 'b2', label: 'Morning Learning', type: 'Learn', time: '09:00', color: '#FFFFFF' },
-                                { id: 'b3', label: 'Lunch', type: 'Lunch', time: '12:00', color: '#a6ff00' },
-                                { id: 'b4', label: 'Afternoon Learning', type: 'Learn', time: '13:00', color: '#FFFFFF' }
-                            ]})} className="bg-white text-black py-4 btn-comic font-black text-xl italic shadow-[8px_8px_0px_black]">AGE {age}</button>
-                        ))}
-                    </div>
-                </div>
-            );
-
-            return (
-                <div className="min-h-screen p-4 pb-48 studs">
-                    <header className="flex justify-between items-center mb-6">
-                        <h1 className="comic-title text-4xl leading-none">THE<br/>PLAYBOOK</h1>
-                        <button onClick={() => setIsEditMode(!isEditMode)} className={`px-4 py-2 btn-comic text-xs ${isEditMode ? 'bg-red-500 text-white' : 'bg-yellow-400 text-black'}`}>
-                            {isEditMode ? 'SAVE' : 'EDIT BLOCKS'}
-                        </button>
-                    </header>
-
-                    <div className="max-w-md mx-auto space-y-8">
-                        {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map(day => (
-                            <div key={day} className="space-y-4">
-                                <h2 className="bg-[#E61E27] inline-block px-4 py-1 border-4 border-black font-black italic shadow-[4px_4px_0px_black]">{day}</h2>
-                                {profile.blocks.map(block => (
-                                    <div key={block.id} className="bg-gray-200/90 p-4 rounded-2xl border-4 border-black space-y-3 shadow-xl">
-                                        <div style={{backgroundColor: block.color}} className="flex justify-between items-center p-3 rounded-xl border-3 border-black shadow-[3px_3px_0px_black]">
-                                            <div className="flex items-center gap-3 flex-1">
-                                                {isEditMode ? (
-                                                    <>
-                                                        <input className="w-16 bg-black text-yellow-400 text-[10px] p-1 rounded font-black" value={block.time} onChange={e => updateBlock(block.id, 'time', e.target.value)} />
-                                                        <input className="flex-1 bg-white/50 text-black text-xs p-1 font-black uppercase" value={block.label} onChange={e => updateBlock(block.id, 'label', e.target.value)} />
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <span className="bg-black text-yellow-400 px-2 py-1 rounded text-[10px] font-black">{block
+                    const raw = e.results[0][0].
