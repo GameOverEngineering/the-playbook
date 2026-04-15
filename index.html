@@ -3,27 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Playbook: All Ages Build</title>
+    <title>The Playbook: High Density Build</title>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Rajdhani:wght@800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { margin: 0; background: #2d5a27; font-family: 'Rajdhani', sans-serif; color: white; overflow-x: hidden; }
+        body { margin: 0; background: #2d5a27; font-family: 'Rajdhani', sans-serif; color: white; }
         .comic-title { font-family: 'Bangers', cursive; color: #E61E27; text-shadow: 3px 3px 0px #000, 5px 5px 0px #FFD000; }
         .studs { background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
         .btn-comic { transition: transform 0.1s; border: 3px solid black; box-shadow: 4px 4px 0px black; text-transform: uppercase; font-weight: 900; }
-        .btn-comic:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0px black; }
-        .library-drawer { background: #f4f4f4; border-top: 8px solid black; box-shadow: 0 -15px 50px rgba(0,0,0,0.8); position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; height: 90vh; display: flex; flex-direction: column; }
+        .library-drawer { background: #f4f4f4; border-top: 8px solid black; position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; height: 85vh; display: flex; flex-direction: column; }
         .brick-chip { background: white; color: black; border: 2px solid black; padding: 6px 10px; border-radius: 6px; font-weight: 900; font-size: 10px; box-shadow: 2px 2px 0px black; cursor: pointer; display: inline-block; margin: 4px; }
-        
-        /* Edit Mode Styles */
-        .edit-input { background: rgba(255,255,255,0.2); border: 2px dashed black; color: black; font-weight: 900; text-transform: uppercase; padding: 2px 5px; width: 100%; border-radius: 4px; }
-        .edit-time { background: #000; border: 1px dashed #FFD000; color: #FFD000; font-size: 10px; text-align: center; width: 60px; border-radius: 4px; }
-        .view-label { font-weight: 900; text-transform: uppercase; color: black; font-style: italic; }
-        .view-time { background: black; color: #FFD000; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 900; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .edit-input { background: rgba(255,255,255,0.3); border: 2px dashed black; color: black; font-weight: 900; width: 100%; padding: 2px; }
+        .time-pill { background: black; color: #FFD000; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 900; }
     </style>
 </head>
 <body class="studs">
@@ -32,22 +26,119 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        const FOOD_LIBRARY = {
-            "Breakfast": ["Oatmeal Bar", "Scrambled Eggs", "Pancakes", "Greek Yogurt", "Fruit Smoothie", "Breakfast Burrito", "French Toast", "Avocado Toast", "Hard Boiled Eggs", "Cereal", "Waffles", "Bacon & Eggs", "Omelet", "Bagel & Cream Cheese", "Muffins", "Quiche", "Protein Shake", "Cottage Cheese", "Breakfast Sandwich", "Hashbrowns", "Smoothie Bowl", "English Muffin", "Breakfast Pizza", "Tofu Scramble", "Steak & Eggs", "Poached Eggs", "Breakfast Wrap"],
-            "Lunch": ["Chicken Wraps", "Turkey Sandwich", "Pasta Salad", "Quinoa Bowl", "Grilled Cheese", "Tomato Soup", "Leftovers", "Hummus & Pita", "Quesadilla", "Tuna Salad", "Chicken Nuggets", "Beef Stew", "Tacos", "Mac & Cheese", "Egg Salad", "Cold Cut Sub", "Stir Fry", "Pizza Bagels", "Fruit & Nut Plate", "Lentil Soup", "Baked Potato", "Sushi Rolls", "Chicken Caesar", "Burritos", "Bento Box", "Ramen", "BLT Sandwich"]
+        const PLAYBOOKS = {
+            "0-2.5": ["Water Play", "Sand Bin", "Ice Melting", "Scent Jars", "Texture Board", "Flashlight Path", "Mirror Faces", "Shaving Cream", "Mud Kitchen", "Jello Dig", "Dry Noodles", "Sponge Squeeze", "Feather Touch", "Rice Scoop", "Oobleck", "Soap Suds", "Edible Paint", "Nature Basket", "Crawl Tunnel", "Balloon Toss", "Sticker Peel", "Block Stack", "Finger Paint", "Bubble Pop", "Ribbon Dance", "Soft Ball", "Climbing", "Magnet Board", "Pom Pom Drop", "Zipping Fun", "Animal Crawls", "Nursery Rhymes", "Puppet Story", "Board Books", "Sing-Along", "First Words", "Story Stones"],
+            "2.5-4.5": ["Alphabet Tracing", "Color Sorting", "Shape Hunt", "Counting Steps", "Cutting Skills", "Glue Collage", "Pattern Blocks", "Sidewalk Chalk", "Name Writing", "I-Spy Letters", "Number Puzzles", "Rhyme Match", "Phonics Sounds", "Sorting Laundry", "Button Sorting", "Bead Stringing", "Letter Stamps", "Sticker Math", "Sight Words", "Tracing Sand", "Calendar Time", "Bird Watching", "Bug Hotel", "Planting Seeds", "Sink or Float", "Magnet Fish", "Nature Journal", "Cloud Watch", "Magnifying Glass", "Rock Sort", "Leaf Rub", "Herb Garden", "Worm Farm", "Sun Prints", "Dino Dig", "Volcano", "Snail Race", "Weather Chart", "Moon Phases", "Playdough", "Dress Up", "Fort Build", "Yoga Kids", "Dance Party", "Recycled Art", "Clay Animals", "Mask Making", "Shadow Art", "Paper Planes", "Origami Easy"],
+            "4.5-8.5": ["Phonics", "Addition Games", "Subtraction War", "Money Math", "Cursive", "Silent Reading", "Spelling Bee", "Clock Reading", "Geography Map", "History Video", "Creative Writing", "Logic Puzzles", "Typing", "Journaling", "Book Report", "Multiplication", "Word Problems", "Grammar", "Poetry", "Vocabulary", "Research Task", "Pen Pal", "Number Lines", "Science Reading", "BJJ Training", "Piano Practice", "Lego Engineering", "Baking", "Chess", "Skating", "Swimming", "Gymnastics", "Nature Hike", "Gardening", "Woodworking", "Origami", "Team Sports", "Jump Rope", "Obstacle Course", "Yoga Flow", "Martial Arts", "Skateboarding", "Dance Class", "Target Practice", "Navigation", "Fire Safety", "Stretching", "Animal Moves", "Soccer Drills", "Parkour", "Tumbling", "Volcano", "Microscope", "Solar System", "Life Cycles", "Recycling", "Weather", "Electricity Kit", "Diorama", "Magnets", "Bird ID", "Star Gazing", "Growth Log", "Water Filter", "Insect Collection", "Rock Tumbler", "Crystals", "Anatomy", "Chemistry", "Robot Coding", "Circuits"],
+            "8.5-12.5": ["Algebra", "Novel Study", "Essay Draft", "Critical Thinking", "Latin Roots", "Debate Prep", "Current Events", "Financial Lit", "Budgeting", "Geography", "Ethics", "Civics", "Stock Market", "Psychology", "Philosophy", "Public Speaking", "Mediation", "Logic Gates", "Speed Reading", "Note Taking", "Memory Palace", "Goal Setting", "Time Management", "Editing", "Persuasive Writing", "Mock Trial", "Ancient History", "World Religions", "Political Science", "Coding Scratch", "Python", "Graphic Design", "Video Editing", "Electronics", "Robotics", "3D Modeling", "Animation", "Podcast", "Photography", "Web Design", "App Design", "Unity Game Dev", "Digital Art", "AI Tools", "Hardware Build", "Linux", "Cyber Security", "Sound Mixing", "Photoshop", "CAD Intro", "BJJ Advanced", "Strength Train", "Survival Skills", "First Aid", "Cooking", "Inventory Mgmt", "Business Plan", "Architecture", "Music Theory", "Anatomy", "Geology", "Auto Basics", "Home Repair", "Taxes", "Contract Law", "Marketing", "Event Plan", "Leadership", "Mental Health", "CPR", "Emergency Prep", "Self Defense", "Tool Prof", "Pitch Deck"]
         };
 
-        const LEARNING_PLAYBOOKS = {
-            "0-2.5": {
-                "Sensory": ["Water Play", "Sand Bin", "Ice Cube Melting", "Scent Jars", "Texture Board", "Flashlight Path", "Mirror Faces", "Shaving Cream Art", "Mud Kitchen", "Jello Dig", "Dry Noodle Bin", "Sponge Squeezing", "Feather Touch", "Rice Scooping", "Oobleck", "Colored Vinegar", "Soap Suds", "Edible Paint", "Nature Basket"],
-                "Motor": ["Crawl Tunnel", "Balloon Toss", "Stair Climbing", "Obstacle Course", "Sticker Peeling", "Block Stacking", "Finger Painting", "Kitchen Drumming", "Push Toy Walk", "Bubble Popping", "Ribbon Dancing", "Soft Ball Rolling", "Climbing Cushions", "Magnet Board", "Pom Pom Drop", "Zipping Fun", "Button Pushing", "Yoga Poses"],
-                "Language": ["Nursery Rhymes", "Puppet Story", "Animal Sounds", "Point & Name", "Board Books", "Sing-Along", "First Words Card", "Mirror Chat", "Nature Walk Sounds", "Peek-a-boo", "Action Songs", "Family Photos", "Flashcards", "Alphabet Songs", "Rhyming Books", "Hand Puppets", "Story Stones"]
-            },
-            "2.5-4.5": {
-                "Early Skills": ["Alphabet Tracing", "Color Sorting", "Shape Hunt", "Counting Steps", "Cutting Skills", "Glue Collage", "Pattern Blocks", "Sidewalk Chalk", "Name Writing", "I-Spy Letters", "Number Puzzles", "Rhyme Matching", "Phonics Sounds", "Sorting Laundry", "Button Sorting", "Bead Stringing", "Connect the Dots", "Letter Stamps", "Sticker Math", "Sight Words", "Tracing Sand", "Calendar Time", "Safety Rules"],
-                "Exploration": ["Bird Watching", "Bug Hotel", "Planting Seeds", "Sink or Float", "Magnet Fishing", "Color Mixing", "Nature Journal", "Cloud Watching", "Magnifying Glass", "Rock Sorting", "Leaf Rubbing", "Herb Garden", "Worm Farm", "Wind Chimes", "Sun Prints", "Dino Dig", "Volcano", "Snail Race", "Weather Chart", "Moon Phases", "Tide Pools", "Tree Bark Art"],
-                "Creative": ["Playdough Sculpt", "Dress Up", "Puppet Show", "Tea Party", "Lego Duplo", "Cardboard Box Fort", "Action Songs", "Yoga Kids", "Finger Puppets", "Story Mapping", "Dance Party", "Painting Play", "Recycled Art", "Clay Animals", "Mask Making", "Shadow Art", "Face Painting", "Drum Circle", "Costume Parade", "Paper Planes", "Origami Easy"]
-            },
-            "4.5-8.5": {
-                "Academic": ["Phonics Lesson", "Addition Games", "Subtraction War", "Money Math", "Cursive Practice", "Silent Reading", "Spelling Bee", "Clock Reading", "Geography Map", "History Video", "Creative Writing", "Logic Puzzles", "Typing Practice", "Journaling", "Book Report", "Multiplication", "Word Problems", "Grammar Check", "Poetry Reading", "Debate Intro", "Vocabulary Quiz", "Research Task", "Pen Pal Letter", "Sight Words", "Number Lines", "Flashcards"],
-                "Active": ["BJJ Training", "Piano Practice", "Lego Engineering", "Baking (Measure)", "Chess Tactics", "Skating/Hockey", "Swimming", "Gym
+        const FOOD = ["Oatmeal", "Eggs", "Pancakes", "Yogurt", "Smoothie", "Burrito", "French Toast", "Avocado Toast", "Cereal", "Waffles", "Bacon", "Omelet", "Bagel", "Muffins", "Quiche", "Protein Shake", "Fruit Salad", "Sausage", "English Muffin", "Chicken Wrap", "Turkey Sandwich", "Pasta Salad", "Quinoa Bowl", "Grilled Cheese", "Tomato Soup", "Leftovers", "Hummus", "Quesadilla", "Tuna Salad", "Nuggets", "Beef Stew", "Tacos", "Mac & Cheese", "Egg Salad", "Sub Sandwich", "Stir Fry", "Pizza Bagels", "Baked Potato", "Sushi", "Caesar Salad", "Bento Box", "Ramen", "BLT", "Poke Bowl"];
+
+        function App() {
+            const [profile, setProfile] = useState(() => JSON.parse(localStorage.getItem('pb_v10_profile')));
+            const [schedule, setSchedule] = useState(() => JSON.parse(localStorage.getItem('pb_v10_sched')) || { Monday: {}, Tuesday: {}, Wednesday: {}, Thursday: {}, Friday: {} });
+            const [isEditMode, setIsEditMode] = useState(false);
+            const [libraryTarget, setLibraryTarget] = useState(null);
+
+            useEffect(() => { if(profile) localStorage.setItem('pb_v10_profile', JSON.stringify(profile)); }, [profile]);
+            useEffect(() => { localStorage.setItem('pb_v10_sched', JSON.stringify(schedule)); }, [schedule]);
+
+            if (!profile) return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+                    <h1 className="comic-title text-6xl mb-10">THE PLAYBOOK</h1>
+                    <div className="grid grid-cols-1 gap-4 w-full max-w-xs">
+                        {Object.keys(PLAYBOOKS).map(age => (
+                            <button key={age} onClick={() => setProfile({ age, blocks: [
+                                { id: 'b1', label: 'Breakfast', type: 'Food', time: '08:00', color: '#FF5F1F' },
+                                { id: 'b2', label: 'Morning Learning', type: 'Learn', time: '09:00', color: '#FFFFFF' },
+                                { id: 'b3', label: 'Lunch', type: 'Food', time: '12:00', color: '#a6ff00' },
+                                { id: 'b4', label: 'Afternoon Learning', type: 'Learn', time: '13:00', color: '#FFFFFF' }
+                            ]})} className="bg-white text-black py-4 btn-comic font-black text-xl">AGE {age}</button>
+                        ))}
+                    </div>
+                </div>
+            );
+
+            const updateBlock = (id, field, val) => {
+                setProfile({ ...profile, blocks: profile.blocks.map(b => b.id === id ? {...b, [field]: val} : b)});
+            };
+
+            return (
+                <div className="min-h-screen p-4 pb-48 studs">
+                    <header className="flex justify-between items-center mb-6">
+                        <h1 className="comic-title text-4xl">PLAYBOOK</h1>
+                        <button onClick={() => setIsEditMode(!isEditMode)} className={`px-4 py-2 btn-comic text-xs ${isEditMode ? 'bg-red-500' : 'bg-yellow-400'}`}>
+                            {isEditMode ? 'SAVE' : 'EDIT BLOCKS'}
+                        </button>
+                    </header>
+
+                    <div className="max-w-md mx-auto space-y-8">
+                        {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map(day => (
+                            <div key={day} className="space-y-4">
+                                <h2 className="bg-[#E61E27] inline-block px-4 py-1 border-4 border-black font-black italic shadow-[4px_4px_0px_black]">{day}</h2>
+                                {profile.blocks.map(block => (
+                                    <div key={block.id} className="bg-gray-200/90 p-4 rounded-2xl border-4 border-black space-y-3 shadow-lg">
+                                        <div style={{backgroundColor: block.color}} className="flex justify-between items-center p-3 rounded-xl border-3 border-black shadow-[3px_3px_0px_black]">
+                                            <div className="flex items-center gap-3 flex-1">
+                                                {isEditMode ? (
+                                                    <>
+                                                        <input className="w-16 bg-black text-yellow-400 text-[10px] p-1 rounded" value={block.time} onChange={e => updateBlock(block.id, 'time', e.target.value)} />
+                                                        <input className="flex-1 bg-white/50 text-black text-xs p-1 font-black" value={block.label} onChange={e => updateBlock(block.id, 'label', e.target.value)} />
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <span className="time-pill">{block.time}</span>
+                                                        <span className="text-black font-black italic text-xs uppercase">{block.label}</span>
+                                                    </>
+                                                )}
+                                            </div>
+                                            {!isEditMode && (
+                                                <button onClick={() => setLibraryTarget({day, id: block.id, type: block.type, label: block.label})} className="bg-white text-black w-8 h-8 rounded border-2 border-black font-black">+</button>
+                                            )}
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {(schedule[day][block.id] || []).map((item, i) => (
+                                                <div key={i} className="bg-white px-2 py-1 rounded border border-black text-[10px] font-black text-black flex items-center">
+                                                    {item}
+                                                    <button onClick={() => {
+                                                        const ns = {...schedule}; ns[day][block.id].splice(i, 1); setSchedule(ns);
+                                                    }} className="ml-2 text-red-500">✕</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+
+                    {libraryTarget && (
+                        <div className="library-drawer p-6 shadow-2xl">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="comic-title text-3xl">{libraryTarget.label}</h3>
+                                <button onClick={() => setLibraryTarget(null)} className="bg-black text-white px-4 py-2 btn-comic text-xs">X</button>
+                            </div>
+                            <div className="overflow-y-auto flex-1 pb-10">
+                                <div className="flex flex-wrap">
+                                    {(libraryTarget.type === 'Food' ? FOOD : PLAYBOOKS[profile.age]).map((item, i) => (
+                                        <div key={i} onClick={() => {
+                                            const ns = {...schedule};
+                                            if(!ns[libraryTarget.day][libraryTarget.id]) ns[libraryTarget.day][libraryTarget.id] = [];
+                                            ns[libraryTarget.day][libraryTarget.id].push(item);
+                                            setSchedule(ns);
+                                            setLibraryTarget(null);
+                                        }} className="brick-chip">{item}</div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+</body>
+</html>
