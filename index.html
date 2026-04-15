@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Playbook</title>
+    <title>The Playbook: Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Rajdhani:wght@800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -11,207 +11,167 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { margin: 0; background: #2d5a27; font-family: 'Rajdhani', sans-serif; color: white; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
-        .comic-title { 
-            font-family: 'Bangers', cursive; 
-            letter-spacing: 0.1em;
-            color: #E61E27; 
-            text-shadow: 4px 4px 0px #000, 8px 8px 0px #FFD000;
-            transform: skew(-5deg) rotate(-2deg);
-        }
-        .brick-modal-title {
-            font-family: 'Bangers', cursive; 
-            letter-spacing: 0.1em;
-            color: #FFD000; 
-            text-shadow: 3px 3px 0px #000;
-        }
+        .comic-title { font-family: 'Bangers', cursive; color: #E61E27; text-shadow: 3px 3px 0px #000, 6px 6px 0px #FFD000; }
         .studs { background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
-        .big-text { font-size: 1.6rem; line-height: 1; letter-spacing: -0.02em; font-weight: 900; }
-        .label-text { font-size: 1.1rem; font-weight: 900; }
+        .hazard-border { border: 12px repeating-linear-gradient(45deg, #FFD000, #FFD000 15px, #000 15px, #000 30px); }
+        .settings-card { background: white; color: black; border: 4px solid black; box-shadow: 8px 8px 0px black; }
+        .btn-comic { transition: transform 0.1s; border: 3px solid black; box-shadow: 4px 4px 0px black; text-transform: uppercase; font-weight: 900; }
+        .btn-comic:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0px black; }
+        .listening-pulse { animation: pulse 1.5s infinite; background: #E61E27 !important; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
 </head>
-<body>
+<body class="studs">
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        const DAY_THEMES = {
-            Monday:    { bg: "#FFD000", shadow: "#f9a825", text: "#000", label: "#E61E27" },
-            Tuesday:   { bg: "#1E88E5", shadow: "#1565c0", text: "#fff", label: "#FFD000" },
-            Wednesday: { bg: "#E61E27", shadow: "#b71c1c", text: "#fff", label: "#1E88E5" },
-            Thursday:  { bg: "#FFFFFF", shadow: "#bdbdbd", text: "#000", label: "#43A047" },
-            Friday:    { bg: "#43A047", shadow: "#2e7d32", text: "#fff", label: "#FFD000" }
+        // NICHE DEFINITIONS (The "Time Savers")
+        const NICHE_PRESETS = {
+            parent: { name: "Family/Pod", sections: [{id:'b', l:'Breakfast', c:'#FF5F1F'}, {id:'m', l:'Morning Learning', c:'#FFF'}, {id:'l', l:'Lunch', c:'#a6ff00'}, {id:'a', l:'Afternoon Fun', c:'#FFF'}] },
+            teacher: { name: "Teacher Pack", price: "$2.99", sections: [{id:'b', l:'Entry/Bell Work', c:'#FFD700'}, {id:'m', l:'Literacy/Math', c:'#FFF'}, {id:'l', l:'Recess/Lunch', c:'#4CAF50'}, {id:'a', l:'Planning/DPA', c:'#FFF'}] },
+            bjj: { name: "BJJ Academy", price: "$2.99", sections: [{id:'b', l:'Kids Class', c:'#E61E27'}, {id:'m', l:'Fundamentals', c:'#FFF'}, {id:'l', l:'Private Lessons', c:'#2196F3'}, {id:'a', l:'Advanced/Live', c:'#FFF'}] }
         };
-
-        const NUTRITION = {
-            "Pizza": { cal: 300, sugar: 4 }, "Tacos": { cal: 200, sugar: 2 }, "Pasta": { cal: 350, sugar: 5 },
-            "Sandwich": { cal: 250, sugar: 3 }, "Burger": { cal: 450, sugar: 7 }, "Chicken": { cal: 200, sugar: 0 },
-            "Fruit": { cal: 80, sugar: 14 }, "Eggs": { cal: 140, sugar: 1 }, "Cereal": { cal: 150, sugar: 12 },
-            "Oatmeal": { cal: 160, sugar: 1 }, "Pancakes": { cal: 300, sugar: 15 }, "Yogurt": { cal: 120, sugar: 10 }
-        };
-
-        const PREMADE_ACTS = ["Park", "Swimming", "Gym", "Dog Walk", "BJJ", "Art", "Math", "Reading", "Science", "Music", "Building", "Movies"];
-        const PREMADE_FOOD = ["Eggs", "Cereal", "Oatmeal", "Pancakes", "Yogurt", "Pizza", "Tacos", "Pasta", "Sandwich", "Burger", "Chicken", "Fruit"];
 
         function App() {
-            const [schedule, setSchedule] = useState(() => {
-                const saved = localStorage.getItem('playbook_v12');
-                return saved ? JSON.parse(saved) : {
-                    Monday: { morning: [], breakfast: [], lunch: [], afternoon: [] },
-                    Tuesday: { morning: [], breakfast: [], lunch: [], afternoon: [] },
-                    Wednesday: { morning: [], breakfast: [], lunch: [], afternoon: [] },
-                    Thursday: { morning: [], breakfast: [], lunch: [], afternoon: [] },
-                    Friday: { morning: [], breakfast: [], lunch: [], afternoon: [] }
-                };
+            const [view, setView] = useState('playbook'); // playbook, settings, archives, onboarding
+            const [selectedArchive, setSelectedArchive] = useState(null);
+            const [isListening, setIsListening] = useState(false);
+
+            // STATE: Config (Niche and Purchases)
+            const [config, setConfig] = useState(() => {
+                const saved = localStorage.getItem('pb_pro_config');
+                return saved ? JSON.parse(saved) : { onboarding: false, niche: 'parent', sections: NICHE_PRESETS.parent.sections, hero: false, purchasedPacks: [] };
             });
 
-            const [showLocker, setShowLocker] = useState(false);
-            const [context, setContext] = useState({ day: null, period: null });
-            const [customText, setCustomText] = useState("");
-            const [movingItem, setMovingItem] = useState(null);
+            // STATE: Weekly Schedule
+            const [schedule, setSchedule] = useState(() => {
+                const saved = localStorage.getItem('pb_pro_current');
+                return saved ? JSON.parse(saved) : { Monday: {b:[], m:[], l:[], a:[]}, Tuesday: {b:[], m:[], l:[], a:[]}, Wednesday: {b:[], m:[], l:[], a:[]}, Thursday: {b:[], m:[], l:[], a:[]}, Friday: {b:[], m:[], l:[], a:[]} };
+            });
 
-            useEffect(() => { localStorage.setItem('playbook_v12', JSON.stringify(schedule)); }, [schedule]);
+            // STATE: Archives
+            const [archives, setArchives] = useState(() => {
+                const saved = localStorage.getItem('pb_pro_archives');
+                return saved ? JSON.parse(saved) : [];
+            });
 
-            const getStats = (day) => {
-                let cal = 0, sugar = 0;
-                [...schedule[day].breakfast, ...schedule[day].lunch].forEach(item => {
-                    if (NUTRITION[item]) {
-                        cal += NUTRITION[item].cal;
-                        sugar += NUTRITION[item].sugar;
-                    }
-                });
-                return { cal, sugar };
+            useEffect(() => { localStorage.setItem('pb_pro_config', JSON.stringify(config)); }, [config]);
+            useEffect(() => { localStorage.setItem('pb_pro_current', JSON.stringify(schedule)); }, [schedule]);
+            if (!config.onboarding && view !== 'onboarding') setView('onboarding');
+
+            const handleArchiveWeek = () => {
+                if (!config.hero) return alert("Archive is a HERO feature! Unlock it in Settings.");
+                if (!confirm("End the week and save to Time Machine?")) return;
+                const date = new Date().toLocaleDateString();
+                const newArchives = [{ date, data: schedule }, ...archives].slice(0, 52);
+                setArchives(newArchives);
+                localStorage.setItem('pb_pro_archives', JSON.stringify(newArchives));
+                setSchedule({ Monday: {b:[], m:[], l:[], a:[]}, Tuesday: {b:[], m:[], l:[], a:[]}, Wednesday: {b:[], m:[], l:[], a:[]}, Thursday: {b:[], m:[], l:[], a:[]}, Friday: {b:[], m:[], l:[], a:[]} });
             };
 
-            const addAct = (item) => {
-                if (!item) return;
-                setSchedule(prev => ({
-                    ...prev, [context.day]: { ...prev[context.day], [context.period]: [...prev[context.day][context.period], item] }
-                }));
-                setShowLocker(false);
-                setCustomText("");
-            };
+            // --- UI COMPONENTS ---
 
-            const removeAct = (day, period, index, e) => {
-                e.stopPropagation();
-                const newSchedule = { ...schedule };
-                newSchedule[day][period].splice(index, 1);
-                setSchedule(newSchedule);
-            };
-
-            const placeItem = (day, period) => {
-                if (!movingItem) return;
-                const newSchedule = { ...schedule };
-                newSchedule[movingItem.day][movingItem.period].splice(movingItem.index, 1);
-                newSchedule[day][period].push(movingItem.name);
-                setSchedule(newSchedule);
-                setMovingItem(null);
-            };
-
-            const SectionHeader = ({ day, period, title, btnColor, headerBg, textColor, borderColor = 'border-black' }) => (
-                <div className={`flex items-center justify-between p-2 rounded-xl border-2 ${borderColor} shadow-[4px_4px_0px_#000] ${headerBg} ${textColor}`}>
-                    <span className="label-text uppercase italic ml-2">{title}</span>
-                    <div className="flex gap-2">
-                        {movingItem && <button onClick={() => placeItem(day, period)} className="bg-blue-500 text-white px-3 py-1 rounded font-black border-2 border-black text-xs">DROP</button>}
-                        <button onClick={() => { setContext({day, period}); setShowLocker(true); }} className={`${btnColor} text-black w-10 h-10 rounded border-2 border-black shadow-[0_3px_0_#000] font-black text-3xl flex items-center justify-center active:translate-y-1`}>+</button>
+            const Onboarding = () => (
+                <div className="fixed inset-0 z-[500] bg-black p-6 flex flex-col justify-center items-center text-center">
+                    <h1 className="comic-title text-5xl mb-4 text-white uppercase">Choose Your Path</h1>
+                    <p className="font-black text-yellow-400 italic mb-8 uppercase text-sm">Select your niche to auto-label your day</p>
+                    <div className="w-full space-y-4 max-w-xs">
+                        {Object.keys(NICHE_PRESETS).map(key => (
+                            <button key={key} onClick={() => {
+                                setConfig({...config, niche: key, sections: NICHE_PRESETS[key].sections, onboarding: true});
+                                setView('playbook');
+                            }} className="w-full p-4 bg-white text-black btn-comic text-xl">I'm a {NICHE_PRESETS[key].name}</button>
+                        ))}
                     </div>
                 </div>
             );
 
-            return (
-                <div className="min-h-screen studs p-4 pb-32">
-                    <header className="flex justify-center mb-12 mt-4">
-                        <div className="border-4 border-black p-4 bg-black/30 rounded-lg text-center">
-                            <h1 className="comic-title text-5xl md:text-7xl uppercase">THE PLAYBOOK</h1>
-                        </div>
-                    </header>
+            const Store = () => (
+                <div className="p-6 pb-20">
+                    <button onClick={() => setView('playbook')} className="bg-black text-white px-4 py-2 mb-6 btn-comic">← Back</button>
+                    <h1 className="comic-title text-4xl mb-6">HERO STORE</h1>
                     
-                    <div className="space-y-12">
-                        {Object.keys(DAY_THEMES).map(day => {
-                            const stats = getStats(day);
-                            return (
-                                <div key={day} className="space-y-6">
-                                    <div className="flex items-center justify-between gap-2">
-                                        <span style={{backgroundColor: DAY_THEMES[day].label, color: day === 'Tuesday' || day === 'Friday' ? 'black' : 'white'}} className="px-5 py-1 rounded-lg font-black italic uppercase shadow-[4px_4px_0px_#000] border-2 border-black label-text">{day}</span>
-                                        <div className="bg-black/40 px-3 py-1 rounded-lg border border-white/20 text-[10px] font-black uppercase text-right">
-                                            Fuel: {stats.cal}cal | <span className={stats.sugar > 25 ? 'text-red-400 animate-pulse' : 'text-white'}>Sugar: {stats.sugar}g</span>
-                                        </div>
-                                    </div>
-
-                                    {/* BREAKFAST BOX - GREY OUTER / MORE NEON ORANGE INNER */}
-                                    <div className="bg-[#b0bec5]/90 p-3 rounded-3xl border-2 border-[#607d8b]/60 space-y-3">
-                                        <SectionHeader 
-                                            day={day} period="breakfast" title="BREAKFAST BOX" btnColor="bg-[#FFD000]" 
-                                            headerBg="bg-[#FF5F1F]" textColor="text-black" 
-                                            borderColor="border-black" />
-                                        <div className="space-y-4 px-1">
-                                            {schedule[day].breakfast.map((act, i) => (
-                                                <div key={i} onClick={() => setMovingItem({day, period: 'breakfast', index: i, name: act})} className="relative flex items-center justify-between p-5 rounded-2xl border-2 border-black bg-white text-black shadow-[0_10px_0_#999,0_10px_0_2px_#000]">
-                                                    <span className="big-text uppercase italic">{act}</span>
-                                                    <button onClick={(e) => removeAct(day, 'breakfast', i, e)} className="bg-red-600 text-white w-10 h-10 rounded-full border-2 border-black font-black text-xl">✕</button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <SectionHeader day={day} period="morning" title="Morning Learning" btnColor="bg-[#FFD000]" headerBg="bg-white" textColor="text-black" />
-                                    <div className="space-y-4">
-                                        {schedule[day].morning.map((act, i) => (
-                                            <div key={i} onClick={() => setMovingItem({day, period: 'morning', index: i, name: act})} className="relative flex items-center justify-between p-5 rounded-2xl border-2 border-black shadow-[0_10px_0_#999,0_10px_0_2px_#000]" style={{ backgroundColor: DAY_THEMES[day].bg, color: DAY_THEMES[day].text }}>
-                                                <span className="big-text uppercase italic">{act}</span>
-                                                <button onClick={(e) => removeAct(day, 'morning', i, e)} className="bg-red-600 text-white w-10 h-10 rounded-full border-2 border-black font-black text-xl">✕</button>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    {/* LUNCH BOX - NEON LIGHT GREEN ZONE */}
-                                    <div className="bg-[#b0bec5]/90 p-3 rounded-3xl border-2 border-[#607d8b]/60 space-y-3">
-                                        <SectionHeader 
-                                            day={day} period="lunch" title="LUNCH BOX" btnColor="bg-[#ccff00]" 
-                                            headerBg="bg-[#a6ff00]" textColor="text-black" 
-                                            borderColor="border-black" />
-                                        <div className="space-y-4 px-1">
-                                            {schedule[day].lunch.map((act, i) => (
-                                                <div key={i} onClick={() => setMovingItem({day, period: 'lunch', index: i, name: act})} className="relative flex items-center justify-between p-5 rounded-2xl border-2 border-black bg-white text-black shadow-[0_10px_0_#999,0_10px_0_2px_#000]">
-                                                    <span className="big-text uppercase italic">{act}</span>
-                                                    <button onClick={(e) => removeAct(day, 'lunch', i, e)} className="bg-red-600 text-white w-10 h-10 rounded-full border-2 border-black font-black text-xl">✕</button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <SectionHeader day={day} period="afternoon" title="Afternoon Learning" btnColor="bg-[#FFD000]" headerBg="bg-white" textColor="text-black" />
-                                    <div className="space-y-4">
-                                        {schedule[day].afternoon.map((act, i) => (
-                                            <div key={i} onClick={() => setMovingItem({day, period: 'afternoon', index: i, name: act})} className="relative flex items-center justify-between p-5 rounded-2xl border-2 border-black shadow-[0_10px_0_#999,0_10px_0_2px_#000]" style={{ backgroundColor: DAY_THEMES[day].bg, color: DAY_THEMES[day].text }}>
-                                                <span className="big-text uppercase italic">{act}</span>
-                                                <button onClick={(e) => removeAct(day, 'afternoon', i, e)} className="bg-red-600 text-white w-10 h-10 rounded-full border-2 border-black font-black text-xl">✕</button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            );
-                        })}
+                    {/* HERO UNLOCK */}
+                    <div className="settings-card p-4 mb-6 border-[#FFD000] border-8">
+                        <h2 className="text-2xl font-black italic uppercase">Hero Upgrade</h2>
+                        <p className="text-xs font-bold mb-4">Unlocks: Archives (Time Machine), Voice Commands, and Email Backups.</p>
+                        <button onClick={() => setConfig({...config, hero: true})} className="w-full p-3 bg-yellow-400 font-black uppercase btn-comic">
+                            {config.hero ? "UNLOCKED ✓" : "Unlock Hero for $14.99"}
+                        </button>
                     </div>
 
-                    {/* PICK A BRICK MODAL */}
-                    {showLocker && (
-                        <div className="fixed inset-0 z-50 flex flex-col justify-end">
-                            <div className="absolute inset-0 bg-black/90" onClick={() => setShowLocker(false)}></div>
-                            <div className="relative bg-[#E61E27] rounded-t-[40px] p-6 border-t-8 border-black max-h-[85vh] overflow-y-auto">
-                                <h2 className="brick-modal-title text-5xl uppercase mb-6 text-center tracking-tight">PICK A BRICK</h2>
-                                <div className="flex gap-2 mb-8 bg-white p-3 rounded-2xl border-4 border-black">
-                                    <input type="text" value={customText} onChange={e => setCustomText(e.target.value)} placeholder="CUSTOM..." className="flex-1 outline-none text-black font-black uppercase text-xl" />
-                                    <button onClick={() => addAct(customText)} className="bg-[#1E88E5] text-white px-6 py-2 rounded-xl border-2 border-black font-black italic">ADD</button>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4 pb-10">
-                                    {(context.period === 'lunch' || context.period === 'breakfast' ? PREMADE_FOOD : PREMADE_ACTS).map(p => (
-                                        <button key={p} onClick={() => addAct(p)} className="bg-white p-5 rounded-2xl border-4 border-black shadow-[6px_6px_0px_#000] text-black font-black uppercase italic text-xl active:translate-y-1">{p}</button>
-                                    ))}
-                                </div>
-                            </div>
+                    {/* NICHE PACKS */}
+                    <h3 className="font-black text-yellow-400 uppercase mb-2">Time-Saver Packs</h3>
+                    {['teacher', 'bjj'].map(id => (
+                        <div key={id} className="settings-card p-4 mb-4">
+                            <h2 className="text-xl font-black uppercase">{NICHE_PRESETS[id].name}</h2>
+                            <p className="text-xs mb-4">Instantly sets your labels to {NICHE_PRESETS[id].sections.map(s => s.l).join(", ")}.</p>
+                            <button onClick={() => setConfig({...config, sections: NICHE_PRESETS[id].sections})} className="w-full p-2 bg-blue-500 text-white font-black uppercase btn-comic">
+                                Apply for {NICHE_PRESETS[id].price}
+                            </button>
                         </div>
-                    )}
+                    ))}
+                </div>
+            );
+
+            if (view === 'onboarding') return <Onboarding />;
+            if (view === 'settings') return <Store />;
+
+            return (
+                <div className={`min-h-screen p-4 pb-32 relative ${selectedArchive ? 'hazard-border' : ''}`}>
+                    <header className="flex justify-between items-start mb-8 relative z-20">
+                        <div>
+                            <h1 className="comic-title text-4xl leading-none">THE<br/>PLAYBOOK</h1>
+                            {selectedArchive && <div className="bg-yellow-400 text-black px-2 py-1 font-black text-xs mt-1 uppercase italic">History Mode</div>}
+                        </div>
+                        <div className="flex gap-2">
+                            <button onClick={() => setView('settings')} className="bg-white text-black p-2 btn-comic text-[10px]">Store</button>
+                            <button onClick={() => {if(config.hero) { setSelectedArchive(archives[0]?.data); } else { alert("Hero feature!")}}} className="bg-white text-black p-2 btn-comic text-[10px]">Archives</button>
+                        </div>
+                    </header>
+
+                    <main className="max-w-md mx-auto space-y-12 relative z-10">
+                        {Object.keys(schedule).map(day => (
+                            <div key={day} className="space-y-4">
+                                <span className="bg-[#E61E27] px-4 py-1 border-2 border-black font-black uppercase text-white shadow-[3px_3px_0px_#000] italic">{day}</span>
+                                {config.sections.map(sec => (
+                                    <div key={sec.id} className="bg-[#b0bec5]/90 p-3 rounded-3xl border-2 border-black space-y-2">
+                                        <div style={{backgroundColor: sec.c}} className="flex justify-between items-center p-2 rounded-xl border-2 border-black">
+                                            <span className="font-black text-black uppercase text-[10px] italic">{sec.l}</span>
+                                            {!selectedArchive && (
+                                                <button onClick={() => {
+                                                    const task = prompt(`New task for ${sec.l}:`);
+                                                    if(task) setSchedule(prev => ({...prev, [day]: {...prev[day], [sec.id]: [...prev[day][sec.id], task]}}));
+                                                }} className="bg-white text-black w-6 h-6 rounded border border-black font-black">+</button>
+                                            )}
+                                        </div>
+                                        {(selectedArchive || schedule)[day][sec.id].map((item, idx) => (
+                                            <div key={idx} className="bg-white p-3 rounded-lg border-2 border-black font-black uppercase text-black italic text-xs flex justify-between">
+                                                <span>{item}</span>
+                                                {!selectedArchive && <button onClick={() => {
+                                                    const ns = {...schedule}; ns[day][sec.id].splice(idx, 1); setSchedule(ns);
+                                                }} className="text-red-600">✕</button>}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+                    </main>
+
+                    {/* ACTION BUTTONS */}
+                    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 z-50">
+                        {!selectedArchive ? (
+                            <>
+                                <button onClick={handleArchiveWeek} className="bg-green-600 text-white px-6 py-4 btn-comic text-lg">Finish Week</button>
+                                <button onClick={() => {if(config.hero) {setIsListening(true); setTimeout(()=>setIsListening(false), 2000)} else {alert("Hero feature!")}}} className={`w-16 h-16 rounded-full border-4 border-black flex items-center justify-center text-3xl shadow-[4px_4px_0px_black] ${isListening ? 'listening-pulse' : 'bg-[#FFD000]'}`}>🎤</button>
+                            </>
+                        ) : (
+                            <button onClick={() => setSelectedArchive(null)} className="bg-black text-white px-10 py-5 border-4 border-[#FFD000] font-black uppercase text-xl">Close Time Machine</button>
+                        )}
+                    </div>
                 </div>
             );
         }
