@@ -17,7 +17,6 @@
     @keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
     @keyframes drawerUp{from{transform:translateY(80px);opacity:0}to{transform:translateY(0);opacity:1}}
     @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
-    @keyframes pulseGreen{0%,100%{box-shadow:0 0 0 0 rgba(76,175,80,0)}50%{box-shadow:0 0 0 8px rgba(76,175,80,0.1)}}
   </style>
 </head>
 <body>
@@ -25,50 +24,72 @@
   <script type="text/babel">
 const { useState, useEffect, useCallback, useRef } = React;
 
-// ─── INLINE SVG ICONS (replaces lucide-react) ─────────────────────────────────
-const iconProps = (size=16) => ({ width:size, height:size, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:2, strokeLinecap:"round", strokeLinejoin:"round", style:{display:"inline-block",flexShrink:0} });
-const Plus = ({size=16,strokeWidth=2,style:s={}}) => <svg {...iconProps(size)} strokeWidth={strokeWidth} style={{...iconProps(size).style,...s}}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
-const Calendar = ({size=16,style:s={}}) => <svg {...iconProps(size)} style={{...iconProps(size).style,...s}}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
-const Archive = ({size=16,style:s={}}) => <svg {...iconProps(size)} style={{...iconProps(size).style,...s}}><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>;
-const Settings = ({size=16,style:s={}}) => <svg {...iconProps(size)} style={{...iconProps(size).style,...s}}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
-const X = ({size=16,style:s={}}) => <svg {...iconProps(size)} style={{...iconProps(size).style,...s}}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
-const DollarSign = ({size=16,style:s={}}) => <svg {...iconProps(size)} style={{...iconProps(size).style,...s}}><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>;
-const Globe = ({size=16,style:s={}}) => <svg {...iconProps(size)} style={{...iconProps(size).style,...s}}><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>;
-const MapPin = ({size=16,style:s={}}) => <svg {...iconProps(size)} style={{...iconProps(size).style,...s}}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>;
-const Tag = ({size=16,style:s={}}) => <svg {...iconProps(size)} style={{...iconProps(size).style,...s}}><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>;
-const Clock = ({size=16,style:s={}}) => <svg {...iconProps(size)} style={{...iconProps(size).style,...s}}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
-const RotateCcw = ({size=16,style:s={}}) => <svg {...iconProps(size)} style={{...iconProps(size).style,...s}}><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.85"/></svg>;
-const CheckCircle = ({size=16,style:s={}}) => <svg {...iconProps(size)} style={{...iconProps(size).style,...s}}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
-const ChevronLeft = ({size=16,style:s={}}) => <svg {...iconProps(size)} style={{...iconProps(size).style,...s}}><polyline points="15 18 9 12 15 6"/></svg>;
-const Trophy = ({size=16,style:s={}}) => <svg {...iconProps(size)} style={{...iconProps(size).style,...s}}><polyline points="8 21 12 17 16 21"/><line x1="12" y1="17" x2="12" y2="11"/><path d="M7 4h10l1 7H6z"/><path d="M5 7H3a2 2 0 0 0 0 4h1"/><path d="M19 7h2a2 2 0 0 1 0 4h-1"/></svg>;
-const Repeat = ({size=16,style:s={}}) => <svg {...iconProps(size)} style={{...iconProps(size).style,...s}}><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>;
-const Search = ({size=16,style:s={}}) => <svg {...iconProps(size)} style={{...iconProps(size).style,...s}}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
-const Edit3 = ({size=16,style:s={}}) => <svg {...iconProps(size)} style={{...iconProps(size).style,...s}}><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>;
-const FileText = ({size=16,style:s={}}) => <svg {...iconProps(size)} style={{...iconProps(size).style,...s}}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>;
-const ExternalLink = ({size=16,style:s={}}) => <svg {...iconProps(size)} style={{...iconProps(size).style,...s}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>;
+// ─── INLINE SVG ICONS ─────────────────────────────────────────────────────────
+const ip = (size=16) => ({ width:size, height:size, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:2, strokeLinecap:"round", strokeLinejoin:"round", style:{display:"inline-block",flexShrink:0,verticalAlign:"middle"} });
+const Plus        = ({size=16,strokeWidth=2,style:s={}}) => <svg {...ip(size)} strokeWidth={strokeWidth} style={{...ip(size).style,...s}}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
+const Calendar    = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
+const Archive     = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>;
+const Settings    = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
+const X           = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+const DollarSign  = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>;
+const Globe       = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>;
+const MapPin      = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>;
+const Tag         = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>;
+const Clock       = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
+const RotateCcw   = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.85"/></svg>;
+const CheckCircle = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
+const Trophy      = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><polyline points="8 21 12 17 16 21"/><line x1="12" y1="17" x2="12" y2="11"/><path d="M7 4h10l1 7H6z"/><path d="M5 7H3a2 2 0 0 0 0 4h1"/><path d="M19 7h2a2 2 0 0 1 0 4h-1"/></svg>;
+const Repeat      = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>;
+const Search      = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
+const Edit3       = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>;
+const FileText    = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>;
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 const DAYS      = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
 const DAY_SHORT = ["MON","TUE","WED","THU","FRI"];
 
 const MOCK_WEATHER = [
-  { emoji:"☀️",  temp:72, label:"Sunny"         },
-  { emoji:"⛅",  temp:65, label:"Partly Cloudy" },
-  { emoji:"🌧️", temp:58, label:"Rainy"          },
-  { emoji:"☀️",  temp:70, label:"Sunny"          },
-  { emoji:"🌤️", temp:68, label:"Mostly Clear"  },
+  { emoji:"☀️",  temp:72, label:"Sunny"        },
+  { emoji:"⛅",  temp:65, label:"Partly Cloudy"},
+  { emoji:"🌧️", temp:58, label:"Rainy"         },
+  { emoji:"☀️",  temp:70, label:"Sunny"         },
+  { emoji:"🌤️", temp:68, label:"Mostly Clear" },
 ];
 
 const CHIP_COLORS = [
-  { bg:"#1565C0", shadow:"#0a3f7f", text:"#fff"    },
-  { bg:"#D32F2F", shadow:"#7f1a1a", text:"#fff"    },
-  { bg:"#7B1FA2", shadow:"#4a0072", text:"#fff"    },
-  { bg:"#E65100", shadow:"#8c3300", text:"#fff"    },
-  { bg:"#00695C", shadow:"#003d33", text:"#fff"    },
+  { bg:"#1565C0", shadow:"#0a3f7f" },
+  { bg:"#D32F2F", shadow:"#7f1a1a" },
+  { bg:"#7B1FA2", shadow:"#4a0072" },
+  { bg:"#E65100", shadow:"#8c3300" },
+  { bg:"#00695C", shadow:"#003d33" },
 ];
 
 const SCHEDULE_KEY = "thePlaybook_v1";
 const LIBRARY_KEY  = "thePlaybook_library_v1";
+
+// ─── PRESET LIBRARY (shown when library is empty) ─────────────────────────────
+const PRESET_LIBRARY = [
+  { title:"Breakfast",    time:"08:00", isPaid:false, cost:0, tags:["daily","meal"],    emoji:"🍳", useCount:10 },
+  { title:"Lunch",        time:"12:00", isPaid:false, cost:0, tags:["daily","meal"],    emoji:"🥪", useCount:10 },
+  { title:"Park",         time:"",      isPaid:false, cost:0, tags:["outdoor"],         emoji:"🌳", useCount:5  },
+  { title:"Library",      time:"",      isPaid:false, cost:0, tags:["learning"],        emoji:"📚", useCount:5  },
+  { title:"BJJ",          time:"",      isPaid:true,  cost:20,tags:["sports"],          emoji:"🥋", useCount:4  },
+  { title:"Soccer",       time:"",      isPaid:false, cost:0, tags:["sports","outdoor"],emoji:"⚽", useCount:4  },
+  { title:"Swimming",     time:"",      isPaid:true,  cost:15,tags:["sports"],          emoji:"🏊", useCount:3  },
+  { title:"Art Class",    time:"",      isPaid:true,  cost:25,tags:["creative"],        emoji:"🎨", useCount:3  },
+  { title:"Bike Ride",    time:"",      isPaid:false, cost:0, tags:["outdoor","sports"],emoji:"🚲", useCount:3  },
+  { title:"Movie Night",  time:"18:00", isPaid:false, cost:0, tags:["family","fun"],    emoji:"🎬", useCount:3  },
+  { title:"Playdate",     time:"",      isPaid:false, cost:0, tags:["social"],          emoji:"🧒", useCount:2  },
+  { title:"Piano",        time:"",      isPaid:true,  cost:30,tags:["music"],           emoji:"🎹", useCount:2  },
+  { title:"Gym",          time:"",      isPaid:true,  cost:0, tags:["fitness"],         emoji:"💪", useCount:2  },
+  { title:"Reading",      time:"",      isPaid:false, cost:0, tags:["learning"],        emoji:"📖", useCount:2  },
+  { title:"Game Night",   time:"19:00", isPaid:false, cost:0, tags:["family","fun"],    emoji:"🎮", useCount:2  },
+  { title:"Cooking",      time:"17:00", isPaid:false, cost:0, tags:["life skills"],     emoji:"👨‍🍳",useCount:2  },
+  { title:"Nature Walk",  time:"",      isPaid:false, cost:0, tags:["outdoor"],         emoji:"🥾", useCount:1  },
+  { title:"Dentist",      time:"",      isPaid:true,  cost:0, tags:["health"],          emoji:"🦷", useCount:1  },
+  { title:"Doctor",       time:"",      isPaid:true,  cost:0, tags:["health"],          emoji:"🏥", useCount:1  },
+  { title:"Haircut",      time:"",      isPaid:true,  cost:20,tags:["grooming"],        emoji:"✂️", useCount:1  },
+];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function generateId() {
@@ -77,9 +98,8 @@ function generateId() {
 
 function snapSound() {
   try {
-    const ctx  = new (window.AudioContext || window.webkitAudioContext)();
-    const osc  = ctx.createOscillator();
-    const gain = ctx.createGain();
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator(); const gain = ctx.createGain();
     osc.connect(gain); gain.connect(ctx.destination);
     osc.type = "square";
     osc.frequency.setValueAtTime(880, ctx.currentTime);
@@ -105,6 +125,7 @@ function missionSound() {
   } catch(e) {}
 }
 
+// Build the initial 4-week schedule with Breakfast + Lunch pre-filled every day
 function buildInitialState() {
   const weeks = {};
   const today = new Date();
@@ -114,7 +135,13 @@ function buildInitialState() {
     weeks[`week_${w}`] = { days: {} };
     for (let d = 0; d < 5; d++) {
       const dt = new Date(base); dt.setDate(base.getDate() + w*7 + d);
-      weeks[`week_${w}`].days[DAYS[d]] = { date: dt.toISOString().slice(0,10), activities:[] };
+      weeks[`week_${w}`].days[DAYS[d]] = {
+        date: dt.toISOString().slice(0,10),
+        activities: [
+          { id:generateId(), title:"Breakfast", time:"08:00", isPaid:false, cost:0, isComplete:false, notes:"", website:"", mapLink:"", tags:["meal"], isFixed:true, emoji:"🍳" },
+          { id:generateId(), title:"Lunch",     time:"12:00", isPaid:false, cost:0, isComplete:false, notes:"", website:"", mapLink:"", tags:["meal"], isFixed:true, emoji:"🥪" },
+        ]
+      };
     }
   }
   return { weeks, activeWeek:"week_0" };
@@ -125,8 +152,17 @@ function loadSchedule() {
   return null;
 }
 function loadLibrary() {
-  try { const r = localStorage.getItem(LIBRARY_KEY); if(r) return JSON.parse(r); } catch(e) {}
-  return [];
+  try {
+    const r = localStorage.getItem(LIBRARY_KEY);
+    if (r) return JSON.parse(r);
+  } catch(e) {}
+  // First time: seed with presets
+  return PRESET_LIBRARY.map(p => ({
+    id: generateId(), title:p.title, time:p.time, isPaid:p.isPaid, cost:p.cost,
+    website:"", mapLink:"", tags:p.tags, useCount:p.useCount,
+    lastUsed: Date.now() - p.useCount * 1000, isRepeatable:false, repeatDay:null,
+    emoji: p.emoji || "⭐",
+  }));
 }
 function saveLibrary(lib) {
   try { localStorage.setItem(LIBRARY_KEY, JSON.stringify(lib)); } catch(e) {}
@@ -137,20 +173,22 @@ function upsertLibrary(library, activity) {
   if (ex) {
     return library.map(e => e.id === ex.id
       ? { ...e, useCount:(e.useCount||1)+1, lastUsed:Date.now(),
-          time: activity.time||e.time, isPaid: activity.isPaid??e.isPaid,
-          cost: activity.cost??e.cost, website: activity.website||e.website,
-          mapLink: activity.mapLink||e.mapLink, tags: activity.tags?.length?activity.tags:e.tags }
+          time:activity.time||e.time, isPaid:activity.isPaid??e.isPaid,
+          cost:activity.cost??e.cost, website:activity.website||e.website,
+          mapLink:activity.mapLink||e.mapLink, tags:activity.tags?.length?activity.tags:e.tags }
       : e);
   }
-  return [...library, { id:generateId(), title:activity.title.trim(), time:activity.time||"",
-    isPaid:activity.isPaid||false, cost:activity.cost||0, website:activity.website||"",
-    mapLink:activity.mapLink||"", tags:activity.tags||[], useCount:1,
-    lastUsed:Date.now(), isRepeatable:false, repeatDay:null }];
+  return [...library, {
+    id:generateId(), title:activity.title.trim(), time:activity.time||"",
+    isPaid:activity.isPaid||false, cost:activity.cost||0,
+    website:activity.website||"", mapLink:activity.mapLink||"",
+    tags:activity.tags||[], useCount:1, lastUsed:Date.now(),
+    isRepeatable:false, repeatDay:null, emoji:"⭐",
+  }];
 }
 function sortedLib(lib) {
-  return [...lib].sort((a,b) => b.useCount !== a.useCount ? b.useCount - a.useCount : b.lastUsed - a.lastUsed);
+  return [...lib].sort((a,b) => b.useCount !== a.useCount ? b.useCount-a.useCount : b.lastUsed-a.lastUsed);
 }
-
 function fmtDate(s) {
   if (!s) return "";
   return new Date(s+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"});
@@ -183,18 +221,15 @@ function LegoBtn({ color="blue", onClick, children, small=false, disabled=false,
     gray:  {bg:"rgba(255,255,255,0.18)",sh:"rgba(0,0,0,0.35)",tx:"#fff"},
     green: {bg:"#2e7d32",sh:"#1a4a1d",tx:"#fff"},
     orange:{bg:"#E65100",sh:"#8c3300",tx:"#fff"},
-  }[color] || {bg:"#1565C0",sh:"#0a3f7f",tx:"#fff"};
+  }[color]||{bg:"#1565C0",sh:"#0a3f7f",tx:"#fff"};
   return (
     <button disabled={disabled} onClick={onClick}
-      style={{ background:disabled?"rgba(255,255,255,0.12)":T.bg, color:disabled?"rgba(255,255,255,0.4)":T.tx,
-        borderBottom:`4px solid ${disabled?"rgba(0,0,0,0.15)":T.sh}`,
-        borderTop:"none",borderLeft:"none",borderRight:"none",
-        borderRadius:9, padding:small?"6px 12px":"9px 18px",
-        fontWeight:900, fontSize:small?11:13, fontFamily:"'Arial Black',Arial,sans-serif",
-        letterSpacing:"0.3px", cursor:disabled?"not-allowed":"pointer",
-        display:"inline-flex",alignItems:"center",gap:6, transition:"transform 0.08s",
-        boxShadow:"0 1px 0 rgba(255,255,255,0.18) inset", textTransform:"uppercase",
-        userSelect:"none", ...ex }}
+      style={{background:disabled?"rgba(255,255,255,0.12)":T.bg,color:disabled?"rgba(255,255,255,0.4)":T.tx,
+        borderBottom:`4px solid ${disabled?"rgba(0,0,0,0.15)":T.sh}`,borderTop:"none",borderLeft:"none",borderRight:"none",
+        borderRadius:9,padding:small?"6px 12px":"9px 18px",fontWeight:900,fontSize:small?11:13,
+        fontFamily:"'Arial Black',Arial,sans-serif",letterSpacing:"0.3px",cursor:disabled?"not-allowed":"pointer",
+        display:"inline-flex",alignItems:"center",gap:6,transition:"transform 0.08s",
+        boxShadow:"0 1px 0 rgba(255,255,255,0.18) inset",textTransform:"uppercase",userSelect:"none",...ex}}
       onMouseDown={e=>{if(!disabled)e.currentTarget.style.transform="scale(0.96) translateY(2px)"}}
       onMouseUp={e=>{e.currentTarget.style.transform=""}}
       onMouseLeave={e=>{e.currentTarget.style.transform=""}}
@@ -203,80 +238,55 @@ function LegoBtn({ color="blue", onClick, children, small=false, disabled=false,
 }
 
 // ─── ACTIVITY DETAIL SHEET ────────────────────────────────────────────────────
-// Opens when tapping an activity chip — shows full info and inline edit
 function ActivityDetailSheet({ activity, dayName, onClose, onSave, onToggleComplete, onDelete }) {
-  const [editing, setEditing]   = useState(false);
-  const [title,   setTitle]     = useState(activity.title);
-  const [time,    setTime]      = useState(activity.time||"");
-  const [notes,   setNotes]     = useState(activity.notes||"");
-  const [website, setWebsite]   = useState(activity.website||"");
-  const [mapLink, setMapLink]   = useState(activity.mapLink||"");
-  const [isPaid,  setIsPaid]    = useState(activity.isPaid||false);
-  const [cost,    setCost]      = useState(activity.cost||"");
+  const [editing,setEditing] = useState(false);
+  const [title,setTitle]     = useState(activity.title);
+  const [time,setTime]       = useState(activity.time||"");
+  const [notes,setNotes]     = useState(activity.notes||"");
+  const [website,setWebsite] = useState(activity.website||"");
+  const [mapLink,setMapLink] = useState(activity.mapLink||"");
+  const [isPaid,setIsPaid]   = useState(activity.isPaid||false);
+  const [cost,setCost]       = useState(activity.cost||"");
 
   function handleSave() {
-    onSave({ ...activity, title:title.trim()||activity.title, time, notes, website:website.trim(), mapLink:mapLink.trim(), isPaid, cost:isPaid?parseFloat(cost)||0:0 });
+    onSave({...activity,title:title.trim()||activity.title,time,notes,website:website.trim(),mapLink:mapLink.trim(),isPaid,cost:isPaid?parseFloat(cost)||0:0});
     setEditing(false);
   }
 
-  const inp = { width:"100%", background:"rgba(255,255,255,0.92)", border:"none", borderBottom:"3px solid rgba(0,0,0,0.15)", borderRadius:8, padding:"8px 10px", fontSize:13, fontWeight:700, fontFamily:"'Arial Black',Arial,sans-serif", color:"#1a1a2e", outline:"none", boxSizing:"border-box" };
-  const lbl = { fontFamily:"'Arial Black',Arial,sans-serif", fontSize:9, fontWeight:900, color:"rgba(255,255,255,0.65)", letterSpacing:"0.8px", textTransform:"uppercase", marginBottom:3, display:"flex", alignItems:"center", gap:4 };
+  const inp = {width:"100%",background:"rgba(255,255,255,0.92)",border:"none",borderBottom:"3px solid rgba(0,0,0,0.15)",borderRadius:8,padding:"8px 10px",fontSize:13,fontWeight:700,fontFamily:"'Arial Black',Arial,sans-serif",color:"#1a1a2e",outline:"none",boxSizing:"border-box"};
+  const lbl = {fontFamily:"'Arial Black',Arial,sans-serif",fontSize:9,fontWeight:900,color:"rgba(255,255,255,0.65)",letterSpacing:"0.8px",textTransform:"uppercase",marginBottom:3,display:"flex",alignItems:"center",gap:4};
 
   return (
-    <div style={{ position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,0.65)",display:"flex",alignItems:"flex-end",justifyContent:"center" }}
-      onClick={e=>{if(e.target===e.currentTarget)onClose()}}
-    >
-      <div style={{ width:"100%",maxWidth:430,background:"#0f1f14",borderRadius:"22px 22px 0 0",
-        border:"2px solid rgba(255,255,255,0.1)",borderBottom:"none",
-        maxHeight:"85vh",display:"flex",flexDirection:"column",
-        animation:"drawerUp 0.28s cubic-bezier(0.34,1.2,0.64,1)",overflow:"hidden" }}>
-
-        {/* Handle + colour bar */}
-        <div style={{ background:activity.isComplete?"#2e7d32":"#1565C0", padding:"8px 16px 7px", display:"flex",alignItems:"center",justifyContent:"space-between" }}>
+    <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,0.65)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}
+      onClick={e=>{if(e.target===e.currentTarget)onClose()}}>
+      <div style={{width:"100%",maxWidth:430,background:"#0f1f14",borderRadius:"22px 22px 0 0",border:"2px solid rgba(255,255,255,0.1)",borderBottom:"none",maxHeight:"85vh",display:"flex",flexDirection:"column",animation:"drawerUp 0.28s cubic-bezier(0.34,1.2,0.64,1)",overflow:"hidden"}}>
+        <div style={{background:activity.isComplete?"#2e7d32":"#1565C0",padding:"8px 16px 7px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{display:"flex",gap:6}}>{[0,1,2,3,4,5].map(i=><div key={i} style={{width:9,height:9,borderRadius:"50%",background:"rgba(255,255,255,0.3)",border:"1.5px solid rgba(255,255,255,0.15)"}}/>)}</div>
           <div style={{display:"flex",gap:6}}>
-            {[0,1,2,3,4,5].map(i=><div key={i} style={{width:9,height:9,borderRadius:"50%",background:"rgba(255,255,255,0.3)",border:"1.5px solid rgba(255,255,255,0.15)"}}/>)}
-          </div>
-          <div style={{display:"flex",gap:6}}>
-            {!editing && (
-              <button onClick={()=>setEditing(true)} style={{background:"rgba(255,255,255,0.18)",border:"none",borderRadius:7,padding:"4px 10px",cursor:"pointer",color:"#fff",display:"flex",alignItems:"center",gap:4,fontFamily:"'Arial Black',Arial,sans-serif",fontSize:10,fontWeight:900,textTransform:"uppercase"}}>
-                <Edit3 size={11}/> Edit
-              </button>
-            )}
-            <button onClick={onClose} style={{background:"rgba(255,255,255,0.15)",border:"none",borderRadius:7,padding:"4px 7px",cursor:"pointer",color:"#fff",display:"flex"}}>
-              <X size={14}/>
-            </button>
+            {!editing&&<button onClick={()=>setEditing(true)} style={{background:"rgba(255,255,255,0.18)",border:"none",borderRadius:7,padding:"4px 10px",cursor:"pointer",color:"#fff",display:"flex",alignItems:"center",gap:4,fontFamily:"'Arial Black',Arial,sans-serif",fontSize:10,fontWeight:900,textTransform:"uppercase"}}><Edit3 size={11}/> Edit</button>}
+            <button onClick={onClose} style={{background:"rgba(255,255,255,0.15)",border:"none",borderRadius:7,padding:"4px 7px",cursor:"pointer",color:"#fff",display:"flex"}}><X size={14}/></button>
           </div>
         </div>
-
         <div style={{overflowY:"auto",flex:1,padding:"14px 16px 24px",display:"flex",flexDirection:"column",gap:14}}>
-
-          {/* Title */}
-          {editing ? (
-            <div>
-              <div style={lbl}>📝 Title</div>
-              <input style={inp} value={title} onChange={e=>setTitle(e.target.value)}/>
-            </div>
-          ) : (
+          {editing?(
+            <div><div style={lbl}>📝 Title</div><input style={inp} value={title} onChange={e=>setTitle(e.target.value)}/></div>
+          ):(
             <div>
               <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:22,fontWeight:900,color:"#fff",textShadow:"0 2px 0 rgba(0,0,0,0.4)",lineHeight:1.1,textDecoration:activity.isComplete?"line-through":"none",opacity:activity.isComplete?0.65:1}}>
-                {activity.title}
+                {activity.emoji&&<span style={{marginRight:8}}>{activity.emoji}</span>}{activity.title}
               </div>
               <div style={{fontFamily:"Arial,sans-serif",fontSize:11,color:"rgba(255,255,255,0.45)",marginTop:4}}>{dayName} · {fmtDateFull(activity._date)}</div>
             </div>
           )}
-
-          {/* Status chips row */}
-          {!editing && (
+          {!editing&&(
             <div style={{display:"flex",flexWrap:"wrap",gap:7}}>
-              {activity.time && <span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(255,255,255,0.12)",borderRadius:8,padding:"5px 10px",fontSize:12,fontWeight:700,color:"#fff",fontFamily:"Arial,sans-serif"}}><Clock size={11}/>{fmtTime(activity.time)}</span>}
-              {activity.isPaid && activity.cost>0 && <span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(255,208,0,0.18)",border:"1px solid rgba(255,208,0,0.4)",borderRadius:8,padding:"5px 10px",fontSize:12,fontWeight:700,color:"#FFD000",fontFamily:"Arial,sans-serif"}}><DollarSign size={11}/>${Number(activity.cost).toFixed(2)}</span>}
-              {activity.isComplete && <span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(46,160,67,0.2)",border:"1px solid rgba(46,160,67,0.4)",borderRadius:8,padding:"5px 10px",fontSize:12,fontWeight:700,color:"#4caf50",fontFamily:"Arial,sans-serif"}}><CheckCircle size={11}/>Done</span>}
+              {activity.time&&<span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(255,255,255,0.12)",borderRadius:8,padding:"5px 10px",fontSize:12,fontWeight:700,color:"#fff",fontFamily:"Arial,sans-serif"}}><Clock size={11}/>{fmtTime(activity.time)}</span>}
+              {activity.isPaid&&activity.cost>0&&<span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(255,208,0,0.18)",border:"1px solid rgba(255,208,0,0.4)",borderRadius:8,padding:"5px 10px",fontSize:12,fontWeight:700,color:"#FFD000",fontFamily:"Arial,sans-serif"}}><DollarSign size={11}/>${Number(activity.cost).toFixed(2)}</span>}
+              {activity.isComplete&&<span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(46,160,67,0.2)",border:"1px solid rgba(46,160,67,0.4)",borderRadius:8,padding:"5px 10px",fontSize:12,fontWeight:700,color:"#4caf50",fontFamily:"Arial,sans-serif"}}><CheckCircle size={11}/>Done</span>}
               {activity.tags?.map(t=><span key={t} style={{background:"rgba(255,255,255,0.1)",borderRadius:20,padding:"4px 10px",fontSize:11,color:"rgba(255,255,255,0.6)",fontFamily:"Arial,sans-serif"}}>#{t}</span>)}
             </div>
           )}
-
-          {/* Edit fields */}
-          {editing && (
+          {editing&&(
             <>
               <div style={{display:"flex",gap:8}}>
                 <div style={{flex:1}}>
@@ -284,64 +294,45 @@ function ActivityDetailSheet({ activity, dayName, onClose, onSave, onToggleCompl
                   <input type="time" style={inp} value={time} onChange={e=>setTime(e.target.value)}/>
                 </div>
                 <div style={{flex:1}}>
-                  <div style={{...lbl,alignItems:"center"}}>
-                    <div onClick={()=>setIsPaid(!isPaid)} style={{width:32,height:18,borderRadius:9,background:isPaid?"#FFD000":"rgba(255,255,255,0.2)",position:"relative",cursor:"pointer",flexShrink:0,border:"2px solid rgba(255,255,255,0.3)"}}>
+                  <div style={{...lbl,cursor:"pointer"}} onClick={()=>setIsPaid(!isPaid)}>
+                    <div style={{width:32,height:18,borderRadius:9,background:isPaid?"#FFD000":"rgba(255,255,255,0.2)",position:"relative",flexShrink:0,border:"2px solid rgba(255,255,255,0.3)"}}>
                       <div style={{position:"absolute",top:0,left:isPaid?14:0,width:14,height:14,borderRadius:"50%",background:"#fff",transition:"left 0.2s"}}/>
                     </div>
                     <DollarSign size={9}/> Paid
                   </div>
-                  {isPaid && <input type="number" style={inp} placeholder="0.00" value={cost} onChange={e=>setCost(e.target.value)} min="0" step="0.01"/>}
+                  {isPaid&&<input type="number" style={inp} placeholder="0.00" value={cost} onChange={e=>setCost(e.target.value)} min="0" step="0.01"/>}
                 </div>
               </div>
-              <div>
-                <div style={lbl}><Globe size={9}/> Website URL</div>
-                <input style={inp} placeholder="https://..." value={website} onChange={e=>setWebsite(e.target.value)}/>
-              </div>
-              <div>
-                <div style={lbl}><MapPin size={9}/> Map / Location Link</div>
-                <input style={inp} placeholder="https://maps.google.com/..." value={mapLink} onChange={e=>setMapLink(e.target.value)}/>
-              </div>
+              <div><div style={lbl}><Globe size={9}/> Website URL</div><input style={inp} placeholder="https://..." value={website} onChange={e=>setWebsite(e.target.value)}/></div>
+              <div><div style={lbl}><MapPin size={9}/> Map / Location Link</div><input style={inp} placeholder="https://maps.google.com/..." value={mapLink} onChange={e=>setMapLink(e.target.value)}/></div>
             </>
           )}
-
-          {/* Notes */}
           <div>
             <div style={lbl}><FileText size={9}/> Notes</div>
-            {editing ? (
+            {editing?(
               <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Add notes, reminders, what to bring..."
                 style={{...inp,minHeight:80,resize:"vertical",fontFamily:"Arial,sans-serif",fontWeight:400,fontSize:13,lineHeight:1.5}}/>
-            ) : notes ? (
-              <div style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"10px 12px",fontFamily:"Arial,sans-serif",fontSize:13,color:"rgba(255,255,255,0.8)",lineHeight:1.55,whiteSpace:"pre-wrap"}}>
-                {notes}
-              </div>
-            ) : (
-              <button onClick={()=>setEditing(true)} style={{background:"rgba(255,255,255,0.06)",border:"1.5px dashed rgba(255,255,255,0.18)",borderRadius:10,padding:"10px 12px",color:"rgba(255,255,255,0.35)",fontFamily:"Arial,sans-serif",fontSize:12,cursor:"pointer",width:"100%",textAlign:"left"}}>
-                Tap to add notes, what to bring, reminders…
-              </button>
+            ):notes?(
+              <div style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"10px 12px",fontFamily:"Arial,sans-serif",fontSize:13,color:"rgba(255,255,255,0.8)",lineHeight:1.55,whiteSpace:"pre-wrap"}}>{notes}</div>
+            ):(
+              <button onClick={()=>setEditing(true)} style={{background:"rgba(255,255,255,0.06)",border:"1.5px dashed rgba(255,255,255,0.18)",borderRadius:10,padding:"10px 12px",color:"rgba(255,255,255,0.35)",fontFamily:"Arial,sans-serif",fontSize:12,cursor:"pointer",width:"100%",textAlign:"left"}}>Tap to add notes, what to bring, reminders…</button>
             )}
           </div>
-
-          {/* Map + Website links */}
-          {!editing && (activity.mapLink || activity.website) && (
+          {!editing&&(activity.mapLink||activity.website)&&(
             <div style={{display:"flex",gap:8}}>
-              {activity.mapLink && <a href={activity.mapLink} target="_blank" rel="noopener noreferrer" style={{textDecoration:"none"}}><LegoBtn color="blue" small><MapPin size={11}/> Open Map</LegoBtn></a>}
-              {activity.website && <a href={activity.website} target="_blank" rel="noopener noreferrer" style={{textDecoration:"none"}}><LegoBtn color="green" small><Globe size={11}/> Website</LegoBtn></a>}
+              {activity.mapLink&&<a href={activity.mapLink} target="_blank" rel="noopener noreferrer" style={{textDecoration:"none"}}><LegoBtn color="blue" small><MapPin size={11}/> Open Map</LegoBtn></a>}
+              {activity.website&&<a href={activity.website} target="_blank" rel="noopener noreferrer" style={{textDecoration:"none"}}><LegoBtn color="green" small><Globe size={11}/> Website</LegoBtn></a>}
             </div>
           )}
-
-          {/* Action row */}
           <div style={{display:"flex",gap:8,marginTop:4}}>
-            {editing ? (
-              <>
-                <LegoBtn color="gray" onClick={()=>setEditing(false)} style={{flex:1}}><X size={12}/> Cancel</LegoBtn>
-                <LegoBtn color="yellow" onClick={handleSave} style={{flex:2}}>💾 Save Changes</LegoBtn>
-              </>
-            ) : (
+            {editing?(
+              <><LegoBtn color="gray" onClick={()=>setEditing(false)} style={{flex:1}}><X size={12}/> Cancel</LegoBtn><LegoBtn color="yellow" onClick={handleSave} style={{flex:2}}>💾 Save Changes</LegoBtn></>
+            ):(
               <>
                 <LegoBtn color={activity.isComplete?"gray":"green"} onClick={()=>{onToggleComplete(activity.id);onClose();}} style={{flex:2}}>
-                  {activity.isComplete ? <><RotateCcw size={13}/> Mark Undone</> : <><CheckCircle size={13}/> Mark Done</>}
+                  {activity.isComplete?<><RotateCcw size={13}/> Mark Undone</>:<><CheckCircle size={13}/> Mark Done</>}
                 </LegoBtn>
-                <LegoBtn color="red" onClick={()=>{onDelete(activity.id);onClose();}} style={{flex:1}}><X size={12}/> Delete</LegoBtn>
+                {!activity.isFixed&&<LegoBtn color="red" onClick={()=>{onDelete(activity.id);onClose();}} style={{flex:1}}><X size={12}/> Delete</LegoBtn>}
               </>
             )}
           </div>
@@ -353,28 +344,27 @@ function ActivityDetailSheet({ activity, dayName, onClose, onSave, onToggleCompl
 
 // ─── ADD ACTIVITY MODAL ───────────────────────────────────────────────────────
 function AddModal({ defaultDay, onClose, onSave }) {
-  const [title,setTitle]             = useState("");
-  const [day,setDay]                 = useState(defaultDay||DAYS[0]);
-  const [time,setTime]               = useState("");
-  const [notes,setNotes]             = useState("");
-  const [isPaid,setIsPaid]           = useState(false);
-  const [cost,setCost]               = useState("");
-  const [website,setWebsite]         = useState("");
-  const [mapLink,setMapLink]         = useState("");
-  const [tags,setTags]               = useState("");
-  const [isRepeatable,setIsRep]      = useState(false);
-  const [expanded,setExpanded]       = useState(false);
-  const [shake,setShake]             = useState(false);
+  const [title,setTitle]       = useState("");
+  const [day,setDay]           = useState(defaultDay||DAYS[0]);
+  const [time,setTime]         = useState("");
+  const [notes,setNotes]       = useState("");
+  const [isPaid,setIsPaid]     = useState(false);
+  const [cost,setCost]         = useState("");
+  const [website,setWebsite]   = useState("");
+  const [mapLink,setMapLink]   = useState("");
+  const [tags,setTags]         = useState("");
+  const [expanded,setExpanded] = useState(false);
+  const [shake,setShake]       = useState(false);
 
   function handleSave() {
     if (!title.trim()) { setShake(true); setTimeout(()=>setShake(false),500); return; }
-    onSave({ id:generateId(), title:title.trim(), day, time, notes:notes.trim(), isPaid,
-      cost:isPaid?parseFloat(cost)||0:0, website:website.trim(), mapLink:mapLink.trim(),
-      tags:tags.split(",").map(t=>t.trim()).filter(Boolean), isComplete:false, isRepeatable });
+    onSave({id:generateId(),title:title.trim(),day,time,notes:notes.trim(),isPaid,
+      cost:isPaid?parseFloat(cost)||0:0,website:website.trim(),mapLink:mapLink.trim(),
+      tags:tags.split(",").map(t=>t.trim()).filter(Boolean),isComplete:false});
   }
 
-  const inp = { width:"100%", background:"rgba(255,255,255,0.92)", border:"none", borderBottom:"3px solid rgba(0,0,0,0.15)", borderRadius:8, padding:"9px 12px", fontSize:14, fontWeight:700, fontFamily:"'Arial Black',Arial,sans-serif", color:"#1a1a2e", outline:"none", boxSizing:"border-box" };
-  const lbl = { fontFamily:"'Arial Black',Arial,sans-serif", fontSize:10, fontWeight:900, color:"rgba(255,255,255,0.85)", letterSpacing:"0.8px", textTransform:"uppercase", marginBottom:4, display:"flex", alignItems:"center", gap:5 };
+  const inp = {width:"100%",background:"rgba(255,255,255,0.92)",border:"none",borderBottom:"3px solid rgba(0,0,0,0.15)",borderRadius:8,padding:"9px 12px",fontSize:14,fontWeight:700,fontFamily:"'Arial Black',Arial,sans-serif",color:"#1a1a2e",outline:"none",boxSizing:"border-box"};
+  const lbl = {fontFamily:"'Arial Black',Arial,sans-serif",fontSize:10,fontWeight:900,color:"rgba(255,255,255,0.85)",letterSpacing:"0.8px",textTransform:"uppercase",marginBottom:4,display:"flex",alignItems:"center",gap:5};
   const Tog = ({on,toggle}) => (
     <div onClick={toggle} style={{width:38,height:22,borderRadius:11,background:on?"#FFD000":"rgba(255,255,255,0.2)",border:"2px solid rgba(255,255,255,0.3)",position:"relative",transition:"background 0.2s",cursor:"pointer",flexShrink:0}}>
       <div style={{position:"absolute",top:1,left:on?17:1,width:16,height:16,borderRadius:"50%",background:"#fff",transition:"left 0.2s",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}}/>
@@ -383,8 +373,7 @@ function AddModal({ defaultDay, onClose, onSave }) {
 
   return (
     <div style={{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,0.7)",display:"flex",alignItems:"flex-end",justifyContent:"center",padding:"0 8px 8px"}}
-      onClick={e=>{if(e.target===e.currentTarget)onClose()}}
-    >
+      onClick={e=>{if(e.target===e.currentTarget)onClose()}}>
       <div style={{width:"100%",maxWidth:430,background:"#1565C0",borderRadius:"20px 20px 14px 14px",borderBottom:"6px solid #0a3f7f",overflow:"hidden",animation:shake?"shake 0.4s ease":"slideUp 0.25s cubic-bezier(0.34,1.4,0.64,1)",boxShadow:"0 -4px 40px rgba(0,0,0,0.5)"}}>
         <div style={{background:"#1976D2",padding:"8px 16px 6px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",gap:6}}>{[0,1,2,3,4,5].map(i=><div key={i} style={{width:10,height:10,borderRadius:"50%",background:"rgba(255,255,255,0.3)",border:"1.5px solid rgba(255,255,255,0.15)"}}/>)}</div>
@@ -417,19 +406,15 @@ function AddModal({ defaultDay, onClose, onSave }) {
             <Tog on={isPaid} toggle={()=>setIsPaid(!isPaid)}/>
             <span style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:11,fontWeight:900,color:"rgba(255,255,255,0.85)",textTransform:"uppercase"}}><DollarSign size={10} style={{display:"inline"}}/> Paid</span>
           </div>
-          {isPaid && <div style={{marginBottom:11}}><div style={lbl}><DollarSign size={10}/> Cost ($)</div><input type="number" style={inp} placeholder="0.00" value={cost} onChange={e=>setCost(e.target.value)} min="0" step="0.01"/></div>}
+          {isPaid&&<div style={{marginBottom:11}}><div style={lbl}><DollarSign size={10}/> Cost ($)</div><input type="number" style={inp} placeholder="0.00" value={cost} onChange={e=>setCost(e.target.value)} min="0" step="0.01"/></div>}
           <button onClick={()=>setExpanded(!expanded)} style={{background:"none",border:"none",color:"rgba(255,255,255,0.6)",fontSize:11,fontWeight:800,fontFamily:"'Arial Black',Arial,sans-serif",cursor:"pointer",padding:"0 0 12px",textTransform:"uppercase"}}>
             {expanded?"▲ Less":"▼ Website, Map & Tags"}
           </button>
-          {expanded && (
+          {expanded&&(
             <div style={{marginBottom:11,display:"flex",flexDirection:"column",gap:10}}>
               <div><div style={lbl}><Globe size={10}/> Website</div><input style={inp} placeholder="https://..." value={website} onChange={e=>setWebsite(e.target.value)}/></div>
               <div><div style={lbl}><MapPin size={10}/> Map Link</div><input style={inp} placeholder="https://maps.google.com/..." value={mapLink} onChange={e=>setMapLink(e.target.value)}/></div>
               <div><div style={lbl}><Tag size={10}/> Tags</div><input style={inp} placeholder="outdoor, sports, kids" value={tags} onChange={e=>setTags(e.target.value)}/></div>
-              <label style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}>
-                <Tog on={isRepeatable} toggle={()=>setIsRep(!isRepeatable)}/>
-                <span style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:11,fontWeight:900,color:"rgba(255,255,255,0.85)",textTransform:"uppercase"}}><RotateCcw size={10} style={{display:"inline"}}/> Repeat weekly</span>
-              </label>
             </div>
           )}
         </div>
@@ -445,20 +430,18 @@ function AddModal({ defaultDay, onClose, onSave }) {
   );
 }
 
-// ─── ARCHIVE DRAWER ───────────────────────────────────────────────────────────
-function ArchiveDrawer({ library, onClose, onAddToDay, onToggleRepeat, onDeleteEntry }) {
-  const [search,setSearch]       = useState("");
-  const [dayPickFor,setDayPick]  = useState(null);
-  const [repeatFor,setRepeatFor] = useState(null);
+// ─── ARCHIVE / LIBRARY DRAWER ─────────────────────────────────────────────────
+function ArchiveDrawer({ library, onClose, onAddToDay, onDeleteEntry }) {
+  const [search,setSearch]   = useState("");
+  const [dayPickFor,setDayPick] = useState(null);
 
   const sorted   = sortedLib(library);
   const filtered = search.trim() ? sorted.filter(e=>e.title.toLowerCase().includes(search.toLowerCase())) : sorted;
 
-  const CHIP_COL = ["#FFD000","#1565C0","#D32F2F","#2e7d32","#7B1FA2"];
-  const CHIP_SH  = ["#b89200","#0a3f7f","#7f1a1a","#1a4a1d","#4a0072"];
-  const CHIP_TX  = ["#3a2600","#fff",   "#fff",   "#fff",   "#fff"   ];
-
-  const tier = u => u>=10?{l:"⭐ Legend",c:"#FFD000"} : u>=5?{l:"🔥 Regular",c:"#ff7043"} : u>=2?{l:"📌 Familiar",c:"#7B1FA2"} : {l:"🆕 New",c:"rgba(255,255,255,0.4)"};
+  const COLS = ["#FFD000","#1565C0","#D32F2F","#2e7d32","#7B1FA2","#E65100","#00695C"];
+  const SHAD = ["#b89200","#0a3f7f","#7f1a1a","#1a4a1d","#4a0072","#8c3300","#003d33"];
+  const TX   = ["#3a2600","#fff",   "#fff",   "#fff",   "#fff",   "#fff",   "#fff"  ];
+  const tier = u => u>=10?{l:"⭐ Legend",c:"#FFD000"}:u>=5?{l:"🔥 Regular",c:"#ff7043"}:u>=2?{l:"📌 Familiar",c:"#a78bfa"}:{l:"🆕 New",c:"rgba(255,255,255,0.4)"};
 
   return (
     <div onClick={e=>{if(e.target===e.currentTarget)onClose()}}
@@ -470,82 +453,76 @@ function ArchiveDrawer({ library, onClose, onAddToDay, onToggleRepeat, onDeleteE
         <div style={{padding:"12px 16px 8px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div>
             <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:18,fontWeight:900,color:"#fff",display:"flex",alignItems:"center",gap:8}}><Archive size={18} style={{color:"#FFD000"}}/> Activity Library</div>
-            <div style={{fontFamily:"Arial,sans-serif",fontSize:11,color:"rgba(255,255,255,0.45)",marginTop:2}}>{library.length} saved · sorted by most used</div>
+            <div style={{fontFamily:"Arial,sans-serif",fontSize:11,color:"rgba(255,255,255,0.45)",marginTop:2}}>{library.length} activities · tap to add to a day</div>
           </div>
           <button onClick={onClose} style={{background:"rgba(255,255,255,0.12)",border:"2px solid rgba(255,255,255,0.15)",borderRadius:8,padding:"5px 8px",cursor:"pointer",color:"#fff",display:"flex"}}><X size={15}/></button>
         </div>
         <div style={{padding:"0 16px 10px"}}>
           <div style={{position:"relative"}}>
             <Search size={13} style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",color:"rgba(255,255,255,0.4)"}}/>
-            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search library…" style={{width:"100%",background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,padding:"8px 10px 8px 30px",color:"#fff",fontFamily:"Arial,sans-serif",fontSize:13,outline:"none",boxSizing:"border-box"}}/>
-            {search && <button onClick={()=>setSearch("")} style={{position:"absolute",right:8,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:"rgba(255,255,255,0.4)",cursor:"pointer",display:"flex"}}><X size={12}/></button>}
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search activities…"
+              style={{width:"100%",background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,padding:"8px 10px 8px 30px",color:"#fff",fontFamily:"Arial,sans-serif",fontSize:13,outline:"none",boxSizing:"border-box"}}/>
+            {search&&<button onClick={()=>setSearch("")} style={{position:"absolute",right:8,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:"rgba(255,255,255,0.4)",cursor:"pointer",display:"flex"}}><X size={12}/></button>}
           </div>
         </div>
         <div style={{overflowY:"auto",flex:1,padding:"0 14px 20px",display:"flex",flexDirection:"column",gap:7}}>
-          {filtered.length===0 && <div style={{textAlign:"center",padding:"30px 0",fontFamily:"'Arial Black',Arial,sans-serif",fontSize:13,color:"rgba(255,255,255,0.3)",textTransform:"uppercase"}}>{search?"No matches":"Add activities to build your library!"}</div>}
+          {filtered.length===0&&<div style={{textAlign:"center",padding:"30px 0",fontFamily:"'Arial Black',Arial,sans-serif",fontSize:13,color:"rgba(255,255,255,0.3)",textTransform:"uppercase"}}>{search?"No matches":"Library is empty!"}</div>}
           {filtered.map((entry,idx)=>{
-            const ci  = idx % CHIP_COL.length;
-            const t   = tier(entry.useCount);
-            const ip  = dayPickFor?.id===entry.id;
-            const irp = repeatFor?.id===entry.id;
+            const ci = idx % COLS.length;
+            const t  = tier(entry.useCount);
+            const ip = dayPickFor?.id===entry.id;
             return (
               <div key={entry.id}>
-                <div style={{background:`${CHIP_COL[ci]}18`,border:`1.5px solid ${CHIP_COL[ci]}44`,borderRadius:11,overflow:"hidden"}}>
-                  <div style={{background:`${CHIP_COL[ci]}28`,padding:"5px 12px",display:"flex",gap:5,alignItems:"center",borderBottom:`1px solid ${CHIP_COL[ci]}28`}}>
-                    {[0,1,2,3,4,5,6,7].map(i=><div key={i} style={{width:7,height:7,borderRadius:"50%",background:`${CHIP_COL[ci]}66`,border:`1px solid ${CHIP_COL[ci]}33`,flexShrink:0}}/>)}
+                <div style={{background:`${COLS[ci]}18`,border:`1.5px solid ${COLS[ci]}44`,borderRadius:11,overflow:"hidden"}}>
+                  {/* Stud row */}
+                  <div style={{background:`${COLS[ci]}28`,padding:"5px 12px",display:"flex",gap:5,alignItems:"center",borderBottom:`1px solid ${COLS[ci]}28`}}>
+                    {[0,1,2,3,4,5,6,7].map(i=><div key={i} style={{width:7,height:7,borderRadius:"50%",background:`${COLS[ci]}66`,border:`1px solid ${COLS[ci]}33`,flexShrink:0}}/>)}
                     <div style={{marginLeft:"auto",fontFamily:"Arial,sans-serif",fontSize:9,fontWeight:700,color:t.c}}>{t.l}</div>
                   </div>
                   <div style={{padding:"9px 12px 10px",display:"flex",alignItems:"center",gap:10}}>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:14,fontWeight:900,color:"#fff",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{entry.title}</div>
-                      <div style={{display:"flex",gap:6,marginTop:4,flexWrap:"wrap",alignItems:"center"}}>
+                      <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:15,fontWeight:900,color:"#fff",display:"flex",alignItems:"center",gap:7}}>
+                        {entry.emoji&&<span>{entry.emoji}</span>}
+                        <span style={{whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{entry.title}</span>
+                      </div>
+                      <div style={{display:"flex",gap:6,marginTop:3,flexWrap:"wrap",alignItems:"center"}}>
                         <span style={{fontFamily:"Arial,sans-serif",fontSize:10,color:"rgba(255,255,255,0.45)"}}>Used {entry.useCount}×</span>
-                        {entry.time && <span style={{fontFamily:"Arial,sans-serif",fontSize:10,color:"rgba(255,255,255,0.5)",display:"flex",alignItems:"center",gap:2}}><Clock size={9}/>{fmtTime(entry.time)}</span>}
-                        {entry.isPaid && entry.cost>0 && <span style={{fontFamily:"Arial,sans-serif",fontSize:10,color:"#FFD000",display:"flex",alignItems:"center",gap:2}}><DollarSign size={9}/>${Number(entry.cost).toFixed(2)}</span>}
-                        {entry.repeatDay && <span style={{fontFamily:"Arial,sans-serif",fontSize:10,color:"#4caf50",display:"flex",alignItems:"center",gap:2}}><Repeat size={9}/>{entry.repeatDay}</span>}
+                        {entry.time&&<span style={{fontFamily:"Arial,sans-serif",fontSize:10,color:"rgba(255,255,255,0.55)",display:"flex",alignItems:"center",gap:2}}><Clock size={9}/>{fmtTime(entry.time)}</span>}
+                        {entry.isPaid&&entry.cost>0&&<span style={{fontFamily:"Arial,sans-serif",fontSize:10,color:"#FFD000",display:"flex",alignItems:"center",gap:2}}><DollarSign size={9}/>${Number(entry.cost).toFixed(2)}</span>}
                       </div>
                     </div>
                     <div style={{display:"flex",gap:5,flexShrink:0}}>
-                      <button onClick={()=>setRepeatFor(irp?null:entry)} title="Set repeat" style={{width:32,height:32,borderRadius:7,border:"none",cursor:"pointer",background:entry.repeatDay?"#2e7d32":"rgba(255,255,255,0.12)",borderBottom:`3px solid ${entry.repeatDay?"#1a4a1d":"rgba(0,0,0,0.3)"}`,display:"flex",alignItems:"center",justifyContent:"center",transition:"background 0.2s"}}
-                        onMouseDown={e=>{e.currentTarget.style.transform="scale(0.92) translateY(2px)"}} onMouseUp={e=>{e.currentTarget.style.transform=""}} onMouseLeave={e=>{e.currentTarget.style.transform=""}}>
-                        <Repeat size={13} color={entry.repeatDay?"#fff":"rgba(255,255,255,0.5)"}/>
-                      </button>
-                      <button onClick={()=>setDayPick(ip?null:entry)} style={{height:32,borderRadius:7,border:"none",cursor:"pointer",background:ip?"#FFD000":CHIP_COL[ci],borderBottom:`3px solid ${ip?"#b89200":CHIP_SH[ci]}`,color:ip?"#3a2600":CHIP_TX[ci],padding:"0 10px",display:"flex",alignItems:"center",gap:5,fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:10,textTransform:"uppercase"}}
-                        onMouseDown={e=>{e.currentTarget.style.transform="scale(0.94) translateY(2px)"}} onMouseUp={e=>{e.currentTarget.style.transform=""}} onMouseLeave={e=>{e.currentTarget.style.transform=""}}>
+                      <button onClick={()=>setDayPick(ip?null:entry)}
+                        style={{height:34,borderRadius:8,border:"none",cursor:"pointer",background:ip?"#FFD000":COLS[ci],borderBottom:`3px solid ${ip?"#b89200":SHAD[ci]}`,color:ip?"#3a2600":TX[ci],padding:"0 12px",display:"flex",alignItems:"center",gap:5,fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:11,textTransform:"uppercase",transition:"background 0.15s"}}
+                        onMouseDown={e=>{e.currentTarget.style.transform="scale(0.94) translateY(2px)"}}
+                        onMouseUp={e=>{e.currentTarget.style.transform=""}}
+                        onMouseLeave={e=>{e.currentTarget.style.transform=""}}>
                         {ip?<>▼ Pick day</>:<><Plus size={12}/> Add</>}
                       </button>
-                      <button onClick={()=>onDeleteEntry(entry.id)} style={{width:32,height:32,borderRadius:7,border:"none",cursor:"pointer",background:"rgba(211,47,47,0.2)",borderBottom:"3px solid rgba(127,26,26,0.5)",display:"flex",alignItems:"center",justifyContent:"center"}}
-                        onMouseDown={e=>{e.currentTarget.style.transform="scale(0.92) translateY(2px)"}} onMouseUp={e=>{e.currentTarget.style.transform=""}} onMouseLeave={e=>{e.currentTarget.style.transform=""}}>
+                      <button onClick={()=>onDeleteEntry(entry.id)}
+                        style={{width:34,height:34,borderRadius:8,border:"none",cursor:"pointer",background:"rgba(211,47,47,0.2)",borderBottom:"3px solid rgba(127,26,26,0.5)",display:"flex",alignItems:"center",justifyContent:"center"}}
+                        onMouseDown={e=>{e.currentTarget.style.transform="scale(0.92) translateY(2px)"}}
+                        onMouseUp={e=>{e.currentTarget.style.transform=""}}
+                        onMouseLeave={e=>{e.currentTarget.style.transform=""}}>
                         <X size={12} color="rgba(255,100,100,0.8)"/>
                       </button>
                     </div>
                   </div>
-                  {ip && (
+                  {/* Day picker inline */}
+                  {ip&&(
                     <div style={{background:"rgba(0,0,0,0.3)",borderTop:"1px solid rgba(255,255,255,0.07)",padding:"10px 12px 12px"}}>
-                      <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:9,fontWeight:900,color:"rgba(255,255,255,0.5)",letterSpacing:"1px",textTransform:"uppercase",marginBottom:8}}>Add "{entry.title}" to:</div>
+                      <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:9,fontWeight:900,color:"rgba(255,255,255,0.5)",letterSpacing:"1px",textTransform:"uppercase",marginBottom:8}}>Add "{entry.title}" to which day?</div>
                       <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
                         {DAYS.map(day=>(
-                          <button key={day} onClick={()=>{onAddToDay(entry,day);setDayPick(null);}} style={{background:CHIP_COL[ci],borderBottom:`3px solid ${CHIP_SH[ci]}`,border:"none",borderRadius:7,padding:"6px 10px",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:10,color:CHIP_TX[ci],cursor:"pointer",textTransform:"uppercase"}}
-                            onMouseDown={e=>{e.currentTarget.style.transform="scale(0.94) translateY(2px)"}} onMouseUp={e=>{e.currentTarget.style.transform=""}} onMouseLeave={e=>{e.currentTarget.style.transform=""}}>
+                          <button key={day} onClick={()=>{onAddToDay(entry,day);setDayPick(null);}}
+                            style={{background:COLS[ci],borderBottom:`3px solid ${SHAD[ci]}`,border:"none",borderRadius:7,padding:"7px 10px",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:11,color:TX[ci],cursor:"pointer",textTransform:"uppercase"}}
+                            onMouseDown={e=>{e.currentTarget.style.transform="scale(0.94) translateY(2px)"}}
+                            onMouseUp={e=>{e.currentTarget.style.transform=""}}
+                            onMouseLeave={e=>{e.currentTarget.style.transform=""}}>
                             {day.slice(0,3)}
                           </button>
                         ))}
                       </div>
-                    </div>
-                  )}
-                  {irp && (
-                    <div style={{background:"rgba(0,0,0,0.3)",borderTop:"1px solid rgba(255,255,255,0.07)",padding:"10px 12px 12px"}}>
-                      <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:9,fontWeight:900,color:"rgba(255,255,255,0.5)",letterSpacing:"1px",textTransform:"uppercase",marginBottom:8}}>Repeat every:</div>
-                      <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-                        {DAYS.map(day=>(
-                          <button key={day} onClick={()=>{onToggleRepeat(entry.id,entry.repeatDay===day?null:day);setRepeatFor(null);}} style={{background:entry.repeatDay===day?"#2e7d32":"rgba(255,255,255,0.12)",borderBottom:`3px solid ${entry.repeatDay===day?"#1a4a1d":"rgba(0,0,0,0.3)"}`,border:"none",borderRadius:7,padding:"6px 10px",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:10,color:"#fff",cursor:"pointer",textTransform:"uppercase",transition:"background 0.15s"}}
-                            onMouseDown={e=>{e.currentTarget.style.transform="scale(0.94) translateY(2px)"}} onMouseUp={e=>{e.currentTarget.style.transform=""}} onMouseLeave={e=>{e.currentTarget.style.transform=""}}>
-                            {day.slice(0,3)}
-                          </button>
-                        ))}
-                        {entry.repeatDay && <button onClick={()=>{onToggleRepeat(entry.id,null);setRepeatFor(null);}} style={{background:"rgba(211,47,47,0.3)",borderBottom:"3px solid rgba(127,26,26,0.5)",border:"none",borderRadius:7,padding:"6px 10px",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:10,color:"#fff",cursor:"pointer",textTransform:"uppercase"}}>Clear</button>}
-                      </div>
-                      {entry.repeatDay && <div style={{fontFamily:"Arial,sans-serif",fontSize:10,color:"rgba(76,175,80,0.8)",marginTop:6}}>✓ Auto-fills every {entry.repeatDay} across all 4 weeks</div>}
                     </div>
                   )}
                 </div>
@@ -558,13 +535,13 @@ function ArchiveDrawer({ library, onClose, onAddToDay, onToggleRepeat, onDeleteE
   );
 }
 
-// ─── MAIN WEEKLY GRID ─────────────────────────────────────────────────────────
+// ─── MAIN APP ─────────────────────────────────────────────────────────────────
 function App() {
   const [state,setState]         = useState(()=>loadSchedule()||buildInitialState());
   const [library,setLibrary]     = useState(()=>loadLibrary());
   const [modal,setModal]         = useState(null);
   const [archiveOpen,setArchive] = useState(false);
-  const [detailAct,setDetailAct] = useState(null); // {activity, dayName}
+  const [detailAct,setDetailAct] = useState(null);
   const [snapAnim,setSnapAnim]   = useState(false);
 
   useEffect(()=>{ try{localStorage.setItem(SCHEDULE_KEY,JSON.stringify(state));}catch(e){} },[state]);
@@ -573,13 +550,10 @@ function App() {
   const activeWk  = state.weeks[state.activeWeek];
   const weekKeys  = Object.keys(state.weeks);
   const activeIdx = weekKeys.indexOf(state.activeWeek);
+  const totalLib  = library.length;
+  const doneThisWk  = Object.values(activeWk.days).flatMap(d=>d.activities||[]).filter(a=>a.isComplete).length;
+  const totalThisWk = Object.values(activeWk.days).flatMap(d=>d.activities||[]).length;
 
-  const totalLib   = library.length;
-  const totalSched = weekKeys.reduce((s,wk)=>s+Object.values(state.weeks[wk].days).reduce((ss,d)=>ss+(d.activities?.length||0),0),0);
-  const doneThisWk = Object.values(activeWk.days).flatMap(d=>d.activities||[]).filter(a=>a.isComplete).length;
-  const totalThisWk= Object.values(activeWk.days).flatMap(d=>d.activities||[]).length;
-
-  // Add activity
   const handleAdd = useCallback((activity)=>{
     const {day,...rest} = activity;
     setState(prev=>{
@@ -593,9 +567,10 @@ function App() {
     snapSound(); setSnapAnim(true); setTimeout(()=>setSnapAnim(false),600); setModal(null);
   },[]);
 
-  // Add library entry to day
   const handleLibAdd = useCallback((entry,day)=>{
-    const act={id:generateId(),title:entry.title,time:entry.time,isPaid:entry.isPaid,cost:entry.cost,website:entry.website,mapLink:entry.mapLink,tags:entry.tags,notes:entry.notes||"",isComplete:false,isRepeatable:!!entry.repeatDay};
+    const act={id:generateId(),title:entry.title,time:entry.time,isPaid:entry.isPaid,
+      cost:entry.cost,website:entry.website,mapLink:entry.mapLink,tags:entry.tags,
+      notes:"",isComplete:false,emoji:entry.emoji||""};
     setState(prev=>{
       const wk={...prev.weeks[prev.activeWeek]};
       const dd={...wk.days[day]};
@@ -607,31 +582,6 @@ function App() {
     snapSound(); setSnapAnim(true); setTimeout(()=>setSnapAnim(false),600);
   },[]);
 
-  // Toggle repeat across all weeks
-  const handleRepeat = useCallback((entryId,newDay)=>{
-    setLibrary(prev=>prev.map(e=>e.id===entryId?{...e,repeatDay:newDay}:e));
-    if (!newDay) return;
-    setLibrary(prev=>{
-      const entry=prev.find(e=>e.id===entryId); if(!entry) return prev;
-      const act={title:entry.title,time:entry.time,isPaid:entry.isPaid,cost:entry.cost,website:entry.website,mapLink:entry.mapLink,tags:entry.tags,notes:"",isComplete:false,isRepeatable:true,libraryId:entryId};
-      setState(sp=>{
-        const nw={...sp.weeks};
-        Object.keys(nw).forEach(wk=>{
-          const w={...nw[wk]};
-          const dd={...w.days[newDay]};
-          if(!(dd.activities||[]).some(a=>a.libraryId===entryId)){
-            dd.activities=[...(dd.activities||[]),{...act,id:generateId()}];
-          }
-          w.days={...w.days,[newDay]:dd}; nw[wk]=w;
-        });
-        return {...sp,weeks:nw};
-      });
-      return prev;
-    });
-    snapSound();
-  },[]);
-
-  // Toggle complete
   const handleToggle = useCallback((dayName,actId)=>{
     setState(prev=>{
       const wk={...prev.weeks[prev.activeWeek]};
@@ -644,7 +594,6 @@ function App() {
     });
   },[]);
 
-  // Save edits to activity
   const handleSaveActivity = useCallback((dayName,updated)=>{
     setState(prev=>{
       const wk={...prev.weeks[prev.activeWeek]};
@@ -656,7 +605,6 @@ function App() {
     setLibrary(prev=>upsertLibrary(prev,updated));
   },[]);
 
-  // Delete activity
   const handleDeleteActivity = useCallback((dayName,actId)=>{
     setState(prev=>{
       const wk={...prev.weeks[prev.activeWeek]};
@@ -667,30 +615,21 @@ function App() {
     });
   },[]);
 
+  // Fixed meals get a special golden colour, regular activities use CHIP_COLORS
+  function chipStyle(act, slotIndex) {
+    if (act.title==="Breakfast") return {bg:"#b8860b",shadow:"#7a5800"};
+    if (act.title==="Lunch")     return {bg:"#2e7d32",shadow:"#1a4a1d"};
+    return CHIP_COLORS[slotIndex % CHIP_COLORS.length];
+  }
+
   return (
     <div style={{minHeight:"100vh",display:"flex",justifyContent:"center",background:"transparent"}}>
-      <style>{`
-        @keyframes snapPop{0%{transform:scale(1)}30%{transform:scale(1.03)}60%{transform:scale(0.98)}100%{transform:scale(1)}}
-        @keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
-        @keyframes drawerUp{from{transform:translateY(80px);opacity:0}to{transform:translateY(0);opacity:1}}
-        @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
-        *{box-sizing:border-box}
-        input[type=time]::-webkit-calendar-picker-indicator{filter:invert(0.5)}
-        select option{background:#1565C0;color:#fff}
-        ::-webkit-scrollbar{width:0}
-      `}</style>
-
-      {/* ── TURF BACKGROUND */}
-      <div style={{position:"fixed",inset:0,zIndex:0,
-        backgroundImage:`
-          repeating-linear-gradient(0deg,rgba(0,0,0,0.07) 0px,rgba(0,0,0,0.07) 10px,transparent 10px,transparent 20px),
-          repeating-linear-gradient(90deg,rgba(255,255,255,0.022) 0px,rgba(255,255,255,0.022) 1px,transparent 1px,transparent 40px),
-          linear-gradient(180deg,#2e7320 0%,#337a24 12%,#2a6a1c 25%,#337a24 37%,#2a6a1c 50%,#337a24 62%,#2a6a1c 75%,#337a24 87%,#2a6a1c 100%)
-        `}}/>
+      {/* Turf bg */}
+      <div style={{position:"fixed",inset:0,zIndex:0,backgroundImage:`repeating-linear-gradient(0deg,rgba(0,0,0,0.07) 0px,rgba(0,0,0,0.07) 10px,transparent 10px,transparent 20px),repeating-linear-gradient(90deg,rgba(255,255,255,0.022) 0px,rgba(255,255,255,0.022) 1px,transparent 1px,transparent 40px),linear-gradient(180deg,#2e7320 0%,#337a24 12%,#2a6a1c 25%,#337a24 37%,#2a6a1c 50%,#337a24 62%,#2a6a1c 75%,#337a24 87%,#2a6a1c 100%)`}}/>
 
       <div style={{position:"relative",zIndex:1,width:"100%",maxWidth:430,display:"flex",flexDirection:"column",minHeight:"100vh",animation:snapAnim?"snapPop 0.5s ease":"none"}}>
 
-        {/* ── HEADER */}
+        {/* HEADER */}
         <div style={{padding:"12px 14px 8px",display:"flex",alignItems:"center",justifyContent:"space-between",background:"rgba(0,0,0,0.30)",borderBottom:"2px solid rgba(255,255,255,0.1)"}}>
           <div style={{display:"flex",alignItems:"center",gap:8}}>
             <div style={{width:30,height:30,background:"#FFD000",borderRadius:7,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,borderBottom:"3px solid #b89200"}}>📋</div>
@@ -702,7 +641,7 @@ function App() {
           </div>
         </div>
 
-        {/* ── WEEK NAV */}
+        {/* WEEK NAV */}
         <div style={{padding:"7px 14px 0",display:"flex",alignItems:"center",justifyContent:"space-between",background:"rgba(0,0,0,0.18)"}}>
           <LegoBtn color="gray" small disabled={activeIdx===0} onClick={()=>setState(p=>({...p,activeWeek:weekKeys[activeIdx-1]}))}>◀</LegoBtn>
           <div style={{textAlign:"center"}}>
@@ -712,125 +651,65 @@ function App() {
           <LegoBtn color="gray" small disabled={activeIdx===weekKeys.length-1} onClick={()=>setState(p=>({...p,activeWeek:weekKeys[activeIdx+1]}))}>▶</LegoBtn>
         </div>
 
-        {/* ── WEEKLY GRID  ─────────────────────────────────────────────────────
-            Reference layout: day header row, then scrollable activity rows     */}
+        {/* GRID */}
         <div style={{flex:1,padding:"8px 10px 10px",display:"flex",flexDirection:"column",gap:0,overflowY:"auto"}}>
 
           {/* Day header row */}
           <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:5,marginBottom:6}}>
             {DAYS.map((day,i)=>{
-              const w    = MOCK_WEATHER[i];
-              const dd   = activeWk.days[day];
-              const acts = dd?.activities||[];
-              const done = acts.filter(a=>a.isComplete).length;
+              const w=MOCK_WEATHER[i],dd=activeWk.days[day],acts=dd?.activities||[];
+              const done=acts.filter(a=>a.isComplete).length;
               return (
-                <div key={day} style={{
-                  background:"rgba(255,255,255,0.14)",
-                  backdropFilter:"blur(10px)",WebkitBackdropFilter:"blur(10px)",
-                  borderRadius:12,border:"1px solid rgba(255,255,255,0.22)",
-                  padding:"8px 4px 7px",
-                  display:"flex",flexDirection:"column",alignItems:"center",gap:3,
-                  position:"relative",
-                }}>
-                  {/* shine strip */}
+                <div key={day} style={{background:"rgba(255,255,255,0.14)",backdropFilter:"blur(10px)",WebkitBackdropFilter:"blur(10px)",borderRadius:12,border:"1px solid rgba(255,255,255,0.22)",padding:"8px 4px 7px",display:"flex",flexDirection:"column",alignItems:"center",gap:3,position:"relative"}}>
                   <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:"rgba(255,255,255,0.2)",borderRadius:"12px 12px 0 0"}}/>
-
-                  {/* Day abbreviation */}
                   <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:10,fontWeight:900,color:"rgba(255,255,255,0.7)",letterSpacing:"0.5px"}}>{DAY_SHORT[i]}</div>
-
-                  {/* Date number — BIG */}
-                  <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:22,fontWeight:900,color:"#fff",textShadow:"0 2px 0 rgba(0,0,0,0.35)",lineHeight:1}}>
-                    {getDayNumber(dd?.date)}
-                  </div>
-
-                  {/* Divider */}
+                  <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:22,fontWeight:900,color:"#fff",textShadow:"0 2px 0 rgba(0,0,0,0.35)",lineHeight:1}}>{getDayNumber(dd?.date)}</div>
                   <div style={{width:"80%",height:1,background:"rgba(255,255,255,0.18)"}}/>
-
-                  {/* Weather */}
                   <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:1}}>
                     <span style={{fontSize:18,lineHeight:1}}>{w.emoji}</span>
                     <span style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:9,fontWeight:800,color:"rgba(255,255,255,0.85)"}}>{w.temp}°</span>
                   </div>
-
-                  {/* Activity count badge */}
-                  {acts.length>0&&(
-                    <div style={{background:done===acts.length?"#4caf50":"rgba(255,255,255,0.15)",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:700,color:"#fff",fontFamily:"Arial,sans-serif"}}>
-                      {done}/{acts.length}
-                    </div>
-                  )}
-
-                  {/* Studs */}
-                  <div style={{display:"flex",gap:4,paddingTop:2}}>
-                    {[0,1].map(j=><div key={j} style={{width:6,height:6,borderRadius:"50%",background:"rgba(255,255,255,0.22)",border:"1px solid rgba(255,255,255,0.1)"}}/>)}
-                  </div>
+                  {acts.length>0&&<div style={{background:done===acts.length?"#4caf50":"rgba(255,255,255,0.15)",borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:700,color:"#fff",fontFamily:"Arial,sans-serif"}}>{done}/{acts.length}</div>}
+                  <div style={{display:"flex",gap:4,paddingTop:2}}>{[0,1].map(j=><div key={j} style={{width:6,height:6,borderRadius:"50%",background:"rgba(255,255,255,0.22)",border:"1px solid rgba(255,255,255,0.1)"}}/>)}</div>
                 </div>
               );
             })}
           </div>
 
-          {/* ── ACTIVITY ROWS — one row per slot, 5 columns */}
-          {(() => {
-            // Find max activities across all days this week
-            const maxActs = Math.max(3, ...DAYS.map(d=>(activeWk.days[d]?.activities||[]).length));
-            const rows = [];
-            for (let slot = 0; slot < maxActs; slot++) {
+          {/* Activity rows */}
+          {(()=>{
+            const maxActs = Math.max(3,...DAYS.map(d=>(activeWk.days[d]?.activities||[]).length));
+            const rows=[];
+            for(let slot=0;slot<maxActs;slot++){
               rows.push(
                 <div key={slot} style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:5,marginBottom:5}}>
-                  {DAYS.map((day,di)=>{
-                    const acts = activeWk.days[day]?.activities||[];
-                    const act  = acts[slot];
-                    const c    = CHIP_COLORS[slot % CHIP_COLORS.length];
-                    if (act) {
+                  {DAYS.map((day)=>{
+                    const acts=activeWk.days[day]?.activities||[];
+                    const act=acts[slot];
+                    const c=chipStyle(act, slot);
+                    if(act){
                       return (
                         <button key={day} onClick={()=>setDetailAct({activity:{...act,_date:activeWk.days[day]?.date},dayName:day})}
-                          style={{
-                            background:act.isComplete?"rgba(46,160,67,0.3)":c.bg,
-                            borderBottom:`3px solid ${act.isComplete?"#1a4a1d":c.shadow}`,
-                            border:"none",borderRadius:8,
-                            padding:"6px 4px",cursor:"pointer",
-                            fontFamily:"'Arial Black',Arial,sans-serif",
-                            fontWeight:900,fontSize:9,
-                            color:"#fff",textAlign:"center",
-                            lineHeight:1.3,
-                            textDecoration:act.isComplete?"line-through":"none",
-                            opacity:act.isComplete?0.65:1,
-                            textShadow:"0 1px 2px rgba(0,0,0,0.4)",
-                            transition:"transform 0.1s, opacity 0.15s",
-                            display:"flex",flexDirection:"column",alignItems:"center",gap:2,
-                            minHeight:38,
-                            boxShadow:"0 1px 0 rgba(255,255,255,0.15) inset",
-                          }}
+                          style={{background:act.isComplete?"rgba(46,160,67,0.35)":c.bg,borderBottom:`3px solid ${act.isComplete?"#1a4a1d":c.shadow}`,border:"none",borderRadius:8,padding:"5px 3px",cursor:"pointer",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:9,color:"#fff",textAlign:"center",lineHeight:1.3,textDecoration:act.isComplete?"line-through":"none",opacity:act.isComplete?0.65:1,textShadow:"0 1px 2px rgba(0,0,0,0.4)",transition:"transform 0.1s",display:"flex",flexDirection:"column",alignItems:"center",gap:1,minHeight:36,boxShadow:"0 1px 0 rgba(255,255,255,0.15) inset"}}
                           onMouseDown={e=>{e.currentTarget.style.transform="scale(0.95) translateY(2px)"}}
                           onMouseUp={e=>{e.currentTarget.style.transform=""}}
-                          onMouseLeave={e=>{e.currentTarget.style.transform=""}}
-                        >
-                          {act.isComplete&&<CheckCircle size={8} style={{flexShrink:0}}/>}
-                          <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:"100%",display:"block",padding:"0 2px"}}>
-                            {act.title}
-                          </span>
-                          {act.time&&<span style={{fontSize:8,opacity:0.8,fontWeight:700,fontFamily:"Arial,sans-serif"}}>{fmtTime(act.time)}</span>}
-                          {/* Detail indicator dots */}
-                          {(act.notes||act.mapLink||act.website)&&(
-                            <div style={{display:"flex",gap:2,marginTop:1}}>
-                              {act.notes&&<div style={{width:4,height:4,borderRadius:"50%",background:"rgba(255,255,255,0.6)"}}/>}
-                              {act.mapLink&&<div style={{width:4,height:4,borderRadius:"50%",background:"rgba(255,255,255,0.6)"}}/>}
-                              {act.website&&<div style={{width:4,height:4,borderRadius:"50%",background:"rgba(255,255,255,0.6)"}}/>}
-                            </div>
-                          )}
+                          onMouseLeave={e=>{e.currentTarget.style.transform=""}}>
+                          {act.emoji&&<span style={{fontSize:11,lineHeight:1}}>{act.emoji}</span>}
+                          {act.isComplete&&<CheckCircle size={7} style={{flexShrink:0}}/>}
+                          <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:"100%",display:"block",padding:"0 2px",fontSize:9}}>{act.title}</span>
+                          {act.time&&<span style={{fontSize:7,opacity:0.85,fontWeight:700,fontFamily:"Arial,sans-serif"}}>{fmtTime(act.time)}</span>}
+                          {(act.notes||act.mapLink||act.website)&&<div style={{display:"flex",gap:2}}>{act.notes&&<div style={{width:3,height:3,borderRadius:"50%",background:"rgba(255,255,255,0.7)"}}/>}{act.mapLink&&<div style={{width:3,height:3,borderRadius:"50%",background:"rgba(255,255,255,0.7)"}}/>}{act.website&&<div style={{width:3,height:3,borderRadius:"50%",background:"rgba(255,255,255,0.7)"}}/>}</div>}
                         </button>
                       );
                     }
-                    // Empty slot — only show for first empty slot per day
-                    if (slot === acts.length) {
+                    if(slot===acts.length){
                       return (
                         <button key={day} onClick={()=>setModal({defaultDay:day})}
-                          style={{background:"rgba(255,255,255,0.06)",border:"1.5px dashed rgba(255,255,255,0.2)",borderRadius:8,padding:"6px 4px",cursor:"pointer",minHeight:38,display:"flex",alignItems:"center",justifyContent:"center",color:"rgba(255,255,255,0.3)",fontSize:16,transition:"background 0.15s,border-color 0.15s"}}
+                          style={{background:"rgba(255,255,255,0.06)",border:"1.5px dashed rgba(255,255,255,0.2)",borderRadius:8,padding:"6px 4px",cursor:"pointer",minHeight:36,display:"flex",alignItems:"center",justifyContent:"center",color:"rgba(255,255,255,0.3)",fontSize:16,transition:"background 0.15s,border-color 0.15s"}}
                           onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,208,0,0.12)";e.currentTarget.style.borderColor="rgba(255,208,0,0.4)"}}
-                          onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.06)";e.currentTarget.style.borderColor="rgba(255,255,255,0.2)"}}
-                        >+</button>
+                          onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.06)";e.currentTarget.style.borderColor="rgba(255,255,255,0.2)"}}>+</button>
                       );
                     }
-                    // Already has activity or past the first empty — blank cell
                     return <div key={day}/>;
                   })}
                 </div>
@@ -840,13 +719,13 @@ function App() {
           })()}
         </div>
 
-        {/* ── BOTTOM NAV */}
+        {/* BOTTOM NAV */}
         <div style={{background:"rgba(0,0,0,0.42)",backdropFilter:"blur(10px)",borderTop:"2px solid rgba(255,255,255,0.1)",padding:"10px 10px 16px",display:"flex",gap:7}}>
           <button style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:3,padding:"9px 4px 7px",borderRadius:10,border:"none",cursor:"pointer",background:"#1565C0",color:"#fff",borderBottom:"4px solid #0a3f7f",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:9,textTransform:"uppercase",letterSpacing:"0.3px"}}>
             <Calendar size={17}/>This Week
           </button>
           <button onClick={()=>setModal({defaultDay:DAYS[0]})}
-            style={{flex:1.4,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:3,padding:"9px 4px 7px",borderRadius:10,border:"none",cursor:"pointer",background:"#FFD000",color:"#3a2600",borderBottom:"4px solid #b89200",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:9,textTransform:"uppercase",letterSpacing:"0.3px",boxShadow:"0 1px 0 rgba(255,255,255,0.3) inset"}}>
+            style={{flex:1.4,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:3,padding:"9px 4px 7px",borderRadius:10,border:"none",cursor:"pointer",background:"#FFD000",color:"#3a2600",borderBottom:"4px solid #b89200",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:9,textTransform:"uppercase",letterSpacing:"0.3px"}}>
             <Plus size={19} strokeWidth={3}/>Add Activity
           </button>
           <button onClick={()=>setArchive(true)}
@@ -857,36 +736,15 @@ function App() {
         </div>
       </div>
 
-      {/* ── ACTIVITY DETAIL SHEET */}
-      {detailAct && (
-        <ActivityDetailSheet
-          activity={detailAct.activity}
-          dayName={detailAct.dayName}
-          onClose={()=>setDetailAct(null)}
-          onSave={(updated)=>{ handleSaveActivity(detailAct.dayName,updated); setDetailAct(null); }}
-          onToggleComplete={(id)=>{ handleToggle(detailAct.dayName,id); setDetailAct({...detailAct,activity:{...detailAct.activity,isComplete:!detailAct.activity.isComplete}}); }}
-          onDelete={(id)=>{ handleDeleteActivity(detailAct.dayName,id); setDetailAct(null); }}
-        />
-      )}
-
-      {/* ── ARCHIVE DRAWER */}
-      {archiveOpen && (
-        <ArchiveDrawer
-          library={library}
-          onClose={()=>setArchive(false)}
-          onAddToDay={(entry,day)=>{ handleLibAdd(entry,day); setArchive(false); }}
-          onToggleRepeat={handleRepeat}
-          onDeleteEntry={(id)=>setLibrary(prev=>prev.filter(e=>e.id!==id))}
-        />
-      )}
-
-      {/* ── ADD MODAL */}
-      {modal && <AddModal defaultDay={modal.defaultDay} onClose={()=>setModal(null)} onSave={handleAdd}/>}
+      {detailAct&&<ActivityDetailSheet activity={detailAct.activity} dayName={detailAct.dayName} onClose={()=>setDetailAct(null)} onSave={(updated)=>{handleSaveActivity(detailAct.dayName,updated);setDetailAct(null);}} onToggleComplete={(id)=>{handleToggle(detailAct.dayName,id);setDetailAct({...detailAct,activity:{...detailAct.activity,isComplete:!detailAct.activity.isComplete}});}} onDelete={(id)=>{handleDeleteActivity(detailAct.dayName,id);setDetailAct(null);}}/>}
+      {archiveOpen&&<ArchiveDrawer library={library} onClose={()=>setArchive(false)} onAddToDay={(entry,day)=>{handleLibAdd(entry,day);setArchive(false);}} onDeleteEntry={(id)=>setLibrary(prev=>prev.filter(e=>e.id!==id))}/>}
+      {modal&&<AddModal defaultDay={modal.defaultDay} onClose={()=>setModal(null)} onSave={handleAdd}/>}
     </div>
   );
 }
-  const root = ReactDOM.createRoot(document.getElementById('root'));
-  root.render(<App />);
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
   </script>
 </body>
 </html>
