@@ -24,7 +24,7 @@
   <script type="text/babel">
 const { useState, useEffect, useCallback, useRef } = React;
 
-// ─── INLINE SVG ICONS ─────────────────────────────────────────────────────────
+// --- INLINE SVG ICONS ---------------------------------------------------------
 const ip = (size=16) => ({ width:size, height:size, viewBox:"0 0 24 24", fill:"none", stroke:"currentColor", strokeWidth:2, strokeLinecap:"round", strokeLinejoin:"round", style:{display:"inline-block",flexShrink:0,verticalAlign:"middle"} });
 const Plus        = ({size=16,strokeWidth=2,style:s={}}) => <svg {...ip(size)} strokeWidth={strokeWidth} style={{...ip(size).style,...s}}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
 const Calendar    = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
@@ -44,7 +44,7 @@ const Search      = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(s
 const Edit3       = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>;
 const FileText    = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>;
 
-// ─── CONSTANTS ────────────────────────────────────────────────────────────────
+// --- CONSTANTS ----------------------------------------------------------------
 const DAYS      = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
 const DAY_SHORT = ["MON","TUE","WED","THU","FRI"];
 
@@ -67,7 +67,7 @@ const CHIP_COLORS = [
 const SCHEDULE_KEY = "thePlaybook_v1";
 const LIBRARY_KEY  = "thePlaybook_library_v1";
 
-// ─── PRESET LIBRARY (shown when library is empty) ─────────────────────────────
+// --- PRESET LIBRARY (shown when library is empty) -----------------------------
 const PRESET_LIBRARY = [
   { title:"Breakfast",    time:"08:00", isPaid:false, cost:0, tags:["daily","meal"],    emoji:"🍳", useCount:10 },
   { title:"Lunch",        time:"12:00", isPaid:false, cost:0, tags:["daily","meal"],    emoji:"🥪", useCount:10 },
@@ -84,14 +84,14 @@ const PRESET_LIBRARY = [
   { title:"Gym",          time:"",      isPaid:true,  cost:0, tags:["fitness"],         emoji:"💪", useCount:2  },
   { title:"Reading",      time:"",      isPaid:false, cost:0, tags:["learning"],        emoji:"📖", useCount:2  },
   { title:"Game Night",   time:"19:00", isPaid:false, cost:0, tags:["family","fun"],    emoji:"🎮", useCount:2  },
-  { title:"Cooking",      time:"17:00", isPaid:false, cost:0, tags:["life skills"],     emoji:"👨‍🍳",useCount:2  },
+  { title:"Cooking",      time:"17:00", isPaid:false, cost:0, tags:["life skills"],     emoji:"🍳",useCount:2  },
   { title:"Nature Walk",  time:"",      isPaid:false, cost:0, tags:["outdoor"],         emoji:"🥾", useCount:1  },
   { title:"Dentist",      time:"",      isPaid:true,  cost:0, tags:["health"],          emoji:"🦷", useCount:1  },
   { title:"Doctor",       time:"",      isPaid:true,  cost:0, tags:["health"],          emoji:"🏥", useCount:1  },
-  { title:"Haircut",      time:"",      isPaid:true,  cost:20,tags:["grooming"],        emoji:"✂️", useCount:1  },
+  { title:"Haircut",      time:"",      isPaid:true,  cost:20,tags:["grooming"],        emoji:"💈", useCount:1  },
 ];
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
+// --- HELPERS ------------------------------------------------------------------
 function generateId() {
   return `act_${Date.now()}_${Math.random().toString(36).slice(2,7)}`;
 }
@@ -205,14 +205,14 @@ function fmtTime(s) {
 function getWeekRange(wd) {
   const dates = Object.values(wd.days).map(d=>d.date).filter(Boolean);
   if (!dates.length) return "";
-  return `${fmtDate(dates[0])} – ${fmtDate(dates[dates.length-1])}`;
+  return `${fmtDate(dates[0])} - ${fmtDate(dates[dates.length-1])}`;
 }
 function getDayNumber(dateStr) {
-  if (!dateStr) return "–";
+  if (!dateStr) return "-";
   return new Date(dateStr+"T12:00:00").getDate();
 }
 
-// ─── LEGO BUTTON ──────────────────────────────────────────────────────────────
+// --- LEGO BUTTON --------------------------------------------------------------
 function LegoBtn({ color="blue", onClick, children, small=false, disabled=false, style:ex={} }) {
   const T = {
     blue:  {bg:"#1565C0",sh:"#0a3f7f",tx:"#fff"},
@@ -237,7 +237,7 @@ function LegoBtn({ color="blue", onClick, children, small=false, disabled=false,
   );
 }
 
-// ─── ACTIVITY DETAIL SHEET ────────────────────────────────────────────────────
+// --- ACTIVITY DETAIL SHEET ----------------------------------------------------
 function ActivityDetailSheet({ activity, dayName, onClose, onSave, onToggleComplete, onDelete }) {
   const [editing,setEditing] = useState(false);
   const [title,setTitle]     = useState(activity.title);
@@ -342,7 +342,7 @@ function ActivityDetailSheet({ activity, dayName, onClose, onSave, onToggleCompl
   );
 }
 
-// ─── ADD ACTIVITY MODAL ───────────────────────────────────────────────────────
+// --- ADD ACTIVITY MODAL -------------------------------------------------------
 function AddModal({ defaultDay, onClose, onSave }) {
   const [title,setTitle]       = useState("");
   const [day,setDay]           = useState(defaultDay||DAYS[0]);
@@ -430,7 +430,7 @@ function AddModal({ defaultDay, onClose, onSave }) {
   );
 }
 
-// ─── ARCHIVE / LIBRARY DRAWER ─────────────────────────────────────────────────
+// --- ARCHIVE / LIBRARY DRAWER -------------------------------------------------
 function ArchiveDrawer({ library, onClose, onAddToDay, onDeleteEntry }) {
   const [search,setSearch]   = useState("");
   const [dayPickFor,setDayPick] = useState(null);
@@ -535,7 +535,7 @@ function ArchiveDrawer({ library, onClose, onAddToDay, onDeleteEntry }) {
   );
 }
 
-// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+// --- MAIN APP -----------------------------------------------------------------
 function App() {
   const [state,setState]         = useState(()=>loadSchedule()||buildInitialState());
   const [library,setLibrary]     = useState(()=>loadLibrary());
