@@ -613,7 +613,7 @@ function App(){
     saveMode(data);
     // Rebuild library from scratch with new mode presets merged in
     const existing=library.map(e=>e.title.toLowerCase());
-    const newPresets=(MODES[newMode]?.extraPresets||[]).filter(p=>!existing.includes(p.title.toLowerCase()));
+    const newPresets=((MODES[newMode]&&MODES[newMode].extraPresets)||[]).filter(p=>!existing.includes(p.title.toLowerCase()));
     if(newPresets.length>0){
       const newEntries=newPresets.map(p=>({id:generateId(),title:p.title,time:p.time,isPaid:p.isPaid,cost:p.cost,website:"",mapLink:"",tags:p.tags,useCount:p.useCount,lastUsed:Date.now()-p.useCount*1000,repeatDay:null}));
       setLibrary(prev=>[...newEntries,...prev]);
