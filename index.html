@@ -9,10 +9,10 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; overflow: hidden; background: #2a6a1c; }
-    select option { background: #1a1a2e; color: #fff; }
-    ::-webkit-scrollbar { width: 0; height: 0; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;overflow:hidden;background:#2a6a1c}
+    select option{background:#1a1a2e;color:#fff}
+    ::-webkit-scrollbar{width:0;height:0}
     @keyframes snapPop{0%{transform:scale(1)}30%{transform:scale(1.03)}60%{transform:scale(0.98)}100%{transform:scale(1)}}
     @keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
     @keyframes drawerUp{from{transform:translateY(80px);opacity:0}to{transform:translateY(0);opacity:1}}
@@ -20,822 +20,864 @@
   </style>
 </head>
 <body>
-  <div id="root" style="height:100%"></div>
-  <script type="text/babel">
-const { useState, useEffect, useCallback, useRef } = React;
-
-// --- ICONS --------------------------------------------------------------------
-const ip = (z=16) => ({width:z,height:z,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round",style:{display:"inline-block",flexShrink:0,verticalAlign:"middle"}});
-const Plus     = ({size=16,sw=2,style:s={}}) => <svg {...ip(size)} strokeWidth={sw} style={{...ip(size).style,...s}}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
-const Archive  = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>;
-const Settings = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
-const X        = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
-const Dollar   = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>;
-const Globe    = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>;
-const MapPin   = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>;
-const Tag      = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>;
-const Clock    = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
-const Undo     = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.85"/></svg>;
-const Check    = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
-const Srch     = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
-const Pencil   = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>;
-const FileTxt  = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>;
-const Cal      = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
-const Repeat   = ({size=16,style:s={}}) => <svg {...ip(size)} style={{...ip(size).style,...s}}><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>;
-
-// --- WEATHER ------------------------------------------------------------------
-const SunIco  = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFD000" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="5" fill="#FFD000" fillOpacity="0.3"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>;
-const CldSun  = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" strokeLinecap="round"><circle cx="14" cy="8" r="3" fill="#FFD000" fillOpacity="0.4" stroke="#FFD000" strokeWidth="2"/><path d="M7 19a4 4 0 0 1 0-8 5 5 0 0 1 9.9-1A4 4 0 0 1 18 19z" fill="rgba(255,255,255,0.25)" stroke="rgba(255,255,255,0.8)" strokeWidth="1.8"/></svg>;
-const RainIco = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" strokeLinecap="round"><path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.7)" strokeWidth="1.8"/><line x1="8" y1="19" x2="8" y2="21" stroke="#7ab3e0" strokeWidth="2"/><line x1="12" y1="19" x2="12" y2="21" stroke="#7ab3e0" strokeWidth="2"/><line x1="16" y1="19" x2="16" y2="21" stroke="#7ab3e0" strokeWidth="2"/></svg>;
-const CldIco  = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" strokeLinecap="round"><path d="M17 18a5 5 0 0 0 0-10h-1A7 7 0 1 0 6 18z" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8"/></svg>;
-function WIco({t}){if(t==="sunny")return <SunIco/>;if(t==="rainy")return <RainIco/>;if(t==="partlycloudy")return <CldSun/>;return <CldIco/>;}
-
-// --- CONSTANTS ----------------------------------------------------------------
-const DAYS    = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
-const DSHORT  = ["MON","TUE","WED","THU","FRI"];
-const WX      = [{t:"sunny",temp:72},{t:"cloudy",temp:65},{t:"rainy",temp:58},{t:"sunny",temp:70},{t:"partlycloudy",temp:68}];
-const HOUR_PX = 56;
-const SNAP    = 15;
-
-// Mode-specific timeline hours. Midnight = hour 24 for display purposes.
-const MODE_HOURS = {
-  parent:     {start:6,  end:22},
-  homeschool: {start:7,  end:16},
-  mancave:    {start:10, end:24},
-  girlsnight: {start:8,  end:24},
-};
-
-const SCH_KEY = "thePlaybook_v1";
-const LIB_KEY = "thePlaybook_library_v1";
-const MOD_KEY = "thePlaybook_mode_v1";
-
-// --- COLOURS ------------------------------------------------------------------
-const TAGC = {
-  sports:{bg:"#b8860b",sh:"#7a5800"},fitness:{bg:"#b8860b",sh:"#7a5800"},
-  outdoor:{bg:"#1b5e20",sh:"#0a3010"},nature:{bg:"#1b5e20",sh:"#0a3010"},
-  family:{bg:"#0d47a1",sh:"#061d45"},fun:{bg:"#0d47a1",sh:"#061d45"},
-  social:{bg:"#006064",sh:"#002f31"},
-  creative:{bg:"#4a148c",sh:"#1e0040"},music:{bg:"#4a148c",sh:"#1e0040"},
-  health:{bg:"#b71c1c",sh:"#5a0000"},grooming:{bg:"#b71c1c",sh:"#5a0000"},
-  meal:{bg:"#E65100",sh:"#8c3300"},learning:{bg:"#E65100",sh:"#8c3300"},
-  "life skills":{bg:"#E65100",sh:"#8c3300"},
-  subject:{bg:"#1565C0",sh:"#0a3f7f"},
-  default:{bg:"#1565C0",sh:"#0a3f7f"},
-};
-function tclr(tags){if(!tags||!tags.length)return TAGC.default;for(const t of tags){const k=t.toLowerCase();if(TAGC[k])return TAGC[k];}return TAGC.default;}
-const DONE = {bg:"#c62828",sh:"#7f0000"};
-
-// --- MODES --------------------------------------------------------------------
-// Parent mode has 3 planner options: Mommy, Daddy, Homeschool
-// Homeschool is a sub-mode of parent with its own hours + presets
-const MODES = {
-  parent:{
-    label:"Parent Mode", icon:"[PB]", desc:"Plan the whole family's week",
+<div id="root" style="height:100%"></div>
+<script type="text/babel">
+var useState=React.useState, useEffect=React.useEffect, useCallback=React.useCallback, useRef=React.useRef;
+ 
+// ---- ICONS ------------------------------------------------------------------
+function svgp(z){return {width:z,height:z,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round",style:{display:"inline-block",flexShrink:0,verticalAlign:"middle"}};}
+function IPlus(p){return <svg {...svgp(p.z||16)}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;}
+function IArchive(p){return <svg {...svgp(p.z||16)}><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>;}
+function ISettings(p){return <svg {...svgp(p.z||16)}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;}
+function IX(p){return <svg {...svgp(p.z||16)}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;}
+function IDollar(p){return <svg {...svgp(p.z||16)}><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>;}
+function IGlobe(p){return <svg {...svgp(p.z||16)}><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>;}
+function IMap(p){return <svg {...svgp(p.z||16)}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>;}
+function ITag(p){return <svg {...svgp(p.z||16)}><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>;}
+function IClock(p){return <svg {...svgp(p.z||16)}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;}
+function IUndo(p){return <svg {...svgp(p.z||16)}><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.85"/></svg>;}
+function ICheck(p){return <svg {...svgp(p.z||16)}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;}
+function ISearch(p){return <svg {...svgp(p.z||16)}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;}
+function IPencil(p){return <svg {...svgp(p.z||16)}><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>;}
+function IFile(p){return <svg {...svgp(p.z||16)}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>;}
+function ICal(p){return <svg {...svgp(p.z||16)}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;}
+function IRepeat(p){return <svg {...svgp(p.z||16)}><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>;}
+ 
+// ---- WEATHER ----------------------------------------------------------------
+function WSun(){return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFD000" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="5" fill="#FFD000" fillOpacity="0.3"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>;}
+function WPartly(){return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" strokeLinecap="round"><circle cx="14" cy="8" r="3" fill="#FFD000" fillOpacity="0.4" stroke="#FFD000" strokeWidth="2"/><path d="M7 19a4 4 0 0 1 0-8 5 5 0 0 1 9.9-1A4 4 0 0 1 18 19z" fill="rgba(255,255,255,0.25)" stroke="rgba(255,255,255,0.8)" strokeWidth="1.8"/></svg>;}
+function WRain(){return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" strokeLinecap="round"><path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.7)" strokeWidth="1.8"/><line x1="8" y1="19" x2="8" y2="21" stroke="#7ab3e0" strokeWidth="2"/><line x1="12" y1="19" x2="12" y2="21" stroke="#7ab3e0" strokeWidth="2"/><line x1="16" y1="19" x2="16" y2="21" stroke="#7ab3e0" strokeWidth="2"/></svg>;}
+function WCloud(){return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" strokeLinecap="round"><path d="M17 18a5 5 0 0 0 0-10h-1A7 7 0 1 0 6 18z" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8"/></svg>;}
+function WIcon(p){
+  if(p.t==="sunny") return <WSun/>;
+  if(p.t==="rainy") return <WRain/>;
+  if(p.t==="partlycloudy") return <WPartly/>;
+  return <WCloud/>;
+}
+ 
+// ---- CONSTANTS --------------------------------------------------------------
+var DAYS    = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
+var DSHORT  = ["MON","TUE","WED","THU","FRI"];
+var WX      = [{t:"sunny",temp:72},{t:"cloudy",temp:65},{t:"rainy",temp:58},{t:"sunny",temp:70},{t:"partlycloudy",temp:68}];
+var HOUR_PX = 56;
+var SNAP    = 15;
+var MODE_HOURS = {parent:{s:6,e:22},homeschool:{s:7,e:16},mancave:{s:10,e:24},girlsnight:{s:8,e:24}};
+var SCH_KEY = "thePlaybook_v1";
+var LIB_KEY = "thePlaybook_library_v1";
+var MOD_KEY = "thePlaybook_mode_v1";
+var DONE_C  = {bg:"#c62828",sh:"#7f0000"};
+var BFST_C  = {bg:"#FFD000",sh:"#b89200"};
+var LNCH_C  = {bg:"#6D4C41",sh:"#3e2723"};
+var PALETTE = [
+  {bg:"#1565C0",sh:"#0a3f7f"},{bg:"#6a1b9a",sh:"#38006b"},
+  {bg:"#00695C",sh:"#003d33"},{bg:"#c62828",sh:"#7f0000"},
+  {bg:"#e65100",sh:"#8c3300"},{bg:"#283593",sh:"#001064"},
+  {bg:"#558b2f",sh:"#255d00"},{bg:"#006064",sh:"#002f31"},
+  {bg:"#4a148c",sh:"#1e0040"},{bg:"#b8860b",sh:"#7a5800"}
+];
+ 
+// ---- MODES ------------------------------------------------------------------
+var MODES = {
+  parent:{label:"Parent Mode",icon:"[PB]",desc:"Plan the whole family's week",
     plannerOptions:["Mommy","Daddy","Homeschool"],
     extraPresets:[
-      {title:"School Pickup",  time:"15:00",isPaid:false,cost:0,tags:["family"],    useCount:8},
-      {title:"Homework Time",  time:"16:00",isPaid:false,cost:0,tags:["learning"],  useCount:6},
-      {title:"Bedtime Routine",time:"20:00",isPaid:false,cost:0,tags:["family"],    useCount:6},
-      {title:"Bath Time",      time:"19:30",isPaid:false,cost:0,tags:["family"],    useCount:5},
-      {title:"Snack Time",     time:"15:30",isPaid:false,cost:0,tags:["meal"],      useCount:5},
-      {title:"Story Time",     time:"20:30",isPaid:false,cost:0,tags:["family","creative"],useCount:4},
-      {title:"Drop Off",       time:"08:30",isPaid:false,cost:0,tags:["family"],    useCount:4},
-      {title:"Playgroup",      time:"10:00",isPaid:false,cost:0,tags:["social"],    useCount:3},
-      {title:"Pediatrician",   time:"",     isPaid:true, cost:0,tags:["health"],    useCount:2},
-      {title:"Parent-Teacher", time:"",     isPaid:false,cost:0,tags:["learning"],  useCount:2},
+      {title:"School Pickup",time:"15:00",isPaid:false,cost:0,tags:["family"],useCount:8},
+      {title:"Homework Time",time:"16:00",isPaid:false,cost:0,tags:["learning"],useCount:6},
+      {title:"Bedtime Routine",time:"20:00",isPaid:false,cost:0,tags:["family"],useCount:6},
+      {title:"Bath Time",time:"19:30",isPaid:false,cost:0,tags:["family"],useCount:5},
+      {title:"Snack Time",time:"15:30",isPaid:false,cost:0,tags:["meal"],useCount:5},
+      {title:"Story Time",time:"20:30",isPaid:false,cost:0,tags:["family"],useCount:4},
+      {title:"Drop Off",time:"08:30",isPaid:false,cost:0,tags:["family"],useCount:4},
+      {title:"Playgroup",time:"10:00",isPaid:false,cost:0,tags:["social"],useCount:3},
+      {title:"Pediatrician",time:"",isPaid:false,cost:0,tags:["health"],useCount:2},
+      {title:"Parent-Teacher",time:"",isPaid:false,cost:0,tags:["learning"],useCount:2}
     ],
     homeschoolPresets:[
-      {title:"Math",         time:"09:00",isPaid:false,cost:0, tags:["subject","learning"],useCount:10},
-      {title:"Reading",      time:"09:45",isPaid:false,cost:0, tags:["subject","learning"],useCount:10},
-      {title:"Science",      time:"10:30",isPaid:false,cost:0, tags:["subject","learning"],useCount:8},
-      {title:"History",      time:"11:00",isPaid:false,cost:0, tags:["subject","learning"],useCount:7},
-      {title:"Recess",       time:"10:15",isPaid:false,cost:0, tags:["outdoor","fun"],    useCount:9},
-      {title:"Art",          time:"13:30",isPaid:false,cost:0, tags:["creative","subject"],useCount:6},
-      {title:"PE",           time:"14:00",isPaid:false,cost:0, tags:["fitness","subject"], useCount:6},
-      {title:"Writing",      time:"10:00",isPaid:false,cost:0, tags:["subject","learning"],useCount:5},
-      {title:"Music Lesson", time:"14:30",isPaid:true, cost:0,tags:["music","subject"],  useCount:4},
-      {title:"Field Trip",   time:"09:00",isPaid:false,cost:0, tags:["outdoor","learning"],useCount:3},
-      {title:"Library Visit",time:"13:00",isPaid:false,cost:0, tags:["learning"],          useCount:3},
-      {title:"Nature Study", time:"11:30",isPaid:false,cost:0, tags:["nature","outdoor"],  useCount:3},
-    ],
+      {title:"Math",time:"09:00",isPaid:false,cost:0,tags:["learning"],useCount:10},
+      {title:"Reading",time:"09:45",isPaid:false,cost:0,tags:["learning"],useCount:10},
+      {title:"Science",time:"10:30",isPaid:false,cost:0,tags:["learning"],useCount:8},
+      {title:"History",time:"11:00",isPaid:false,cost:0,tags:["learning"],useCount:7},
+      {title:"Recess",time:"10:15",isPaid:false,cost:0,tags:["outdoor"],useCount:9},
+      {title:"Art",time:"13:30",isPaid:false,cost:0,tags:["creative"],useCount:6},
+      {title:"PE",time:"14:00",isPaid:false,cost:0,tags:["fitness"],useCount:6},
+      {title:"Writing",time:"10:00",isPaid:false,cost:0,tags:["learning"],useCount:5},
+      {title:"Music Lesson",time:"14:30",isPaid:false,cost:0,tags:["music"],useCount:4},
+      {title:"Field Trip",time:"09:00",isPaid:false,cost:0,tags:["outdoor"],useCount:3}
+    ]
   },
-  mancave:{
-    label:"Man Cave", icon:"[FB]", desc:"Never miss the big game",
+  mancave:{label:"Man Cave",icon:"[FB]",desc:"Never miss the big game",
     plannerOptions:[],
     extraPresets:[
-      {title:"NFL Game",    time:"13:00",isPaid:false,cost:0,  tags:["sports","fun"],    useCount:8},
-      {title:"NBA Game",    time:"19:30",isPaid:false,cost:0,  tags:["sports","fun"],    useCount:6},
-      {title:"UFC Night",   time:"20:00",isPaid:false,cost:0,  tags:["sports","fun"],    useCount:5},
-      {title:"Golf Round",  time:"08:00",isPaid:true, cost:0, tags:["sports","outdoor"],useCount:5},
-      {title:"Poker Night", time:"19:00",isPaid:false,cost:0,  tags:["social","fun"],    useCount:4},
-      {title:"Gym Session", time:"11:00",isPaid:true, cost:0,  tags:["fitness"],         useCount:4},
-      {title:"BBQ",         time:"17:00",isPaid:false,cost:0,  tags:["social","meal"],   useCount:4},
-      {title:"Fishing Trip",time:"06:00",isPaid:false,cost:0,  tags:["outdoor","sports"],useCount:3},
-      {title:"Watch Party", time:"18:00",isPaid:false,cost:0,  tags:["social","fun"],    useCount:3},
-      {title:"Hockey Game", time:"19:00",isPaid:false,cost:0,  tags:["sports","fun"],    useCount:2},
-      {title:"Fantasy Draft",time:"19:00",isPaid:false,cost:0, tags:["sports","fun"],    useCount:2},
-    ],
+      {title:"NFL Game",time:"13:00",isPaid:false,cost:0,tags:["sports"],useCount:8},
+      {title:"NBA Game",time:"19:30",isPaid:false,cost:0,tags:["sports"],useCount:6},
+      {title:"UFC Night",time:"20:00",isPaid:false,cost:0,tags:["sports"],useCount:5},
+      {title:"Golf Round",time:"08:00",isPaid:false,cost:0,tags:["sports"],useCount:5},
+      {title:"Poker Night",time:"19:00",isPaid:false,cost:0,tags:["social"],useCount:4},
+      {title:"Gym Session",time:"11:00",isPaid:false,cost:0,tags:["fitness"],useCount:4},
+      {title:"BBQ",time:"17:00",isPaid:false,cost:0,tags:["social"],useCount:4},
+      {title:"Fishing Trip",time:"06:00",isPaid:false,cost:0,tags:["outdoor"],useCount:3},
+      {title:"Watch Party",time:"18:00",isPaid:false,cost:0,tags:["social"],useCount:3},
+      {title:"Hockey Game",time:"19:00",isPaid:false,cost:0,tags:["sports"],useCount:2}
+    ]
   },
-  girlsnight:{
-    label:"Girls Night", icon:"[NL]", desc:"Your time, your schedule",
+  girlsnight:{label:"Girls Night",icon:"[NL]",desc:"Your time, your schedule",
     plannerOptions:[],
     extraPresets:[
-      {title:"Girls Night Out",  time:"19:00",isPaid:false,cost:0,  tags:["social","fun"],    useCount:8},
-      {title:"The Bachelorette", time:"20:00",isPaid:false,cost:0,  tags:["fun","social"],    useCount:6},
-      {title:"Yoga Class",       time:"09:00",isPaid:true, cost:0, tags:["fitness","health"],useCount:6},
-      {title:"Brunch",           time:"11:00",isPaid:false,cost:0,  tags:["social","meal"],   useCount:5},
-      {title:"Wine Night",       time:"19:00",isPaid:false,cost:0,  tags:["social","fun"],    useCount:5},
-      {title:"Pilates",          time:"09:00",isPaid:true, cost:0, tags:["fitness"],         useCount:4},
-      {title:"Book Club",        time:"18:00",isPaid:false,cost:0,  tags:["social","learning"],useCount:4},
-      {title:"Spa Day",          time:"11:00",isPaid:true, cost:0, tags:["health","grooming"],useCount:4},
-      {title:"Nail Appointment", time:"14:00",isPaid:true, cost:0, tags:["grooming"],        useCount:3},
-      {title:"Shopping",         time:"12:00",isPaid:false,cost:0,  tags:["social","fun"],    useCount:3},
-      {title:"Meditation",       time:"09:00",isPaid:false,cost:0,  tags:["health","fitness"],useCount:2},
-    ],
-  },
+      {title:"Girls Night Out",time:"19:00",isPaid:false,cost:0,tags:["social"],useCount:8},
+      {title:"The Bachelorette",time:"20:00",isPaid:false,cost:0,tags:["fun"],useCount:6},
+      {title:"Yoga Class",time:"09:00",isPaid:false,cost:0,tags:["fitness"],useCount:6},
+      {title:"Brunch",time:"11:00",isPaid:false,cost:0,tags:["social"],useCount:5},
+      {title:"Wine Night",time:"19:00",isPaid:false,cost:0,tags:["social"],useCount:5},
+      {title:"Pilates",time:"09:00",isPaid:false,cost:0,tags:["fitness"],useCount:4},
+      {title:"Book Club",time:"18:00",isPaid:false,cost:0,tags:["social"],useCount:4},
+      {title:"Spa Day",time:"11:00",isPaid:false,cost:0,tags:["health"],useCount:4},
+      {title:"Nail Appointment",time:"14:00",isPaid:false,cost:0,tags:["grooming"],useCount:3},
+      {title:"Shopping",time:"12:00",isPaid:false,cost:0,tags:["social"],useCount:3}
+    ]
+  }
 };
-
-const BASE_PRESETS = [
-  {title:"Park",        time:"",      isPaid:false,cost:0, tags:["outdoor"],        useCount:5},
-  {title:"Library",     time:"",      isPaid:false,cost:0, tags:["learning"],       useCount:5},
-  {title:"BJJ",         time:"",      isPaid:true, cost:0,tags:["sports"],         useCount:4},
-  {title:"Soccer",      time:"",      isPaid:false,cost:0, tags:["sports","outdoor"],useCount:4},
-  {title:"Swimming",    time:"",      isPaid:true, cost:0,tags:["sports"],         useCount:3},
-  {title:"Art Class",   time:"",      isPaid:true, cost:0,tags:["creative"],       useCount:3},
-  {title:"Bike Ride",   time:"",      isPaid:false,cost:0, tags:["outdoor","sports"],useCount:3},
-  {title:"Movie Night", time:"18:00", isPaid:false,cost:0, tags:["family","fun"],   useCount:3},
-  {title:"Playdate",    time:"",      isPaid:false,cost:0, tags:["social"],         useCount:2},
-  {title:"Piano",       time:"",      isPaid:true, cost:0,tags:["music"],          useCount:2},
-  {title:"Gym",         time:"",      isPaid:true, cost:0, tags:["fitness"],        useCount:2},
-  {title:"Game Night",  time:"19:00", isPaid:false,cost:0, tags:["family","fun"],   useCount:2},
-  {title:"Cooking",     time:"17:00", isPaid:false,cost:0, tags:["life skills"],    useCount:2},
-  {title:"Nature Walk", time:"",      isPaid:false,cost:0, tags:["outdoor","nature"],useCount:1},
-  {title:"Dentist",     time:"",      isPaid:true, cost:0, tags:["health"],         useCount:1},
-  {title:"Doctor",      time:"",      isPaid:true, cost:0, tags:["health"],         useCount:1},
-  {title:"Haircut",     time:"",      isPaid:true, cost:0,tags:["grooming"],       useCount:1},
+ 
+var BASE_PRESETS = [
+  {title:"Park",time:"",isPaid:false,cost:0,tags:["outdoor"],useCount:5},
+  {title:"Library",time:"",isPaid:false,cost:0,tags:["learning"],useCount:5},
+  {title:"BJJ",time:"",isPaid:false,cost:0,tags:["sports"],useCount:4},
+  {title:"Soccer",time:"",isPaid:false,cost:0,tags:["sports"],useCount:4},
+  {title:"Swimming",time:"",isPaid:false,cost:0,tags:["sports"],useCount:3},
+  {title:"Art Class",time:"",isPaid:false,cost:0,tags:["creative"],useCount:3},
+  {title:"Bike Ride",time:"",isPaid:false,cost:0,tags:["outdoor"],useCount:3},
+  {title:"Movie Night",time:"18:00",isPaid:false,cost:0,tags:["fun"],useCount:3},
+  {title:"Playdate",time:"",isPaid:false,cost:0,tags:["social"],useCount:2},
+  {title:"Piano",time:"",isPaid:false,cost:0,tags:["music"],useCount:2},
+  {title:"Gym",time:"",isPaid:false,cost:0,tags:["fitness"],useCount:2},
+  {title:"Game Night",time:"19:00",isPaid:false,cost:0,tags:["fun"],useCount:2},
+  {title:"Cooking",time:"17:00",isPaid:false,cost:0,tags:["learning"],useCount:2},
+  {title:"Nature Walk",time:"",isPaid:false,cost:0,tags:["outdoor"],useCount:1},
+  {title:"Dentist",time:"",isPaid:false,cost:0,tags:["health"],useCount:1},
+  {title:"Doctor",time:"",isPaid:false,cost:0,tags:["health"],useCount:1},
+  {title:"Haircut",time:"",isPaid:false,cost:0,tags:["grooming"],useCount:1}
 ];
-
-// --- HELPERS ------------------------------------------------------------------
+ 
+// ---- HELPERS ----------------------------------------------------------------
 function genId(){return "a"+Date.now()+"_"+Math.random().toString(36).slice(2,6);}
-function snap2(){try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type="square";o.frequency.setValueAtTime(880,c.currentTime);o.frequency.exponentialRampToValueAtTime(220,c.currentTime+0.08);g.gain.setValueAtTime(0.15,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.12);o.start(c.currentTime);o.stop(c.currentTime+0.12);}catch(e){}}
-function win2(){try{const c=new(window.AudioContext||window.webkitAudioContext)();[523,659,784,1047].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type="square";o.frequency.value=f;const t=c.currentTime+i*0.08;g.gain.setValueAtTime(0.1,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.12);o.start(t);o.stop(t+0.12);});}catch(e){}}
-
-function t2m(s){if(!s)return null;const[h,m]=s.split(":").map(Number);return h*60+m;}
-function m2t(n){return Math.floor(n/60).toString().padStart(2,"0")+":"+((n%60)).toString().padStart(2,"0");}
-function fmt(s){if(!s)return null;const[h,m]=s.split(":").map(Number);return(h%12||12)+":"+(m.toString().padStart(2,"0"))+" "+(h>=12?"PM":"AM");}
+function t2m(s){if(!s)return null;var p=s.split(":");return parseInt(p[0])*60+parseInt(p[1]);}
+function m2t(n){return (Math.floor(n/60)).toString().padStart(2,"0")+":"+(n%60).toString().padStart(2,"0");}
+function fmt(s){if(!s)return null;var p=s.split(":"),h=parseInt(p[0]),m=parseInt(p[1]);return (h%12||12)+":"+(m.toString().padStart(2,"0"))+" "+(h>=12?"PM":"AM");}
 function fmtD(s){if(!s)return"";return new Date(s+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"});}
 function fmtDF(s){if(!s)return"";return new Date(s+"T12:00:00").toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});}
-function wkRange(wd){const d=Object.values(wd.days).map(x=>x.date).filter(Boolean);if(!d.length)return"";return fmtD(d[0])+" - "+fmtD(d[d.length-1]);}
-function dayN(s){if(!s)return"-";return new Date(s+"T12:00:00").getDate();}
-function sortA(a){return[...a].sort((a,b)=>{const am=t2m(a.time),bm=t2m(b.time);if(am===null&&bm===null)return 0;if(am===null)return 1;if(bm===null)return -1;return am-bm;});}
-function t2px(ts,hs){const m=t2m(ts);if(m===null)return null;return((m-hs*60)/60)*HOUR_PX;}
-function px2t(px,hs,he){const total=hs*60+Math.round((px/HOUR_PX)*60/SNAP)*SNAP;const c=Math.max(hs*60,Math.min((he-1)*60+45,total));return m2t(c);}
+function wkRange(wd){var d=Object.values(wd.days).map(function(x){return x.date;}).filter(Boolean);if(!d.length)return"";return fmtD(d[0])+" - "+fmtD(d[d.length-1]);}
+function dayNum(s){if(!s)return"-";return new Date(s+"T12:00:00").getDate();}
+function sortA(a){return a.slice().sort(function(a,b){var am=t2m(a.time),bm=t2m(b.time);if(am===null&&bm===null)return 0;if(am===null)return 1;if(bm===null)return -1;return am-bm;});}
+function t2px(ts,hs){var m=t2m(ts);if(m===null)return null;return((m-hs*60)/60)*HOUR_PX;}
+function px2t(px,hs,he){var total=hs*60+Math.round((px/HOUR_PX)*60/SNAP)*SNAP;var c=Math.max(hs*60,Math.min((he-1)*60+45,total));return m2t(c);}
 function fmtH(h){if(h===0||h===24)return"12am";if(h===12)return"12pm";return h<12?h+"am":(h-12)+"pm";}
-
-// Determine effective hours for a modeData object
-function getHours(modeData){
-  if(!modeData)return MODE_HOURS.parent;
-  if(modeData.mode==="parent"&&modeData.planner==="Homeschool")return MODE_HOURS.homeschool;
-  return MODE_HOURS[modeData.mode]||MODE_HOURS.parent;
-}
-
-
+function getHours(md){if(!md)return MODE_HOURS.parent;if(md.mode==="parent"&&md.planner==="Homeschool")return MODE_HOURS.homeschool;return MODE_HOURS[md.mode]||MODE_HOURS.parent;}
+function chipColor(act,idx){if(act.isComplete)return DONE_C;if(act.title==="Breakfast")return BFST_C;if(act.title==="Lunch")return LNCH_C;return PALETTE[idx%PALETTE.length];}
+ 
+function snapSound(){try{var c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type="square";o.frequency.setValueAtTime(880,c.currentTime);o.frequency.exponentialRampToValueAtTime(220,c.currentTime+0.08);g.gain.setValueAtTime(0.15,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.12);o.start(c.currentTime);o.stop(c.currentTime+0.12);}catch(e){}}
+function winSound(){try{var c=new(window.AudioContext||window.webkitAudioContext)();[523,659,784,1047].forEach(function(f,i){var o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type="square";o.frequency.value=f;var t=c.currentTime+i*0.08;g.gain.setValueAtTime(0.1,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.12);o.start(t);o.stop(t+0.12);});}catch(e){}}
+ 
 function buildState(){
-  const weeks={};const today=new Date();
-  const diff=today.getDay()===0?-6:1-today.getDay();
-  const base=new Date(today);base.setDate(today.getDate()+diff);
-  for(let w=0;w<4;w++){
+  var weeks={},today=new Date(),diff=today.getDay()===0?-6:1-today.getDay(),base=new Date(today);
+  base.setDate(today.getDate()+diff);
+  for(var w=0;w<4;w++){
     weeks["week_"+w]={days:{}};
-    for(let d=0;d<5;d++){
-      const dt=new Date(base);dt.setDate(base.getDate()+w*7+d);
+    for(var d=0;d<5;d++){
+      var dt=new Date(base);dt.setDate(base.getDate()+w*7+d);
       weeks["week_"+w].days[DAYS[d]]={date:dt.toISOString().slice(0,10),activities:[
         {id:genId(),title:"Breakfast",time:"08:00",isPaid:false,cost:0,isComplete:false,notes:"",website:"",mapLink:"",tags:["meal"],isFixed:true},
-        {id:genId(),title:"Lunch",    time:"12:00",isPaid:false,cost:0,isComplete:false,notes:"",website:"",mapLink:"",tags:["meal"],isFixed:true},
+        {id:genId(),title:"Lunch",time:"12:00",isPaid:false,cost:0,isComplete:false,notes:"",website:"",mapLink:"",tags:["meal"],isFixed:true}
       ]};
     }
   }
-  return{weeks,activeWeek:"week_0"};
+  return {weeks:weeks,activeWeek:"week_0"};
 }
-function loadS(){try{const r=localStorage.getItem(SCH_KEY);if(r)return JSON.parse(r);}catch(e){}return null;}
-function buildLib(modeData){
-  const mk=modeData?modeData.mode:"parent";
-  const isHS=modeData&&modeData.planner==="Homeschool";
-  const modeP=(MODES[mk]&&MODES[mk].extraPresets)||[];
-  const hsP=isHS?((MODES.parent&&MODES.parent.homeschoolPresets)||[]):[];
-  return[...hsP,...modeP,...BASE_PRESETS].map(p=>({id:genId(),title:p.title,time:p.time,isPaid:p.isPaid,cost:p.cost,website:"",mapLink:"",tags:p.tags,useCount:p.useCount,lastUsed:Date.now()-p.useCount*1000}));
-}
-function loadL(){try{const r=localStorage.getItem(LIB_KEY);if(r)return JSON.parse(r);}catch(e){}return null;}
+ 
+function loadS(){try{var r=localStorage.getItem(SCH_KEY);if(r)return JSON.parse(r);}catch(e){}return null;}
+function saveS(s){try{localStorage.setItem(SCH_KEY,JSON.stringify(s));}catch(e){}}
+function loadL(){try{var r=localStorage.getItem(LIB_KEY);if(r){var p=JSON.parse(r);if(p&&p.length>0)return p;}}catch(e){}return null;}
 function saveL(l){try{localStorage.setItem(LIB_KEY,JSON.stringify(l));}catch(e){}}
-function loadM(){try{const r=localStorage.getItem(MOD_KEY);if(r)return JSON.parse(r);}catch(e){}return null;}
+function loadM(){try{var r=localStorage.getItem(MOD_KEY);if(r)return JSON.parse(r);}catch(e){}return null;}
 function saveM(m){try{localStorage.setItem(MOD_KEY,JSON.stringify(m));}catch(e){}}
-function upsert(lib,act){
-  const k=act.title.trim().toLowerCase();
-  const ex=lib.find(e=>e.title.trim().toLowerCase()===k);
-  if(ex)return lib.map(e=>e.id===ex.id?{...e,useCount:(e.useCount||1)+1,lastUsed:Date.now(),time:act.time||e.time,isPaid:act.isPaid!=null?act.isPaid:e.isPaid,cost:act.cost!=null?act.cost:e.cost,website:act.website||e.website,mapLink:act.mapLink||e.mapLink,tags:act.tags&&act.tags.length?act.tags:e.tags}:e);
-  return[...lib,{id:genId(),title:act.title.trim(),time:act.time||"",isPaid:act.isPaid||false,cost:act.cost||0,website:act.website||"",mapLink:act.mapLink||"",tags:act.tags||[],useCount:1,lastUsed:Date.now()}];
+ 
+function buildLib(md){
+  var mk=md?md.mode:"parent",isHS=md&&md.planner==="Homeschool";
+  var mp=(MODES[mk]&&MODES[mk].extraPresets)||[];
+  var hp=isHS?((MODES.parent&&MODES.parent.homeschoolPresets)||[]):[];
+  return hp.concat(mp).concat(BASE_PRESETS).map(function(p){
+    return {id:genId(),title:p.title,time:p.time,isPaid:false,cost:0,website:"",mapLink:"",tags:p.tags,useCount:p.useCount,lastUsed:Date.now()-p.useCount*1000};
+  });
 }
-function sortL(l){return[...l].sort((a,b)=>b.useCount!==a.useCount?b.useCount-a.useCount:b.lastUsed-a.lastUsed);}
-
-// --- TIME PICKER --------------------------------------------------------------
-function TmPick({value,onChange}){
-  function parse(v){if(!v)return{h:"",m:"00",ap:"AM"};const[hh,mm]=v.split(":").map(Number);return{h:String(hh%12||12),m:mm.toString().padStart(2,"0"),ap:hh>=12?"PM":"AM"};}
-  const p=parse(value);
-  const[h,setH]=useState(p.h);const[m,setM]=useState(p.m);const[ap,setAp]=useState(p.ap);
-  function emit(nh,nm,na){if(!nh){onChange("");return;}let hr=parseInt(nh);if(na==="PM"&&hr!==12)hr+=12;if(na==="AM"&&hr===12)hr=0;onChange(hr.toString().padStart(2,"0")+":"+nm);}
-  const sel={background:"rgba(255,255,255,0.92)",border:"none",borderBottom:"3px solid rgba(0,0,0,0.15)",borderRadius:8,padding:"9px 4px",fontSize:14,fontWeight:700,fontFamily:"'Arial Black',Arial,sans-serif",color:"#1a1a2e",outline:"none",cursor:"pointer",appearance:"none",textAlign:"center",width:"100%"};
-  return(
+ 
+function upsert(lib,act){
+  var k=act.title.trim().toLowerCase();
+  var ex=lib.filter(function(e){return e.title.trim().toLowerCase()===k;})[0];
+  if(ex){return lib.map(function(e){if(e.id!==ex.id)return e;return Object.assign({},e,{useCount:(e.useCount||1)+1,lastUsed:Date.now(),time:act.time||e.time,isPaid:e.isPaid,cost:e.cost,website:act.website||e.website,mapLink:act.mapLink||e.mapLink,tags:(act.tags&&act.tags.length)?act.tags:e.tags});});}
+  return lib.concat([{id:genId(),title:act.title.trim(),time:act.time||"",isPaid:false,cost:0,website:act.website||"",mapLink:act.mapLink||"",tags:act.tags||[],useCount:1,lastUsed:Date.now()}]);
+}
+function sortL(l){return l.slice().sort(function(a,b){return b.useCount!==a.useCount?b.useCount-a.useCount:b.lastUsed-a.lastUsed;});}
+ 
+var DOTS6_SM=[0,1,2,3,4,5].map(function(i){return <div key={i} style={{width:9,height:9,borderRadius:"50%",background:"rgba(255,255,255,0.3)"}}/>;});
+var DOTS6_MD=[0,1,2,3,4,5].map(function(i){return <div key={i} style={{width:10,height:10,borderRadius:"50%",background:"rgba(255,255,255,0.3)"}}/>;});
+var DOTS8_SM=[0,1,2,3,4,5,6,7].map(function(i){return <div key={i} style={{width:8,height:8,borderRadius:"50%",background:"rgba(255,255,255,0.2)"}}/>;});
+ 
+// ---- LEGO BUTTON ------------------------------------------------------------
+function LBtn(props){
+  var color=props.color||"blue",small=props.small,disabled=props.disabled,ex=props.style||{};
+  var T={blue:{bg:"#1565C0",sh:"#0a3f7f",tx:"#fff"},yellow:{bg:"#FFD000",sh:"#b89200",tx:"#3a2600"},red:{bg:"#D32F2F",sh:"#7f1a1a",tx:"#fff"},gray:{bg:"rgba(255,255,255,0.18)",sh:"rgba(0,0,0,0.35)",tx:"#fff"},green:{bg:"#2e7d32",sh:"#1a4a1d",tx:"#fff"}}[color]||{bg:"#1565C0",sh:"#0a3f7f",tx:"#fff"};
+  var style=Object.assign({background:disabled?"rgba(255,255,255,0.12)":T.bg,color:disabled?"rgba(255,255,255,0.4)":T.tx,borderBottom:"4px solid "+(disabled?"rgba(0,0,0,0.15)":T.sh),borderTop:"none",borderLeft:"none",borderRight:"none",borderRadius:9,padding:small?"5px 10px":"9px 18px",fontWeight:900,fontSize:small?10:13,fontFamily:"'Arial Black',Arial,sans-serif",letterSpacing:"0.3px",cursor:disabled?"not-allowed":"pointer",display:"inline-flex",alignItems:"center",gap:5,transition:"transform 0.08s",boxShadow:"0 1px 0 rgba(255,255,255,0.18) inset",textTransform:"uppercase",userSelect:"none"},ex);
+  return <button disabled={disabled} onClick={props.onClick} style={style} onMouseDown={function(e){if(!disabled)e.currentTarget.style.transform="scale(0.96) translateY(2px)";}} onMouseUp={function(e){e.currentTarget.style.transform="";}} onMouseLeave={function(e){e.currentTarget.style.transform="";}}>{props.children}</button>;
+}
+ 
+// ---- TIME PICKER ------------------------------------------------------------
+function TmPick(props){
+  function parse(v){if(!v)return{h:"",m:"00",ap:"AM"};var p=v.split(":"),hh=parseInt(p[0]),mm=parseInt(p[1]);return{h:String(hh%12||12),m:mm.toString().padStart(2,"0"),ap:hh>=12?"PM":"AM"};}
+  var parsed=parse(props.value);
+  var hState=useState(parsed.h),h=hState[0],setH=hState[1];
+  var mState=useState(parsed.m),m=mState[0],setM=mState[1];
+  var aState=useState(parsed.ap),ap=aState[0],setAp=aState[1];
+  function emit(nh,nm,na){if(!nh){props.onChange("");return;}var hr=parseInt(nh);if(na==="PM"&&hr!==12)hr+=12;if(na==="AM"&&hr===12)hr=0;props.onChange(hr.toString().padStart(2,"0")+":"+nm);}
+  var sel={background:"rgba(255,255,255,0.92)",border:"none",borderBottom:"3px solid rgba(0,0,0,0.15)",borderRadius:8,padding:"9px 4px",fontSize:14,fontWeight:700,fontFamily:"'Arial Black',Arial,sans-serif",color:"#1a1a2e",outline:"none",cursor:"pointer",appearance:"none",textAlign:"center",width:"100%"};
+  return (
     <div style={{display:"flex",gap:4,alignItems:"center"}}>
-      <select value={h} onChange={e=>{setH(e.target.value);emit(e.target.value,m,ap);}} style={{...sel,flex:2}}>
+      <select value={h} onChange={function(e){setH(e.target.value);emit(e.target.value,m,ap);}} style={Object.assign({},sel,{flex:2})}>
         <option value="">--</option>
-        {[1,2,3,4,5,6,7,8,9,10,11,12].map(n=><option key={n} value={String(n)}>{n}</option>)}
+        {[1,2,3,4,5,6,7,8,9,10,11,12].map(function(n){return <option key={n} value={String(n)}>{n}</option>;})}
       </select>
       <span style={{color:"#fff",fontWeight:900,fontSize:16,flexShrink:0}}>:</span>
-      <select value={m} onChange={e=>{setM(e.target.value);emit(h,e.target.value,ap);}} style={{...sel,flex:2}}>
-        {["00","15","30","45"].map(n=><option key={n} value={n}>{n}</option>)}
+      <select value={m} onChange={function(e){setM(e.target.value);emit(h,e.target.value,ap);}} style={Object.assign({},sel,{flex:2})}>
+        {["00","15","30","45"].map(function(n){return <option key={n} value={n}>{n}</option>;})}
       </select>
-      <select value={ap} onChange={e=>{setAp(e.target.value);emit(h,m,e.target.value);}} style={{...sel,flex:2}}>
+      <select value={ap} onChange={function(e){setAp(e.target.value);emit(h,m,e.target.value);}} style={Object.assign({},sel,{flex:2})}>
         <option value="AM">AM</option><option value="PM">PM</option>
       </select>
     </div>
   );
 }
-
-// --- LEGO BTN -----------------------------------------------------------------
-function LBtn({color="blue",onClick,children,small=false,disabled=false,style:ex={}}){
-  const T={blue:{bg:"#1565C0",sh:"#0a3f7f",tx:"#fff"},yellow:{bg:"#FFD000",sh:"#b89200",tx:"#3a2600"},red:{bg:"#D32F2F",sh:"#7f1a1a",tx:"#fff"},gray:{bg:"rgba(255,255,255,0.18)",sh:"rgba(0,0,0,0.35)",tx:"#fff"},green:{bg:"#2e7d32",sh:"#1a4a1d",tx:"#fff"},orange:{bg:"#E65100",sh:"#8c3300",tx:"#fff"}}[color]||{bg:"#1565C0",sh:"#0a3f7f",tx:"#fff"};
-  return <button disabled={disabled} onClick={onClick} style={{background:disabled?"rgba(255,255,255,0.12)":T.bg,color:disabled?"rgba(255,255,255,0.4)":T.tx,borderBottom:"4px solid "+(disabled?"rgba(0,0,0,0.15)":T.sh),borderTop:"none",borderLeft:"none",borderRight:"none",borderRadius:9,padding:small?"5px 10px":"9px 18px",fontWeight:900,fontSize:small?10:13,fontFamily:"'Arial Black',Arial,sans-serif",letterSpacing:"0.3px",cursor:disabled?"not-allowed":"pointer",display:"inline-flex",alignItems:"center",gap:5,transition:"transform 0.08s",boxShadow:"0 1px 0 rgba(255,255,255,0.18) inset",textTransform:"uppercase",userSelect:"none",...ex}} onMouseDown={e=>{if(!disabled)e.currentTarget.style.transform="scale(0.96) translateY(2px)"}} onMouseUp={e=>{e.currentTarget.style.transform=""}} onMouseLeave={e=>{e.currentTarget.style.transform=""}}>{children}</button>;
-}
-
-// --- ONBOARDING ---------------------------------------------------------------
-function Onboard({onSelect}){
-  const[hover,setHover]=useState(null);
-  const[sub,setSub]=useState(null);
-  const[pick,setPick]=useState("Mommy");
-
-  // sub = "parent" means show planner picker (Mommy / Daddy / Homeschool)
+ 
+// ---- ONBOARDING -------------------------------------------------------------
+function Onboard(props){
+  var hoverState=useState(null),hover=hoverState[0],setHover=hoverState[1];
+  var subState=useState(null),sub=subState[0],setSub=subState[1];
+  var pickState=useState("Mommy"),pick=pickState[0],setPick=pickState[1];
   if(sub==="parent"){
-    return(
+    var plannerBtns=["Mommy","Daddy","Homeschool"].map(function(p){
+      var active=pick===p;
+      return <button key={p} onClick={function(){setPick(p);}} style={{background:active?"#FFD000":"rgba(255,255,255,0.1)",color:active?"#3a2600":"#fff",border:"3px solid "+(active?"#b89200":"rgba(255,255,255,0.2)"),borderBottom:"5px solid "+(active?"#7a5800":"rgba(0,0,0,0.3)"),borderRadius:12,padding:"12px 18px",fontFamily:"'Bangers',cursive",fontSize:20,letterSpacing:"1px",cursor:"pointer",display:"flex",alignItems:"center",gap:10,textAlign:"left",width:"100%",marginBottom:8}}>
+        <span>{p==="Homeschool"?"[HS]":"[PB]"}</span>
+        <span>{p}{p==="Homeschool"&&<span style={{fontFamily:"Arial,sans-serif",fontSize:10,opacity:0.7,fontWeight:400,display:"block",letterSpacing:0}}>7am-4pm learning day</span>}</span>
+      </button>;
+    });
+    return (
       <div style={{position:"fixed",inset:0,zIndex:1000,background:"#1a3a0f",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24}}>
         <div style={{fontFamily:"'Bangers',cursive",fontSize:28,color:"#FFD000",letterSpacing:"2px",textShadow:"-2px 2px 0 #7a5800",marginBottom:6}}>Parent Mode</div>
-        <div style={{fontFamily:"Arial,sans-serif",fontSize:13,color:"rgba(255,255,255,0.6)",marginBottom:24}}>Who's planning? (change anytime in Settings)</div>
-        <div style={{display:"flex",flexDirection:"column",gap:10,width:"100%",maxWidth:280,marginBottom:28}}>
-          {["Mommy","Daddy","Homeschool"].map(p=>{
-            const isHS=p==="Homeschool";
-            return(
-              <button key={p} onClick={()=>setPick(p)}
-                style={{background:pick===p?"#FFD000":"rgba(255,255,255,0.1)",color:pick===p?"#3a2600":"#fff",border:"3px solid "+(pick===p?"#b89200":"rgba(255,255,255,0.2)"),borderBottom:"5px solid "+(pick===p?"#7a5800":"rgba(0,0,0,0.3)"),borderRadius:12,padding:"14px 20px",fontFamily:"'Bangers',cursive",fontSize:22,letterSpacing:"1px",cursor:"pointer",display:"flex",alignItems:"center",gap:12,textAlign:"left"}}>
-                <span style={{fontSize:24}}>{isHS?"[HS]":p==="Mommy"?"[PB]":"[PB]"}</span>
-                <div>
-                  <div>{p}</div>
-                  {isHS&&<div style={{fontFamily:"Arial,sans-serif",fontSize:11,opacity:0.7,fontWeight:400,letterSpacing:0}}>7am - 4pm structured learning day</div>}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-        <LBtn color="yellow" onClick={()=>onSelect({mode:"parent",planner:pick})} style={{fontSize:15,padding:"11px 30px"}}>Let's Go!</LBtn>
-        <button onClick={()=>setSub(null)} style={{marginTop:14,background:"none",border:"none",color:"rgba(255,255,255,0.4)",fontFamily:"Arial,sans-serif",fontSize:12,cursor:"pointer"}}>Back</button>
+        <div style={{fontFamily:"Arial,sans-serif",fontSize:13,color:"rgba(255,255,255,0.6)",marginBottom:20}}>Who's planning? (change anytime in Settings)</div>
+        <div style={{width:"100%",maxWidth:280,marginBottom:24}}>{plannerBtns}</div>
+        <LBtn color="yellow" onClick={function(){props.onSelect({mode:"parent",planner:pick});}} style={{fontSize:15,padding:"11px 30px"}}>Let's Go!</LBtn>
+        <button onClick={function(){setSub(null);}} style={{marginTop:14,background:"none",border:"none",color:"rgba(255,255,255,0.4)",fontFamily:"Arial,sans-serif",fontSize:12,cursor:"pointer"}}>Back</button>
       </div>
     );
   }
-
-  return(
+  var modeCards=Object.keys(MODES).map(function(key){
+    var mode=MODES[key];
+    return <button key={key} onClick={function(){if(key==="parent"){setSub("parent");}else{props.onSelect({mode:key,planner:null});}}} onMouseEnter={function(){setHover(key);}} onMouseLeave={function(){setHover(null);}} style={{background:hover===key?"rgba(255,208,0,0.15)":"rgba(255,255,255,0.07)",border:"2px solid "+(hover===key?"rgba(255,208,0,0.5)":"rgba(255,255,255,0.15)"),borderBottom:"5px solid "+(hover===key?"rgba(255,208,0,0.4)":"rgba(0,0,0,0.3)"),borderRadius:14,padding:"14px 18px",cursor:"pointer",display:"flex",alignItems:"center",gap:12,textAlign:"left",marginBottom:10,width:"100%"}}>
+      <span style={{fontSize:26,flexShrink:0}}>{mode.icon}</span>
+      <div>
+        <div style={{fontFamily:"'Bangers',cursive",fontSize:21,color:"#FFD000",letterSpacing:"1px",textShadow:"-1px 1px 0 #7a5800"}}>{mode.label}</div>
+        <div style={{fontFamily:"Arial,sans-serif",fontSize:11,color:"rgba(255,255,255,0.55)",marginTop:2}}>{mode.desc}</div>
+      </div>
+    </button>;
+  });
+  return (
     <div style={{position:"fixed",inset:0,zIndex:1000,background:"#1a3a0f",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:20,overflowY:"auto"}}>
       <div style={{fontFamily:"'Bangers',cursive",fontSize:36,color:"#FFD000",letterSpacing:"3px",textShadow:"-2px 2px 0 #7a5800",marginBottom:6,textAlign:"center"}}>The Playbook</div>
-      <div style={{fontFamily:"Arial,sans-serif",fontSize:14,color:"rgba(255,255,255,0.65)",marginBottom:28,textAlign:"center"}}>Choose your mode to get started</div>
-      <div style={{display:"flex",flexDirection:"column",gap:12,width:"100%",maxWidth:340}}>
-        {Object.entries(MODES).map(([key,mode])=>(
-          <button key={key}
-            onClick={()=>key==="parent"?setSub("parent"):onSelect({mode:key,planner:null})}
-            onMouseEnter={()=>setHover(key)} onMouseLeave={()=>setHover(null)}
-            style={{background:hover===key?"rgba(255,208,0,0.15)":"rgba(255,255,255,0.07)",border:"2px solid "+(hover===key?"rgba(255,208,0,0.5)":"rgba(255,255,255,0.15)"),borderBottom:"5px solid "+(hover===key?"rgba(255,208,0,0.4)":"rgba(0,0,0,0.3)"),borderRadius:14,padding:"14px 18px",cursor:"pointer",display:"flex",alignItems:"center",gap:12,textAlign:"left"}}>
-            <span style={{fontSize:28,flexShrink:0}}>{mode.icon}</span>
-            <div>
-              <div style={{fontFamily:"'Bangers',cursive",fontSize:21,color:"#FFD000",letterSpacing:"1px",textShadow:"-1px 1px 0 #7a5800"}}>{mode.label}</div>
-              <div style={{fontFamily:"Arial,sans-serif",fontSize:11,color:"rgba(255,255,255,0.55)",marginTop:2}}>{mode.desc}</div>
-            </div>
-          </button>
-        ))}
-      </div>
+      <div style={{fontFamily:"Arial,sans-serif",fontSize:14,color:"rgba(255,255,255,0.65)",marginBottom:24,textAlign:"center"}}>Choose your mode to get started</div>
+      <div style={{width:"100%",maxWidth:340}}>{modeCards}</div>
     </div>
   );
 }
-
-// --- SETTINGS -----------------------------------------------------------------
-function SettingsModal({modeData,onClose,onChange}){
-  const[pMode,setPMode]=useState(modeData.mode);
-  const[pPlan,setPPlan]=useState(modeData.planner);
-  const needsPlan=pMode==="parent";
-  return(
-    <div style={{position:"fixed",inset:0,zIndex:400,background:"rgba(0,0,0,0.7)",display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+ 
+// ---- SETTINGS ---------------------------------------------------------------
+function SettingsModal(props){
+  var md=props.modeData;
+  var pmState=useState(md.mode),pMode=pmState[0],setPMode=pmState[1];
+  var ppState=useState(md.planner),pPlan=ppState[0],setPPlan=ppState[1];
+  var needsPlan=pMode==="parent";
+  var modeRows=Object.keys(MODES).map(function(k){
+    var m=MODES[k];
+    return <button key={k} onClick={function(){setPMode(k);}} style={{width:"100%",background:pMode===k?"rgba(255,208,0,0.15)":"rgba(255,255,255,0.07)",border:"2px solid "+(pMode===k?"rgba(255,208,0,0.4)":"rgba(255,255,255,0.12)"),borderRadius:10,padding:"10px 12px",cursor:"pointer",display:"flex",alignItems:"center",gap:10,textAlign:"left",marginBottom:6}}>
+      <span style={{fontSize:16}}>{m.icon}</span>
+      <span style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:13,fontWeight:900,color:pMode===k?"#FFD000":"#fff"}}>{m.label}</span>
+      {pMode===k&&<div style={{marginLeft:"auto",width:9,height:9,borderRadius:"50%",background:"#FFD000"}}/>}
+    </button>;
+  });
+  var plannerBtns=["Mommy","Daddy","Homeschool"].map(function(p){
+    return <button key={p} onClick={function(){setPPlan(p);}} style={{flex:1,background:pPlan===p?"rgba(255,208,0,0.18)":"rgba(255,255,255,0.07)",border:"2px solid "+(pPlan===p?"rgba(255,208,0,0.4)":"rgba(255,255,255,0.12)"),borderRadius:9,padding:"8px 4px",cursor:"pointer",fontFamily:"'Arial Black',Arial,sans-serif",fontSize:10,fontWeight:900,color:pPlan===p?"#FFD000":"#fff",textAlign:"center"}}>{p}</button>;
+  });
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:400,background:"rgba(0,0,0,0.7)",display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={function(e){if(e.target===e.currentTarget)props.onClose();}}>
       <div style={{width:"100%",maxWidth:430,background:"#0f1f14",borderRadius:"22px 22px 0 0",border:"2px solid rgba(255,255,255,0.1)",borderBottom:"none",animation:"drawerUp 0.28s cubic-bezier(0.34,1.2,0.64,1)",overflow:"hidden"}}>
         <div style={{background:"#1a3020",padding:"8px 16px 6px",display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:"1px solid rgba(255,255,255,0.07)"}}>
           <span style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:14,fontWeight:900,color:"#FFD000"}}>Settings</span>
-          <button onClick={onClose} style={{background:"none",border:"none",color:"rgba(255,255,255,0.5)",cursor:"pointer",display:"flex"}}><X size={16}/></button>
+          <button onClick={props.onClose} style={{background:"none",border:"none",color:"rgba(255,255,255,0.5)",cursor:"pointer",display:"flex"}}><IX z={16}/></button>
         </div>
-        <div style={{padding:"14px 16px 24px",display:"flex",flexDirection:"column",gap:14}}>
+        <div style={{padding:"14px 16px 24px",display:"flex",flexDirection:"column",gap:12}}>
           <div>
             <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:10,fontWeight:900,color:"rgba(255,255,255,0.5)",letterSpacing:"1px",textTransform:"uppercase",marginBottom:8}}>Mode</div>
-            {Object.entries(MODES).map(([k,m])=>(
-              <button key={k} onClick={()=>setPMode(k)} style={{width:"100%",background:pMode===k?"rgba(255,208,0,0.15)":"rgba(255,255,255,0.07)",border:"2px solid "+(pMode===k?"rgba(255,208,0,0.4)":"rgba(255,255,255,0.12)"),borderRadius:10,padding:"10px 12px",cursor:"pointer",display:"flex",alignItems:"center",gap:10,textAlign:"left",marginBottom:6}}>
-                <span style={{fontSize:18}}>{m.icon}</span>
-                <span style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:13,fontWeight:900,color:pMode===k?"#FFD000":"#fff"}}>{m.label}</span>
-                {pMode===k&&<div style={{marginLeft:"auto",width:9,height:9,borderRadius:"50%",background:"#FFD000"}}/>}
-              </button>
-            ))}
+            {modeRows}
           </div>
-          {needsPlan&&(
-            <div>
-              <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:10,fontWeight:900,color:"rgba(255,255,255,0.5)",letterSpacing:"1px",textTransform:"uppercase",marginBottom:8}}>Who's Planning?</div>
-              <div style={{display:"flex",gap:8}}>
-                {["Mommy","Daddy","Homeschool"].map(p=>(
-                  <button key={p} onClick={()=>setPPlan(p)} style={{flex:1,background:pPlan===p?"rgba(255,208,0,0.18)":"rgba(255,255,255,0.07)",border:"2px solid "+(pPlan===p?"rgba(255,208,0,0.4)":"rgba(255,255,255,0.12)"),borderRadius:9,padding:"8px 4px",cursor:"pointer",fontFamily:"'Arial Black',Arial,sans-serif",fontSize:11,fontWeight:900,color:pPlan===p?"#FFD000":"#fff",textAlign:"center"}}>{p}</button>
-                ))}
-              </div>
-            </div>
-          )}
-          <LBtn color="yellow" onClick={()=>{onChange(pMode,needsPlan?pPlan:null);onClose();}} style={{width:"100%",justifyContent:"center"}}>Save Settings</LBtn>
-          <button onClick={()=>{if(window.confirm("Reset library to default presets for current mode?")){localStorage.removeItem("thePlaybook_library_v1");window.location.reload();}}} style={{width:"100%",background:"rgba(211,47,47,0.15)",border:"1px solid rgba(211,47,47,0.3)",borderRadius:9,padding:"9px",cursor:"pointer",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:11,color:"rgba(255,100,100,0.8)",textTransform:"uppercase",letterSpacing:"0.3px"}}>Reset Library to Defaults</button>
+          {needsPlan&&<div>
+            <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:10,fontWeight:900,color:"rgba(255,255,255,0.5)",letterSpacing:"1px",textTransform:"uppercase",marginBottom:8}}>Who's Planning?</div>
+            <div style={{display:"flex",gap:8}}>{plannerBtns}</div>
+          </div>}
+          <LBtn color="yellow" onClick={function(){props.onChange(pMode,needsPlan?pPlan:null);props.onClose();}} style={{width:"100%",justifyContent:"center"}}>Save Settings</LBtn>
+          <button onClick={function(){if(window.confirm("Reset library to defaults?")){localStorage.removeItem(LIB_KEY);window.location.reload();}}} style={{width:"100%",background:"rgba(211,47,47,0.15)",border:"1px solid rgba(211,47,47,0.3)",borderRadius:9,padding:"9px",cursor:"pointer",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:11,color:"rgba(255,100,100,0.8)",textTransform:"uppercase"}}>Reset Library to Defaults</button>
         </div>
       </div>
     </div>
   );
 }
-
-// --- ACTIVITY DETAIL ----------------------------------------------------------
-function Detail({activity,dayName,onClose,onSave,onToggle,onDelete}){
-  const[ed,setEd]=useState(false);
-  const[title,setTi]=useState(activity.title);
-  const[time,setTm]=useState(activity.time||"");
-  const[notes,setNo]=useState(activity.notes||"");
-  const[website,setWs]=useState(activity.website||"");
-  const[mapLink,setMl]=useState(activity.mapLink||"");
-  const[isPaid,setIp]=useState(activity.isPaid||false);
-  const[cost,setCo]=useState(activity.cost||"");
-  function save(){onSave({...activity,title:title.trim()||activity.title,time,notes,website:website.trim(),mapLink:mapLink.trim(),isPaid,cost:isPaid?parseFloat(cost)||0:0});setEd(false);}
-  const inp={width:"100%",background:"rgba(255,255,255,0.92)",border:"none",borderBottom:"3px solid rgba(0,0,0,0.15)",borderRadius:8,padding:"8px 10px",fontSize:13,fontWeight:700,fontFamily:"'Arial Black',Arial,sans-serif",color:"#1a1a2e",outline:"none",boxSizing:"border-box"};
-  const lbl={fontFamily:"'Arial Black',Arial,sans-serif",fontSize:9,fontWeight:900,color:"rgba(255,255,255,0.65)",letterSpacing:"0.8px",textTransform:"uppercase",marginBottom:3,display:"flex",alignItems:"center",gap:4};
-  return(
-    <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,0.65)",display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+ 
+// ---- ACTIVITY DETAIL --------------------------------------------------------
+function Detail(props){
+  var act=props.activity;
+  var edState=useState(false),ed=edState[0],setEd=edState[1];
+  var tiState=useState(act.title),ti=tiState[0],setTi=tiState[1];
+  var tmState=useState(act.time||""),tm=tmState[0],setTm=tmState[1];
+  var noState=useState(act.notes||""),no=noState[0],setNo=noState[1];
+  var wsState=useState(act.website||""),ws=wsState[0],setWs=wsState[1];
+  var mlState=useState(act.mapLink||""),ml=mlState[0],setMl=mlState[1];
+  var ipState=useState(act.isPaid||false),ip=ipState[0],setIp=ipState[1];
+  var coState=useState(act.cost||""),co=coState[0],setCo=coState[1];
+  function save(){props.onSave(Object.assign({},act,{title:ti.trim()||act.title,time:tm,notes:no,website:ws.trim(),mapLink:ml.trim(),isPaid:ip,cost:ip?parseFloat(co)||0:0}));setEd(false);}
+  var inp={width:"100%",background:"rgba(255,255,255,0.92)",border:"none",borderBottom:"3px solid rgba(0,0,0,0.15)",borderRadius:8,padding:"8px 10px",fontSize:13,fontWeight:700,fontFamily:"'Arial Black',Arial,sans-serif",color:"#1a1a2e",outline:"none",boxSizing:"border-box"};
+  var lbl={fontFamily:"'Arial Black',Arial,sans-serif",fontSize:9,fontWeight:900,color:"rgba(255,255,255,0.65)",letterSpacing:"0.8px",textTransform:"uppercase",marginBottom:3,display:"flex",alignItems:"center",gap:4};
+  var hdrBg=act.isComplete?"#c62828":"#1565C0";
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,0.65)",display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={function(e){if(e.target===e.currentTarget)props.onClose();}}>
       <div style={{width:"100%",maxWidth:430,background:"#0f1f14",borderRadius:"22px 22px 0 0",border:"2px solid rgba(255,255,255,0.1)",borderBottom:"none",maxHeight:"85vh",display:"flex",flexDirection:"column",animation:"drawerUp 0.28s cubic-bezier(0.34,1.2,0.64,1)",overflow:"hidden"}}>
-        <div style={{background:activity.isComplete?"#c62828":"#1565C0",padding:"8px 16px 7px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <div style={{display:"flex",gap:5}}>{[0,1,2,3,4,5].map(i=><div key={i} style={{width:9,height:9,borderRadius:"50%",background:"rgba(255,255,255,0.3)"}}/>)}</div>
+        <div style={{background:hdrBg,padding:"8px 16px 7px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{display:"flex",gap:5}}>{DOTS6_SM}</div>
           <div style={{display:"flex",gap:6}}>
-            {!ed&&<button onClick={()=>setEd(true)} style={{background:"rgba(255,255,255,0.18)",border:"none",borderRadius:7,padding:"4px 10px",cursor:"pointer",color:"#fff",display:"flex",alignItems:"center",gap:4,fontFamily:"'Arial Black',Arial,sans-serif",fontSize:10,fontWeight:900,textTransform:"uppercase"}}><Pencil size={11}/> Edit</button>}
-            <button onClick={onClose} style={{background:"rgba(255,255,255,0.15)",border:"none",borderRadius:7,padding:"4px 7px",cursor:"pointer",color:"#fff",display:"flex"}}><X size={14}/></button>
+            {!ed&&<button onClick={function(){setEd(true);}} style={{background:"rgba(255,255,255,0.18)",border:"none",borderRadius:7,padding:"4px 10px",cursor:"pointer",color:"#fff",display:"flex",alignItems:"center",gap:4,fontFamily:"'Arial Black',Arial,sans-serif",fontSize:10,fontWeight:900,textTransform:"uppercase"}}><IPencil z={11}/> Edit</button>}
+            <button onClick={props.onClose} style={{background:"rgba(255,255,255,0.15)",border:"none",borderRadius:7,padding:"4px 7px",cursor:"pointer",color:"#fff",display:"flex"}}><IX z={14}/></button>
           </div>
         </div>
         <div style={{overflowY:"auto",flex:1,padding:"14px 16px 24px",display:"flex",flexDirection:"column",gap:14}}>
-          {ed?(<div><div style={lbl}>Title</div><input style={inp} value={title} onChange={e=>setTi(e.target.value)}/></div>):(<div><div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:20,fontWeight:900,color:"#fff",lineHeight:1.1,textDecoration:activity.isComplete?"line-through":"none",opacity:activity.isComplete?0.65:1}}>{activity.title}</div><div style={{fontFamily:"Arial,sans-serif",fontSize:11,color:"rgba(255,255,255,0.45)",marginTop:3}}>{dayName} . {fmtDF(activity._date)}</div></div>)}
-          {!ed&&(<div style={{display:"flex",flexWrap:"wrap",gap:6}}>{activity.time&&<span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(255,255,255,0.12)",borderRadius:8,padding:"5px 10px",fontSize:12,fontWeight:700,color:"#fff",fontFamily:"Arial,sans-serif"}}><Clock size={11}/>{fmt(activity.time)}</span>}{activity.isPaid&&activity.cost>0&&<span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(255,208,0,0.18)",border:"1px solid rgba(255,208,0,0.4)",borderRadius:8,padding:"5px 10px",fontSize:12,fontWeight:700,color:"#FFD000",fontFamily:"Arial,sans-serif"}}><Dollar size={11}/>${Number(activity.cost).toFixed(2)}</span>}{activity.isComplete&&<span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(198,40,40,0.2)",border:"1px solid rgba(198,40,40,0.5)",borderRadius:8,padding:"5px 10px",fontSize:12,fontWeight:700,color:"#ef9a9a",fontFamily:"Arial,sans-serif"}}><Check size={11}/>Done</span>}{activity.tags&&activity.tags.map(t=><span key={t} style={{background:"rgba(255,255,255,0.1)",borderRadius:20,padding:"3px 9px",fontSize:11,color:"rgba(255,255,255,0.6)",fontFamily:"Arial,sans-serif"}}>#{t}</span>)}</div>)}
-          {ed&&(<div style={{display:"flex",flexDirection:"column",gap:10}}><div style={{display:"flex",gap:8}}><div style={{flex:2}}><div style={lbl}><Clock size={9}/> Time</div><TmPick value={time} onChange={setTm}/></div><div style={{flex:1}}><div style={{...lbl,cursor:"pointer"}} onClick={()=>setIp(!isPaid)}><div style={{width:32,height:18,borderRadius:9,background:isPaid?"#FFD000":"rgba(255,255,255,0.2)",position:"relative",flexShrink:0,border:"2px solid rgba(255,255,255,0.3)"}}><div style={{position:"absolute",top:0,left:isPaid?14:0,width:14,height:14,borderRadius:"50%",background:"#fff",transition:"left 0.2s"}}/></div><Dollar size={9}/> Paid</div>{isPaid&&<input type="number" style={inp} placeholder="0.00" value={cost} onChange={e=>setCo(e.target.value)} min="0" step="0.01"/>}</div></div><div><div style={lbl}><Globe size={9}/> Website</div><input style={inp} placeholder="https://..." value={website} onChange={e=>setWs(e.target.value)}/></div><div><div style={lbl}><MapPin size={9}/> Map Link</div><input style={inp} placeholder="https://maps.google.com/..." value={mapLink} onChange={e=>setMl(e.target.value)}/></div></div>)}
-          <div><div style={lbl}><FileTxt size={9}/> Notes</div>{ed?(<textarea value={notes} onChange={e=>setNo(e.target.value)} placeholder="Add notes, reminders, what to bring..." style={{...inp,minHeight:80,resize:"vertical",fontFamily:"Arial,sans-serif",fontWeight:400,fontSize:13,lineHeight:1.5}}/>):notes?(<div style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"10px 12px",fontFamily:"Arial,sans-serif",fontSize:13,color:"rgba(255,255,255,0.8)",lineHeight:1.55,whiteSpace:"pre-wrap"}}>{notes}</div>):(<button onClick={()=>setEd(true)} style={{background:"rgba(255,255,255,0.06)",border:"1.5px dashed rgba(255,255,255,0.18)",borderRadius:10,padding:"10px 12px",color:"rgba(255,255,255,0.35)",fontFamily:"Arial,sans-serif",fontSize:12,cursor:"pointer",width:"100%",textAlign:"left"}}>Tap to add notes...</button>)}</div>
-          {!ed&&(activity.mapLink||activity.website)&&(<div style={{display:"flex",gap:8}}>{activity.mapLink&&<a href={activity.mapLink} target="_blank" rel="noopener noreferrer" style={{textDecoration:"none"}}><LBtn color="blue" small><MapPin size={11}/> Map</LBtn></a>}{activity.website&&<a href={activity.website} target="_blank" rel="noopener noreferrer" style={{textDecoration:"none"}}><LBtn color="green" small><Globe size={11}/> Web</LBtn></a>}</div>)}
+          {ed
+            ?<div><div style={lbl}>Title</div><input style={inp} value={ti} onChange={function(e){setTi(e.target.value);}}/></div>
+            :<div>
+              <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:20,fontWeight:900,color:"#fff",lineHeight:1.1,textDecoration:act.isComplete?"line-through":"none",opacity:act.isComplete?0.65:1}}>{act.title}</div>
+              <div style={{fontFamily:"Arial,sans-serif",fontSize:11,color:"rgba(255,255,255,0.45)",marginTop:3}}>{props.dayName} . {fmtDF(act._date)}</div>
+            </div>
+          }
+          {!ed&&<div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+            {act.time&&<span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(255,255,255,0.12)",borderRadius:8,padding:"5px 10px",fontSize:12,fontWeight:700,color:"#fff",fontFamily:"Arial,sans-serif"}}><IClock z={11}/>{fmt(act.time)}</span>}
+            {act.isPaid&&act.cost>0&&<span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(255,208,0,0.18)",border:"1px solid rgba(255,208,0,0.4)",borderRadius:8,padding:"5px 10px",fontSize:12,fontWeight:700,color:"#FFD000",fontFamily:"Arial,sans-serif"}}><IDollar z={11}/>${Number(act.cost).toFixed(2)}</span>}
+            {act.isComplete&&<span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(198,40,40,0.2)",border:"1px solid rgba(198,40,40,0.5)",borderRadius:8,padding:"5px 10px",fontSize:12,fontWeight:700,color:"#ef9a9a",fontFamily:"Arial,sans-serif"}}><ICheck z={11}/>Done</span>}
+            {act.tags&&act.tags.map(function(t){return <span key={t} style={{background:"rgba(255,255,255,0.1)",borderRadius:20,padding:"3px 9px",fontSize:11,color:"rgba(255,255,255,0.6)",fontFamily:"Arial,sans-serif"}}>#{t}</span>;})}
+          </div>}
+          {ed&&<div style={{display:"flex",flexDirection:"column",gap:10}}>
+            <div style={{display:"flex",gap:8}}>
+              <div style={{flex:2}}><div style={lbl}><IClock z={9}/> Time</div><TmPick value={tm} onChange={setTm}/></div>
+              <div style={{flex:1}}>
+                <div style={Object.assign({},lbl,{cursor:"pointer"})} onClick={function(){setIp(!ip);}}>
+                  <div style={{width:32,height:18,borderRadius:9,background:ip?"#FFD000":"rgba(255,255,255,0.2)",position:"relative",flexShrink:0,border:"2px solid rgba(255,255,255,0.3)"}}>
+                    <div style={{position:"absolute",top:0,left:ip?14:0,width:14,height:14,borderRadius:"50%",background:"#fff",transition:"left 0.2s"}}/>
+                  </div>
+                  <IDollar z={9}/> Paid
+                </div>
+                {ip&&<input type="number" style={inp} placeholder="0.00" value={co} onChange={function(e){setCo(e.target.value);}} min="0" step="0.01"/>}
+              </div>
+            </div>
+            <div><div style={lbl}><IGlobe z={9}/> Website</div><input style={inp} placeholder="https://..." value={ws} onChange={function(e){setWs(e.target.value);}}/></div>
+            <div><div style={lbl}><IMap z={9}/> Map Link</div><input style={inp} placeholder="https://maps.google.com/..." value={ml} onChange={function(e){setMl(e.target.value);}}/></div>
+          </div>}
+          <div>
+            <div style={lbl}><IFile z={9}/> Notes</div>
+            {ed
+              ?<textarea value={no} onChange={function(e){setNo(e.target.value);}} placeholder="Add notes, reminders, what to bring..." style={Object.assign({},inp,{minHeight:80,resize:"vertical",fontFamily:"Arial,sans-serif",fontWeight:400,fontSize:13,lineHeight:1.5})}/>
+              :no
+                ?<div style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"10px 12px",fontFamily:"Arial,sans-serif",fontSize:13,color:"rgba(255,255,255,0.8)",lineHeight:1.55,whiteSpace:"pre-wrap"}}>{no}</div>
+                :<button onClick={function(){setEd(true);}} style={{background:"rgba(255,255,255,0.06)",border:"1.5px dashed rgba(255,255,255,0.18)",borderRadius:10,padding:"10px 12px",color:"rgba(255,255,255,0.35)",fontFamily:"Arial,sans-serif",fontSize:12,cursor:"pointer",width:"100%",textAlign:"left"}}>Tap to add notes...</button>
+            }
+          </div>
+          {!ed&&(act.mapLink||act.website)&&<div style={{display:"flex",gap:8}}>
+            {act.mapLink&&<a href={act.mapLink} target="_blank" rel="noopener noreferrer" style={{textDecoration:"none"}}><LBtn color="blue" small><IMap z={11}/> Map</LBtn></a>}
+            {act.website&&<a href={act.website} target="_blank" rel="noopener noreferrer" style={{textDecoration:"none"}}><LBtn color="green" small><IGlobe z={11}/> Web</LBtn></a>}
+          </div>}
           <div style={{display:"flex",gap:8,marginTop:4}}>
-            {ed?(<><LBtn color="gray" onClick={()=>setEd(false)} style={{flex:1}}><X size={12}/> Cancel</LBtn><LBtn color="yellow" onClick={save} style={{flex:2}}>Save Changes</LBtn></>):(<><LBtn color={activity.isComplete?"gray":"red"} onClick={()=>{onToggle(activity.id);onClose();}} style={{flex:2}}>{activity.isComplete?<><Undo size={13}/> Undo</>:<><Check size={13}/> Mark Done</>}</LBtn>{!activity.isFixed&&<LBtn color="red" onClick={()=>{onDelete(activity.id);onClose();}} style={{flex:1}}><X size={12}/> Delete</LBtn>}</>)}
+            {ed
+              ?<><LBtn color="gray" onClick={function(){setEd(false);}} style={{flex:1}}><IX z={12}/> Cancel</LBtn><LBtn color="yellow" onClick={save} style={{flex:2}}>Save Changes</LBtn></>
+              :<><LBtn color={act.isComplete?"gray":"red"} onClick={function(){props.onToggle(act.id);props.onClose();}} style={{flex:2}}>{act.isComplete?<><IUndo z={13}/> Undo</>:<><ICheck z={13}/> Mark Done</>}</LBtn>{!act.isFixed&&<LBtn color="red" onClick={function(){props.onDelete(act.id);props.onClose();}} style={{flex:1}}><IX z={12}/> Delete</LBtn>}</>
+            }
           </div>
         </div>
       </div>
     </div>
   );
 }
-
-// --- ADD MODAL ----------------------------------------------------------------
-function AddModal({defaultDay,defaultTime,onClose,onSave,onSaveR}){
-  const[title,setTi]=useState("");
-  const[day,setDy]=useState(defaultDay||DAYS[0]);
-  const[time,setTm]=useState(defaultTime||"");
-  const[notes,setNo]=useState("");
-  const[isPaid,setIp]=useState(false);
-  const[cost,setCo]=useState("");
-  const[web,setWb]=useState("");
-  const[map,setMp]=useState("");
-  const[tags,setTg]=useState("");
-  const[exp,setExp]=useState(false);
-  const[shk,setShk]=useState(false);
-  const[rOpen,setRO]=useState(false);
-  const[rDays,setRD]=useState([]);
-  const[rWeeks,setRW]=useState(false);
-  function togRD(d){setRD(p=>p.includes(d)?p.filter(x=>x!==d):[...p,d]);}
+ 
+// ---- ADD MODAL --------------------------------------------------------------
+function AddModal(props){
+  var tiState=useState(""),ti=tiState[0],setTi=tiState[1];
+  var dyState=useState(props.defaultDay||DAYS[0]),dy=dyState[0],setDy=dyState[1];
+  var tmState=useState(props.defaultTime||""),tm=tmState[0],setTm=tmState[1];
+  var noState=useState(""),no=noState[0],setNo=noState[1];
+  var ipState=useState(false),ip=ipState[0],setIp=ipState[1];
+  var coState=useState(""),co=coState[0],setCo=coState[1];
+  var wbState=useState(""),wb=wbState[0],setWb=wbState[1];
+  var mpState=useState(""),mp=mpState[0],setMp=mpState[1];
+  var tgState=useState(""),tg=tgState[0],setTg=tgState[1];
+  var expState=useState(false),exp=expState[0],setExp=expState[1];
+  var shkState=useState(false),shk=shkState[0],setShk=shkState[1];
+  var roState=useState(false),ro=roState[0],setRo=roState[1];
+  var rdState=useState([]),rd=rdState[0],setRd=rdState[1];
+  var rwState=useState(false),rw=rwState[0],setRw=rwState[1];
+  function togRD(d){setRd(function(p){return p.indexOf(d)>=0?p.filter(function(x){return x!==d;}):[].concat(p,[d]);});}
   function go(){
-    if(!title.trim()){setShk(true);setTimeout(()=>setShk(false),500);return;}
-    const b={id:genId(),title:title.trim(),time,notes:notes.trim(),isPaid,cost:isPaid?parseFloat(cost)||0:0,website:web.trim(),mapLink:map.trim(),tags:tags.split(",").map(t=>t.trim()).filter(Boolean),isComplete:false};
-    if(rDays.length>0){onSaveR(b,rDays,rWeeks);}else{onSave({...b,day});}
+    if(!ti.trim()){setShk(true);setTimeout(function(){setShk(false);},500);return;}
+    var base={id:genId(),title:ti.trim(),time:tm,notes:no.trim(),isPaid:ip,cost:ip?parseFloat(co)||0:0,website:wb.trim(),mapLink:mp.trim(),tags:tg.split(",").map(function(t){return t.trim();}).filter(Boolean),isComplete:false};
+    if(rd.length>0){props.onSaveR(base,rd,rw);}else{props.onSave(Object.assign({},base,{day:dy}));}
   }
-  const inp={width:"100%",background:"rgba(255,255,255,0.92)",border:"none",borderBottom:"3px solid rgba(0,0,0,0.15)",borderRadius:8,padding:"9px 12px",fontSize:14,fontWeight:700,fontFamily:"'Arial Black',Arial,sans-serif",color:"#1a1a2e",outline:"none",boxSizing:"border-box"};
-  const lbl={fontFamily:"'Arial Black',Arial,sans-serif",fontSize:10,fontWeight:900,color:"rgba(255,255,255,0.85)",letterSpacing:"0.8px",textTransform:"uppercase",marginBottom:4,display:"flex",alignItems:"center",gap:5};
-  const Tog=({on,tog})=><div onClick={tog} style={{width:38,height:22,borderRadius:11,background:on?"#FFD000":"rgba(255,255,255,0.2)",border:"2px solid rgba(255,255,255,0.3)",position:"relative",cursor:"pointer",flexShrink:0}}><div style={{position:"absolute",top:1,left:on?17:1,width:16,height:16,borderRadius:"50%",background:"#fff",transition:"left 0.2s",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}}/></div>;
-  return(
-    <div style={{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,0.7)",display:"flex",alignItems:"flex-end",justifyContent:"center",padding:"0 8px 8px"}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+  var inp={width:"100%",background:"rgba(255,255,255,0.92)",border:"none",borderBottom:"3px solid rgba(0,0,0,0.15)",borderRadius:8,padding:"9px 12px",fontSize:14,fontWeight:700,fontFamily:"'Arial Black',Arial,sans-serif",color:"#1a1a2e",outline:"none",boxSizing:"border-box"};
+  var lbl={fontFamily:"'Arial Black',Arial,sans-serif",fontSize:10,fontWeight:900,color:"rgba(255,255,255,0.85)",letterSpacing:"0.8px",textTransform:"uppercase",marginBottom:4,display:"flex",alignItems:"center",gap:5};
+  var dayOpts=DAYS.map(function(d){return <option key={d} value={d}>{d}</option>;});
+  var rdBtns=DAYS.map(function(d){return <button key={d} onClick={function(){togRD(d);}} style={{background:rd.indexOf(d)>=0?"#FFD000":"rgba(255,255,255,0.12)",borderBottom:"3px solid "+(rd.indexOf(d)>=0?"#b89200":"rgba(0,0,0,0.3)"),border:"none",borderRadius:7,padding:"6px 10px",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:10,color:rd.indexOf(d)>=0?"#3a2600":"#fff",cursor:"pointer",textTransform:"uppercase"}}>{d.slice(0,3)}</button>;});
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,0.7)",display:"flex",alignItems:"flex-end",justifyContent:"center",padding:"0 8px 8px"}} onClick={function(e){if(e.target===e.currentTarget)props.onClose();}}>
       <div style={{width:"100%",maxWidth:430,background:"#1565C0",borderRadius:"20px 20px 14px 14px",borderBottom:"6px solid #0a3f7f",overflow:"hidden",overflowY:"auto",maxHeight:"92vh",animation:shk?"shake 0.4s ease":"slideUp 0.25s cubic-bezier(0.34,1.4,0.64,1)",boxShadow:"0 -4px 40px rgba(0,0,0,0.5)"}}>
         <div style={{background:"#1976D2",padding:"8px 16px 6px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:1}}>
-          <div style={{display:"flex",gap:6}}>{[0,1,2,3,4,5].map(i=><div key={i} style={{width:10,height:10,borderRadius:"50%",background:"rgba(255,255,255,0.3)"}}/>)}</div>
-          <button onClick={onClose} style={{background:"rgba(255,255,255,0.15)",border:"none",borderRadius:6,padding:"3px 6px",cursor:"pointer",color:"#fff",display:"flex"}}><X size={14}/></button>
+          <div style={{display:"flex",gap:6}}>{DOTS6_MD}</div>
+          <button onClick={props.onClose} style={{background:"rgba(255,255,255,0.15)",border:"none",borderRadius:6,padding:"3px 6px",cursor:"pointer",color:"#fff",display:"flex"}}><IX z={14}/></button>
         </div>
         <div style={{padding:"14px 16px 6px"}}>
           <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:15,fontWeight:900,color:"#fff",marginBottom:14}}>+ ADD ACTIVITY TO LIBRARY</div>
-          <div style={{marginBottom:11}}><div style={lbl}>Title *</div><input autoFocus style={{...inp,borderBottomColor:title?"rgba(255,208,0,0.8)":"rgba(0,0,0,0.15)"}} placeholder="e.g. BJJ, Library, Park Run" value={title} onChange={e=>setTi(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()}/></div>
-          {rDays.length===0&&(<div style={{display:"flex",gap:8,marginBottom:11}}><div style={{flex:1}}><div style={lbl}><Cal size={10}/> Day</div><select style={{...inp,appearance:"none",cursor:"pointer"}} value={day} onChange={e=>setDy(e.target.value)}>{DAYS.map(d=><option key={d} value={d}>{d}</option>)}</select></div><div style={{flex:1.4}}><div style={lbl}><Clock size={10}/> Time</div><TmPick value={time} onChange={setTm}/></div></div>)}
-          {rDays.length>0&&(<div style={{marginBottom:11}}><div style={lbl}><Clock size={10}/> Time</div><TmPick value={time} onChange={setTm}/></div>)}
+          <div style={{marginBottom:11}}><div style={lbl}>Title *</div><input autoFocus style={Object.assign({},inp,{borderBottomColor:ti?"rgba(255,208,0,0.8)":"rgba(0,0,0,0.15)"})} placeholder="e.g. BJJ, Library, Park Run" value={ti} onChange={function(e){setTi(e.target.value);}} onKeyDown={function(e){if(e.key==="Enter")go();}}/></div>
+          {rd.length===0&&<div style={{display:"flex",gap:8,marginBottom:11}}>
+            <div style={{flex:1}}><div style={lbl}><ICal z={10}/> Day</div><select style={Object.assign({},inp,{appearance:"none",cursor:"pointer"})} value={dy} onChange={function(e){setDy(e.target.value);}}>{dayOpts}</select></div>
+            <div style={{flex:1.4}}><div style={lbl}><IClock z={10}/> Time</div><TmPick value={tm} onChange={setTm}/></div>
+          </div>}
+          {rd.length>0&&<div style={{marginBottom:11}}><div style={lbl}><IClock z={10}/> Time</div><TmPick value={tm} onChange={setTm}/></div>}
           <div style={{marginBottom:11,background:"rgba(0,0,0,0.2)",borderRadius:10,overflow:"hidden"}}>
-            <button onClick={()=>setRO(!rOpen)} style={{width:"100%",background:"none",border:"none",color:"#FFD000",fontFamily:"'Arial Black',Arial,sans-serif",fontSize:11,fontWeight:900,cursor:"pointer",padding:"10px 12px",display:"flex",alignItems:"center",gap:8,textTransform:"uppercase"}}>
-              <Repeat size={13}/>{rOpen?"Hide Recurring":"Set as Recurring"}
-              {rDays.length>0&&<span style={{background:"#FFD000",color:"#3a2600",borderRadius:10,padding:"1px 7px",fontSize:9,marginLeft:"auto"}}>{rDays.length} day{rDays.length>1?"s":""}</span>}
+            <button onClick={function(){setRo(!ro);}} style={{width:"100%",background:"none",border:"none",color:"#FFD000",fontFamily:"'Arial Black',Arial,sans-serif",fontSize:11,fontWeight:900,cursor:"pointer",padding:"10px 12px",display:"flex",alignItems:"center",gap:8,textTransform:"uppercase"}}>
+              <IRepeat z={13}/>{ro?"Hide Recurring":"Set as Recurring"}
+              {rd.length>0&&<span style={{background:"#FFD000",color:"#3a2600",borderRadius:10,padding:"1px 7px",fontSize:9,marginLeft:"auto"}}>{rd.length} day{rd.length>1?"s":""}</span>}
             </button>
-            {rOpen&&(<div style={{padding:"0 12px 12px",display:"flex",flexDirection:"column",gap:10}}>
-              <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>{DAYS.map(d=>(<button key={d} onClick={()=>togRD(d)} style={{background:rDays.includes(d)?"#FFD000":"rgba(255,255,255,0.12)",borderBottom:"3px solid "+(rDays.includes(d)?"#b89200":"rgba(0,0,0,0.3)"),border:"none",borderRadius:7,padding:"6px 10px",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:10,color:rDays.includes(d)?"#3a2600":"#fff",cursor:"pointer",textTransform:"uppercase"}}>{d.slice(0,3)}</button>))}</div>
-              <div style={{display:"flex",alignItems:"center",gap:10}}><Tog on={rWeeks} tog={()=>setRW(!rWeeks)}/><span style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:11,color:"rgba(255,255,255,0.85)",textTransform:"uppercase"}}>All 4 weeks</span></div>
-              {rDays.length>0&&<div style={{fontFamily:"Arial,sans-serif",fontSize:11,color:"rgba(255,208,0,0.8)"}}>Will add to: {rDays.join(", ")}{rWeeks?" across all 4 weeks":" this week only"}</div>}
-            </div>)}
+            {ro&&<div style={{padding:"0 12px 12px",display:"flex",flexDirection:"column",gap:10}}>
+              <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>{rdBtns}</div>
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <div onClick={function(){setRw(!rw);}} style={{width:38,height:22,borderRadius:11,background:rw?"#FFD000":"rgba(255,255,255,0.2)",border:"2px solid rgba(255,255,255,0.3)",position:"relative",cursor:"pointer",flexShrink:0}}>
+                  <div style={{position:"absolute",top:1,left:rw?17:1,width:16,height:16,borderRadius:"50%",background:"#fff",transition:"left 0.2s"}}/>
+                </div>
+                <span style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:11,color:"rgba(255,255,255,0.85)",textTransform:"uppercase"}}>All 4 weeks</span>
+              </div>
+              {rd.length>0&&<div style={{fontFamily:"Arial,sans-serif",fontSize:11,color:"rgba(255,208,0,0.8)"}}>Will add to: {rd.join(", ")}{rw?" across all 4 weeks":" this week only"}</div>}
+            </div>}
           </div>
-          <div style={{marginBottom:11}}><div style={lbl}><FileTxt size={10}/> Notes</div><textarea value={notes} onChange={e=>setNo(e.target.value)} placeholder="What to bring, reminders..." style={{...inp,minHeight:55,resize:"vertical",fontFamily:"Arial,sans-serif",fontWeight:400,fontSize:13,lineHeight:1.5}}/></div>
-          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:isPaid?10:14}}><Tog on={isPaid} tog={()=>setIp(!isPaid)}/><span style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:11,fontWeight:900,color:"rgba(255,255,255,0.85)",textTransform:"uppercase"}}><Dollar size={10} style={{display:"inline"}}/> Paid</span></div>
-          {isPaid&&<div style={{marginBottom:11}}><div style={lbl}><Dollar size={10}/> Cost ($)</div><input type="number" style={inp} placeholder="0.00" value={cost} onChange={e=>setCo(e.target.value)} min="0" step="0.01"/></div>}
-          <button onClick={()=>setExp(!exp)} style={{background:"none",border:"none",color:"rgba(255,255,255,0.6)",fontSize:11,fontWeight:800,fontFamily:"'Arial Black',Arial,sans-serif",cursor:"pointer",padding:"0 0 12px",textTransform:"uppercase"}}>{exp?"^ Less":"v Website, Map + Tags"}</button>
-          {exp&&(<div style={{marginBottom:11,display:"flex",flexDirection:"column",gap:10}}><div><div style={lbl}><Globe size={10}/> Website</div><input style={inp} placeholder="https://..." value={web} onChange={e=>setWb(e.target.value)}/></div><div><div style={lbl}><MapPin size={10}/> Map Link</div><input style={inp} placeholder="https://maps.google.com/..." value={map} onChange={e=>setMp(e.target.value)}/></div><div><div style={lbl}><Tag size={10}/> Tags</div><input style={inp} placeholder="outdoor, sports, kids" value={tags} onChange={e=>setTg(e.target.value)}/></div></div>)}
+          <div style={{marginBottom:11}}><div style={lbl}><IFile z={10}/> Notes</div><textarea value={no} onChange={function(e){setNo(e.target.value);}} placeholder="What to bring, reminders..." style={Object.assign({},inp,{minHeight:55,resize:"vertical",fontFamily:"Arial,sans-serif",fontWeight:400,fontSize:13,lineHeight:1.5})}/></div>
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:ip?10:14}}>
+            <div onClick={function(){setIp(!ip);}} style={{width:38,height:22,borderRadius:11,background:ip?"#FFD000":"rgba(255,255,255,0.2)",border:"2px solid rgba(255,255,255,0.3)",position:"relative",cursor:"pointer",flexShrink:0}}>
+              <div style={{position:"absolute",top:1,left:ip?17:1,width:16,height:16,borderRadius:"50%",background:"#fff",transition:"left 0.2s"}}/>
+            </div>
+            <span style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:11,fontWeight:900,color:"rgba(255,255,255,0.85)",textTransform:"uppercase"}}><IDollar z={10} style={{display:"inline"}}/> Paid</span>
+          </div>
+          {ip&&<div style={{marginBottom:11}}><div style={lbl}><IDollar z={10}/> Cost ($)</div><input type="number" style={inp} placeholder="0.00" value={co} onChange={function(e){setCo(e.target.value);}} min="0" step="0.01"/></div>}
+          <button onClick={function(){setExp(!exp);}} style={{background:"none",border:"none",color:"rgba(255,255,255,0.6)",fontSize:11,fontWeight:800,fontFamily:"'Arial Black',Arial,sans-serif",cursor:"pointer",padding:"0 0 12px",textTransform:"uppercase"}}>{exp?"^ Less":"v Website, Map + Tags"}</button>
+          {exp&&<div style={{marginBottom:11,display:"flex",flexDirection:"column",gap:10}}>
+            <div><div style={lbl}><IGlobe z={10}/> Website</div><input style={inp} placeholder="https://..." value={wb} onChange={function(e){setWb(e.target.value);}}/></div>
+            <div><div style={lbl}><IMap z={10}/> Map Link</div><input style={inp} placeholder="https://maps.google.com/..." value={mp} onChange={function(e){setMp(e.target.value);}}/></div>
+            <div><div style={lbl}><ITag z={10}/> Tags</div><input style={inp} placeholder="outdoor, sports, kids" value={tg} onChange={function(e){setTg(e.target.value);}}/></div>
+          </div>}
         </div>
         <div style={{padding:"4px 16px 16px",display:"flex",gap:8}}>
-          <LBtn color="gray" onClick={onClose} style={{flex:1}}><X size={12}/> Cancel</LBtn>
-          <LBtn color="yellow" onClick={go} style={{flex:2}}><Plus size={14}/> SNAP IT IN!</LBtn>
+          <LBtn color="gray" onClick={props.onClose} style={{flex:1}}><IX z={12}/> Cancel</LBtn>
+          <LBtn color="yellow" onClick={go} style={{flex:2}}><IPlus z={14}/> SNAP IT IN!</LBtn>
         </div>
-        <div style={{background:"#0d4d9e",padding:"6px 16px",display:"flex",gap:5,justifyContent:"center"}}>{[0,1,2,3,4,5,6,7].map(i=><div key={i} style={{width:8,height:8,borderRadius:"50%",background:"rgba(255,255,255,0.2)"}}/>)}</div>
+        <div style={{background:"#0d4d9e",padding:"6px 16px",display:"flex",gap:5,justifyContent:"center"}}>{DOTS8_SM}</div>
       </div>
     </div>
   );
 }
-
-// --- LIBRARY DRAWER -----------------------------------------------------------
-function LibDrawer({library,onClose,onAdd,onDel,modeData}){
-  const[search,setSrch]=useState("");
-  const[sel,setSel]=useState(null);
-  const filtered=(search.trim()?sortL(library).filter(e=>e.title.toLowerCase().includes(search.toLowerCase())):sortL(library));
-  const tier=u=>u>=10?"Legend":u>=5?"Regular":u>=2?"Familiar":"New";
-  const mk=modeData?modeData.mode:"";
-  const ml=(MODES[mk]&&MODES[mk].label)||"";
-  return(
-    <div onClick={e=>{if(e.target===e.currentTarget)onClose();}} style={{position:"fixed",inset:0,zIndex:150,background:"rgba(0,0,0,0.6)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+ 
+// ---- LIBRARY DRAWER ---------------------------------------------------------
+function LibDrawer(props){
+  var srchState=useState(""),srch=srchState[0],setSrch=srchState[1];
+  var selState=useState(null),sel=selState[0],setSel=selState[1];
+  var sorted=sortL(props.library);
+  var filtered=srch.trim()?sorted.filter(function(e){return e.title.toLowerCase().indexOf(srch.toLowerCase())>=0;}):sorted;
+  function tier(u){return u>=10?"Legend":u>=5?"Regular":u>=2?"Familiar":"New";}
+  var mk=props.modeData?props.modeData.mode:"";
+  var ml=(MODES[mk]&&MODES[mk].label)||"";
+  var cards=filtered.map(function(entry){
+    var c=chipColor(entry,filtered.indexOf(entry));
+    var isS=sel&&sel.id===entry.id;
+    var dayBtns=DAYS.map(function(day){
+      return <button key={day} onClick={function(){props.onAdd(entry,day);setSel(null);}} style={{background:c.bg,borderBottom:"3px solid "+c.sh,border:"none",borderRadius:6,padding:"6px 9px",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:10,color:"#fff",cursor:"pointer",textTransform:"uppercase"}} onMouseDown={function(e){e.currentTarget.style.transform="scale(0.94) translateY(2px)";}} onMouseUp={function(e){e.currentTarget.style.transform="";}} onMouseLeave={function(e){e.currentTarget.style.transform="";}}>{day.slice(0,3)}</button>;
+    });
+    return (
+      <div key={entry.id} style={{marginBottom:6}}>
+        <div style={{background:c.bg+"22",border:"1.5px solid "+c.bg+"55",borderRadius:10,overflow:"hidden"}}>
+          <div style={{background:c.bg+"33",padding:"4px 10px",display:"flex",gap:4,alignItems:"center",borderBottom:"1px solid "+c.bg+"33"}}>
+            {[0,1,2,3,4,5,6].map(function(i){return <div key={i} style={{width:6,height:6,borderRadius:"50%",background:c.bg+"77",flexShrink:0}}/>;})}
+            <div style={{marginLeft:"auto",fontFamily:"Arial,sans-serif",fontSize:8,fontWeight:700,color:"rgba(255,255,255,0.5)"}}>{tier(entry.useCount)}</div>
+          </div>
+          <div style={{padding:"8px 10px",display:"flex",alignItems:"center",gap:8}}>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:14,fontWeight:900,color:"#fff",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{entry.title}</div>
+              <div style={{display:"flex",gap:5,marginTop:2,flexWrap:"wrap",alignItems:"center"}}>
+                <span style={{fontFamily:"Arial,sans-serif",fontSize:9,color:"rgba(255,255,255,0.45)"}}>Used {entry.useCount}x</span>
+                {entry.time&&<span style={{fontFamily:"Arial,sans-serif",fontSize:9,color:"rgba(255,255,255,0.55)",display:"flex",alignItems:"center",gap:1}}><IClock z={8}/>{fmt(entry.time)}</span>}
+                {entry.tags&&entry.tags.slice(0,2).map(function(t){return <span key={t} style={{background:"rgba(255,255,255,0.1)",borderRadius:8,padding:"1px 5px",fontSize:8,color:"rgba(255,255,255,0.5)",fontFamily:"Arial,sans-serif"}}>#{t}</span>;})}
+              </div>
+            </div>
+            <div style={{display:"flex",gap:4,flexShrink:0}}>
+              <button onClick={function(){setSel(isS?null:entry);}} style={{height:32,borderRadius:7,border:"none",cursor:"pointer",background:isS?"#FFD000":c.bg,borderBottom:"3px solid "+(isS?"#b89200":c.sh),color:isS?"#3a2600":"#fff",padding:"0 10px",display:"flex",alignItems:"center",gap:4,fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:10,textTransform:"uppercase"}} onMouseDown={function(e){e.currentTarget.style.transform="scale(0.94) translateY(2px)";}} onMouseUp={function(e){e.currentTarget.style.transform="";}} onMouseLeave={function(e){e.currentTarget.style.transform="";}}>{isS?"Pick day":<span><IPlus z={11}/> Add</span>}</button>
+              <button onClick={function(){props.onDel(entry.id);}} style={{width:32,height:32,borderRadius:7,border:"none",cursor:"pointer",background:"rgba(211,47,47,0.2)",borderBottom:"3px solid rgba(127,26,26,0.5)",display:"flex",alignItems:"center",justifyContent:"center"}} onMouseDown={function(e){e.currentTarget.style.transform="scale(0.92) translateY(2px)";}} onMouseUp={function(e){e.currentTarget.style.transform="";}} onMouseLeave={function(e){e.currentTarget.style.transform="";}}><IX z={11} color="rgba(255,100,100,0.8)"/></button>
+            </div>
+          </div>
+          {isS&&<div style={{background:"rgba(0,0,0,0.3)",borderTop:"1px solid rgba(255,255,255,0.07)",padding:"8px 10px 10px"}}>
+            <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:8,fontWeight:900,color:"rgba(255,255,255,0.5)",letterSpacing:"1px",textTransform:"uppercase",marginBottom:7}}>Add to:</div>
+            <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{dayBtns}</div>
+          </div>}
+        </div>
+      </div>
+    );
+  });
+  return (
+    <div onClick={function(e){if(e.target===e.currentTarget)props.onClose();}} style={{position:"fixed",inset:0,zIndex:150,background:"rgba(0,0,0,0.6)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
       <div style={{width:"100%",maxWidth:430,background:"#0f1f14",borderRadius:"22px 22px 0 0",border:"2px solid rgba(255,255,255,0.1)",borderBottom:"none",maxHeight:"88vh",display:"flex",flexDirection:"column",animation:"drawerUp 0.3s cubic-bezier(0.34,1.2,0.64,1)",overflow:"hidden"}}>
         <div style={{background:"#1a3020",padding:"8px 16px 6px",display:"flex",justifyContent:"center",borderBottom:"1px solid rgba(255,255,255,0.07)"}}><div style={{width:36,height:4,borderRadius:2,background:"rgba(255,255,255,0.2)"}}/></div>
         <div style={{padding:"10px 16px 8px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <div><div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:16,fontWeight:900,color:"#fff",display:"flex",alignItems:"center",gap:8}}><Archive size={16} style={{color:"#FFD000"}}/> Activity Library</div><div style={{fontFamily:"Arial,sans-serif",fontSize:10,color:"rgba(255,255,255,0.45)",marginTop:2}}>{library.length} activities{ml?" - "+ml:""}</div></div>
-          <button onClick={onClose} style={{background:"rgba(255,255,255,0.12)",border:"2px solid rgba(255,255,255,0.15)",borderRadius:8,padding:"5px 8px",cursor:"pointer",color:"#fff",display:"flex"}}><X size={14}/></button>
+          <div>
+            <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:16,fontWeight:900,color:"#fff",display:"flex",alignItems:"center",gap:8}}><IArchive z={16} style={{color:"#FFD000"}}/> Activity Library</div>
+            <div style={{fontFamily:"Arial,sans-serif",fontSize:10,color:"rgba(255,255,255,0.45)",marginTop:2}}>{props.library.length} activities{ml?" - "+ml:""}</div>
+          </div>
+          <button onClick={props.onClose} style={{background:"rgba(255,255,255,0.12)",border:"2px solid rgba(255,255,255,0.15)",borderRadius:8,padding:"5px 8px",cursor:"pointer",color:"#fff",display:"flex"}}><IX z={14}/></button>
         </div>
-        <div style={{padding:"0 16px 10px"}}><div style={{position:"relative"}}><Srch size={12} style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",color:"rgba(255,255,255,0.4)"}}/><input value={search} onChange={e=>setSrch(e.target.value)} placeholder="Search..." style={{width:"100%",background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,padding:"7px 10px 7px 28px",color:"#fff",fontFamily:"Arial,sans-serif",fontSize:13,outline:"none",boxSizing:"border-box"}}/>{search&&<button onClick={()=>setSrch("")} style={{position:"absolute",right:8,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:"rgba(255,255,255,0.4)",cursor:"pointer",display:"flex"}}><X size={11}/></button>}</div></div>
-        <div style={{overflowY:"auto",flex:1,padding:"0 14px 20px",display:"flex",flexDirection:"column",gap:6}}>
-          {filtered.length===0&&<div style={{textAlign:"center",padding:"28px 0",fontFamily:"'Arial Black',Arial,sans-serif",fontSize:12,color:"rgba(255,255,255,0.3)",textTransform:"uppercase"}}>{search?"No matches":"Library empty!"}</div>}
-          {filtered.map((entry)=>{
-            const c=tclr(entry.tags);const isS=sel&&sel.id===entry.id;
-            return(
-              <div key={entry.id}>
-                <div style={{background:c.bg+"22",border:"1.5px solid "+c.bg+"55",borderRadius:10,overflow:"hidden"}}>
-                  <div style={{background:c.bg+"33",padding:"4px 10px",display:"flex",gap:4,alignItems:"center",borderBottom:"1px solid "+c.bg+"33"}}>{[0,1,2,3,4,5,6].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:c.bg+"77",flexShrink:0}}/>)}<div style={{marginLeft:"auto",fontFamily:"Arial,sans-serif",fontSize:8,fontWeight:700,color:"rgba(255,255,255,0.5)"}}>{tier(entry.useCount)}</div></div>
-                  <div style={{padding:"8px 10px",display:"flex",alignItems:"center",gap:8}}>
-                    <div style={{flex:1,minWidth:0}}><div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:14,fontWeight:900,color:"#fff",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{entry.title}</div><div style={{display:"flex",gap:5,marginTop:2,flexWrap:"wrap",alignItems:"center"}}><span style={{fontFamily:"Arial,sans-serif",fontSize:9,color:"rgba(255,255,255,0.45)"}}>Used {entry.useCount}x</span>{entry.time&&<span style={{fontFamily:"Arial,sans-serif",fontSize:9,color:"rgba(255,255,255,0.55)",display:"flex",alignItems:"center",gap:1}}><Clock size={8}/>{fmt(entry.time)}</span>}{entry.isPaid&&entry.cost>0&&<span style={{fontFamily:"Arial,sans-serif",fontSize:9,color:"#FFD000",display:"flex",alignItems:"center",gap:1}}><Dollar size={8}/>${Number(entry.cost).toFixed(2)}</span>}{entry.tags&&entry.tags.slice(0,2).map(t=><span key={t} style={{background:"rgba(255,255,255,0.1)",borderRadius:8,padding:"1px 5px",fontSize:8,color:"rgba(255,255,255,0.5)",fontFamily:"Arial,sans-serif"}}>#{t}</span>)}</div></div>
-                    <div style={{display:"flex",gap:4,flexShrink:0}}>
-                      <button onClick={()=>setSel(isS?null:entry)} style={{height:32,borderRadius:7,border:"none",cursor:"pointer",background:isS?"#FFD000":c.bg,borderBottom:"3px solid "+(isS?"#b89200":c.sh),color:isS?"#3a2600":"#fff",padding:"0 10px",display:"flex",alignItems:"center",gap:4,fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:10,textTransform:"uppercase"}} onMouseDown={e=>{e.currentTarget.style.transform="scale(0.94) translateY(2px)"}} onMouseUp={e=>{e.currentTarget.style.transform=""}} onMouseLeave={e=>{e.currentTarget.style.transform=""}}>{isS?"Pick day":<><Plus size={11}/> Add</>}</button>
-                      <button onClick={()=>onDel(entry.id)} style={{width:32,height:32,borderRadius:7,border:"none",cursor:"pointer",background:"rgba(211,47,47,0.2)",borderBottom:"3px solid rgba(127,26,26,0.5)",display:"flex",alignItems:"center",justifyContent:"center"}} onMouseDown={e=>{e.currentTarget.style.transform="scale(0.92) translateY(2px)"}} onMouseUp={e=>{e.currentTarget.style.transform=""}} onMouseLeave={e=>{e.currentTarget.style.transform=""}}><X size={11} color="rgba(255,100,100,0.8)"/></button>
-                    </div>
-                  </div>
-                  {isS&&(<div style={{background:"rgba(0,0,0,0.3)",borderTop:"1px solid rgba(255,255,255,0.07)",padding:"8px 10px 10px"}}><div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:8,fontWeight:900,color:"rgba(255,255,255,0.5)",letterSpacing:"1px",textTransform:"uppercase",marginBottom:7}}>Add to:</div><div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{DAYS.map(day=><button key={day} onClick={()=>{onAdd(entry,day);setSel(null);}} style={{background:c.bg,borderBottom:"3px solid "+c.sh,border:"none",borderRadius:6,padding:"6px 9px",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:10,color:"#fff",cursor:"pointer",textTransform:"uppercase"}} onMouseDown={e=>{e.currentTarget.style.transform="scale(0.94) translateY(2px)"}} onMouseUp={e=>{e.currentTarget.style.transform=""}} onMouseLeave={e=>{e.currentTarget.style.transform=""}}>{day.slice(0,3)}</button>)}</div></div>)}
-                </div>
-              </div>
-            );
-          })}
+        <div style={{padding:"0 16px 10px"}}>
+          <div style={{position:"relative"}}>
+            <ISearch z={12} style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",color:"rgba(255,255,255,0.4)"}}/>
+            <input value={srch} onChange={function(e){setSrch(e.target.value);}} placeholder="Search..." style={{width:"100%",background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,padding:"7px 10px 7px 28px",color:"#fff",fontFamily:"Arial,sans-serif",fontSize:13,outline:"none",boxSizing:"border-box"}}/>
+            {srch&&<button onClick={function(){setSrch("");}} style={{position:"absolute",right:8,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:"rgba(255,255,255,0.4)",cursor:"pointer",display:"flex"}}><IX z={11}/></button>}
+          </div>
+        </div>
+        <div style={{overflowY:"auto",flex:1,padding:"0 14px 20px"}}>
+          {filtered.length===0&&<div style={{textAlign:"center",padding:"28px 0",fontFamily:"'Arial Black',Arial,sans-serif",fontSize:12,color:"rgba(255,255,255,0.3)",textTransform:"uppercase"}}>{srch?"No matches":"Library empty!"}</div>}
+          {cards}
         </div>
       </div>
     </div>
   );
 }
-
-// --- UNSCHEDULED TRAY ---------------------------------------------------------
-// Morning = 08:00, Afternoon = 13:00
-function USTray({activeWk,onAssign,onTap}){
-  const items=[];
-  DAYS.forEach(day=>{const dd=activeWk.days[day];if(!dd)return;(dd.activities||[]).forEach(act=>{if(!act.time)items.push({act,day,date:dd.date});});});
+ 
+// ---- UNSCHEDULED TRAY -------------------------------------------------------
+function USTray(props){
+  var items=[];
+  DAYS.forEach(function(day){
+    var dd=props.activeWk.days[day];
+    if(!dd)return;
+    (dd.activities||[]).forEach(function(act){if(!act.time)items.push({act:act,day:day,date:dd.date});});
+  });
   if(!items.length)return null;
-  return(
+  var chips=items.map(function(item){
+    var c=chipColor(item.act,0);
+    return (
+      <div key={item.act.id} style={{flexShrink:0,background:c.bg+"33",border:"1px solid "+c.bg+"55",borderRadius:8,padding:"4px 7px",display:"flex",flexDirection:"column",gap:3,minWidth:0}}>
+        <button onClick={function(){props.onTap(item.act,item.day,item.date);}} style={{background:"none",border:"none",color:"#fff",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:9,cursor:"pointer",padding:0,textAlign:"left",whiteSpace:"nowrap",maxWidth:80,overflow:"hidden",textOverflow:"ellipsis"}}>
+          {item.act.title} <span style={{opacity:0.5,fontSize:8}}>{DSHORT[DAYS.indexOf(item.day)]}</span>
+        </button>
+        <div style={{display:"flex",gap:3}}>
+          <button onClick={function(){props.onAssign(item.act,item.day,"08:00");}} style={{background:"#FFD000",border:"none",borderRadius:4,padding:"2px 5px",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:8,color:"#3a2600",cursor:"pointer",flexShrink:0}}>AM</button>
+          <button onClick={function(){props.onAssign(item.act,item.day,"13:00");}} style={{background:"rgba(255,255,255,0.18)",border:"none",borderRadius:4,padding:"2px 5px",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:8,color:"#fff",cursor:"pointer",flexShrink:0}}>PM</button>
+        </div>
+      </div>
+    );
+  });
+  return (
     <div style={{background:"rgba(0,0,0,0.25)",borderBottom:"1px solid rgba(255,255,255,0.08)",padding:"5px 8px 7px",flexShrink:0}}>
       <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:8,fontWeight:900,color:"rgba(255,255,255,0.4)",letterSpacing:"0.8px",textTransform:"uppercase",marginBottom:5}}>Unscheduled - tap AM/PM to place on timeline</div>
-      <div style={{display:"flex",gap:5,overflowX:"auto",paddingBottom:2}}>
-        {items.map(({act,day,date})=>{
-          const c=act.isComplete?DONE:chipColor;
-          return(
-            <div key={act.id} style={{flexShrink:0,background:c.bg+"33",border:"1px solid "+c.bg+"55",borderRadius:8,padding:"4px 7px",display:"flex",flexDirection:"column",gap:3,minWidth:0}}>
-              <button onClick={()=>onTap(act,day,date)} style={{background:"none",border:"none",color:"#fff",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:9,cursor:"pointer",padding:0,textAlign:"left",textDecoration:act.isComplete?"line-through":"none",opacity:act.isComplete?0.65:1,whiteSpace:"nowrap",maxWidth:80,overflow:"hidden",textOverflow:"ellipsis"}}>
-                {act.title} <span style={{opacity:0.5,fontSize:8}}>{DSHORT[DAYS.indexOf(day)]}</span>
-              </button>
-              <div style={{display:"flex",gap:3}}>
-                <button onClick={()=>onAssign(act,day,"08:00")} style={{background:"#FFD000",border:"none",borderRadius:4,padding:"2px 5px",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:8,color:"#3a2600",cursor:"pointer",flexShrink:0}}>AM</button>
-                <button onClick={()=>onAssign(act,day,"13:00")} style={{background:"rgba(255,255,255,0.18)",border:"none",borderRadius:4,padding:"2px 5px",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:8,color:"#fff",cursor:"pointer",flexShrink:0}}>PM</button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <div style={{display:"flex",gap:5,overflowX:"auto",paddingBottom:2}}>{chips}</div>
     </div>
   );
 }
-
-// --- TIMELINE CHIP (draggable) ------------------------------------------------
-function TLChip({act,dayName,onTap,onDrop,hs,he,chipColor}){
-  const ref=useRef(null);
-  const ds=useRef(null);
-  const c=act.isComplete?DONE:chipColor;
-  const top=t2px(act.time,hs);
-  const H=50;
+ 
+// ---- TIMELINE CHIP ----------------------------------------------------------
+function TLChip(props){
+  var act=props.act, hs=props.hs, he=props.he, cidx=props.cidx;
+  var ref=useRef(null);
+  var actRef=useRef(act);
+  useEffect(function(){actRef.current=act;},[act]);
+  var ds=useRef(null);
+  var c=chipColor(act,cidx);
+  var top=t2px(act.time,hs);
+  var H=50;
+  useEffect(function(){
+    return function(){if(ds.current&&ds.current.gh){try{document.body.removeChild(ds.current.gh);}catch(e){}ds.current=null;}};
+  },[]);
   function pDown(e){
     e.stopPropagation();
-    const rect=ref.current.getBoundingClientRect();
-    const cols=Array.from(document.querySelectorAll("[data-tlc]")).map(el=>({rect:el.getBoundingClientRect(),day:el.dataset.tlc}));
-    ds.current={sy:e.clientY,sx:e.clientX,ot:top,mv:false,cr:rect,cols,gh:null};
+    var rect=ref.current.getBoundingClientRect();
+    var cols=Array.from(document.querySelectorAll("[data-tlc]")).map(function(el){return {rect:el.getBoundingClientRect(),day:el.dataset.tlc};});
+    ds.current={sy:e.clientY,sx:e.clientX,ot:top,mv:false,cr:rect,cols:cols,gh:null};
     ref.current.setPointerCapture(e.pointerId);
   }
   function pMove(e){
     if(!ds.current)return;
-    const d=ds.current;
-    const dy=e.clientY-d.sy,dx=e.clientX-d.sx;
+    var d=ds.current,dy=e.clientY-d.sy,dx=e.clientX-d.sx;
     if(!d.mv&&Math.abs(dy)<6&&Math.abs(dx)<6)return;
     if(!d.mv){
       d.mv=true;
-      const g=document.createElement("div");
+      var g=document.createElement("div");
       g.style.cssText="position:fixed;z-index:9999;pointer-events:none;border-radius:7px;opacity:0.9;font-family:'Arial Black',Arial,sans-serif;font-size:9px;font-weight:900;color:#fff;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:"+c.bg+";border-bottom:3px solid "+c.sh+";box-shadow:0 4px 20px rgba(0,0,0,0.5);min-width:40px;max-width:80px;";
-      g.textContent=act.title;document.body.appendChild(g);d.gh=g;
+      g.textContent=actRef.current.title;
+      document.body.appendChild(g);
+      d.gh=g;
     }
-    d.gh.style.left=(d.cr.left+dx)+"px";d.gh.style.top=(d.cr.top+dy)+"px";
-    document.querySelectorAll("[data-tlc]").forEach(el=>el.style.background="transparent");
-    const tc=d.cols.find(col=>e.clientX>=col.rect.left&&e.clientX<=col.rect.right);
-    if(tc){const el=document.querySelector("[data-tlc='"+tc.day+"']");if(el)el.style.background="rgba(255,208,0,0.07)";}
+    d.gh.style.left=(d.cr.left+dx)+"px";
+    d.gh.style.top=(d.cr.top+dy)+"px";
+    document.querySelectorAll("[data-tlc]").forEach(function(el){el.style.background="transparent";});
+    var tc=d.cols.filter(function(col){return e.clientX>=col.rect.left&&e.clientX<=col.rect.right;})[0];
+    if(tc){var el=document.querySelector("[data-tlc='"+tc.day+"']");if(el)el.style.background="rgba(255,208,0,0.07)";}
   }
   function pUp(e){
     if(!ds.current)return;
-    const d=ds.current;
-    if(d.gh)document.body.removeChild(d.gh);
-    document.querySelectorAll("[data-tlc]").forEach(el=>el.style.background="transparent");
-    if(!d.mv){ds.current=null;onTap();return;}
-    const dy=e.clientY-d.sy;
-    const newT=px2t(d.ot+dy,hs,he);
-    const tc=d.cols.find(col=>e.clientX>=col.rect.left&&e.clientX<=col.rect.right);
+    var d=ds.current;
+    if(d.gh){try{document.body.removeChild(d.gh);}catch(err){}d.gh=null;}
+    document.querySelectorAll("[data-tlc]").forEach(function(el){el.style.background="transparent";});
+    var wasDrag=d.mv,savedAct=Object.assign({},actRef.current),savedDay=props.dayName;
     ds.current=null;
-    onDrop(act,dayName,tc?tc.day:dayName,newT);
+    if(!wasDrag){props.onTap();return;}
+    var dy=e.clientY-d.sy,newT=px2t(d.ot+dy,hs,he);
+    var tc=d.cols.filter(function(col){return e.clientX>=col.rect.left&&e.clientX<=col.rect.right;})[0];
+    props.onDrop(savedAct,savedDay,tc?tc.day:savedDay,newT);
   }
   function pCan(){
     if(!ds.current)return;
-    if(ds.current.gh)document.body.removeChild(ds.current.gh);
-    document.querySelectorAll("[data-tlc]").forEach(el=>el.style.background="transparent");
+    if(ds.current.gh){try{document.body.removeChild(ds.current.gh);}catch(e){}ds.current.gh=null;}
+    document.querySelectorAll("[data-tlc]").forEach(function(el){el.style.background="transparent";});
     ds.current=null;
   }
   if(top===null)return null;
-  return(
+  return (
     <div ref={ref} onPointerDown={pDown} onPointerMove={pMove} onPointerUp={pUp} onPointerCancel={pCan}
       style={{position:"absolute",top:top,left:1,right:1,height:H,background:c.bg,borderBottom:"3px solid "+c.sh,borderRadius:7,padding:"4px 5px",cursor:"grab",userSelect:"none",touchAction:"none",boxShadow:"0 2px 8px rgba(0,0,0,0.3)",overflow:"hidden",zIndex:10}}>
-      {act.isComplete&&<Check size={7} style={{position:"absolute",top:3,right:3,opacity:0.8}}/>}
+      {act.isComplete&&<ICheck z={7} style={{position:"absolute",top:3,right:3,opacity:0.8}}/>}
       <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:9,color:"#fff",textShadow:"0 1px 2px rgba(0,0,0,0.5)",lineHeight:1.2,overflow:"hidden",maxHeight:28,textDecoration:act.isComplete?"line-through":"none",opacity:act.isComplete?0.75:1}}>{act.title}</div>
       {act.time&&<div style={{fontFamily:"Arial,sans-serif",fontSize:7.5,color:"rgba(255,255,255,0.8)",marginTop:2,fontWeight:700}}>{fmt(act.time)}</div>}
     </div>
   );
 }
-
-// --- TIMELINE GRID ------------------------------------------------------------
-const CHIP_PALETTE=[
-  {bg:"#b8860b",sh:"#7a5800"},
-  {bg:"#1565C0",sh:"#0a3f7f"},
-  {bg:"#6a1b9a",sh:"#38006b"},
-  {bg:"#c62828",sh:"#7f0000"},
-  {bg:"#00695C",sh:"#003d33"},
-  {bg:"#2e7d32",sh:"#1a4a1d"},
-  {bg:"#e65100",sh:"#8c3300"},
-  {bg:"#283593",sh:"#001064"},
-  {bg:"#558b2f",sh:"#255d00"},
-  {bg:"#4e342e",sh:"#260e04"},
-];
-function TLGrid({activeWk,modeData,onTap,onDrop,onAddAt,snapAnim}){
-  const scrollRef=useRef(null);
-  const hrs=getHours(modeData);
-  const hs=hrs.start,he=hrs.end;
-  const totalPx=(he-hs)*HOUR_PX;
-  const hours=[];for(let h=hs;h<=he;h++)hours.push(h);
-  const TW=32;
-
-  useEffect(()=>{if(scrollRef.current)scrollRef.current.scrollTop=0;},[activeWk.activeWeek]);
-
-  return(
-    <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden",animation:snapAnim?"snapPop 0.5s ease":"none"}}>
-      {/* Day header */}
+ 
+// ---- TIMELINE GRID ----------------------------------------------------------
+function TLGrid(props){
+  var scrollRef=useRef(null);
+  var hrs=getHours(props.modeData);
+  var hs=hrs.s, he=hrs.e;
+  var totalPx=(he-hs)*HOUR_PX;
+  var hours=[];
+  for(var hh=hs;hh<=he;hh++)hours.push(hh);
+  var TW=36;
+  useEffect(function(){if(scrollRef.current)scrollRef.current.scrollTop=0;},[]);
+ 
+  var dayHeaders=DAYS.map(function(day,i){
+    var w=WX[i],dd=props.activeWk.days[day],acts=(dd&&dd.activities)||[];
+    var done=acts.filter(function(a){return a.isComplete;}).length;
+    return (
+      <div key={day} style={{flex:1,padding:"5px 2px 4px",display:"flex",flexDirection:"column",alignItems:"center",gap:1,borderLeft:"1px solid rgba(255,255,255,0.07)"}}>
+        <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:8,fontWeight:900,color:"rgba(255,255,255,0.55)",letterSpacing:"0.5px"}}>{DSHORT[i]}</div>
+        <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:15,fontWeight:900,color:"#fff",lineHeight:1}}>{dayNum(dd?dd.date:null)}</div>
+        <WIcon t={w.t}/>
+        <span style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:7,fontWeight:800,color:"rgba(255,255,255,0.65)"}}>{w.temp}F</span>
+        {acts.length>0&&<div style={{background:done===acts.length?"#c62828":"rgba(255,255,255,0.15)",borderRadius:8,padding:"1px 4px",fontSize:7,fontWeight:700,color:"#fff",fontFamily:"Arial,sans-serif"}}>{done}/{acts.length}</div>}
+      </div>
+    );
+  });
+ 
+  var hourLabels=hours.map(function(h){
+    return (
+      <div key={h} style={{position:"absolute",top:(h-hs)*HOUR_PX-7,left:0,right:0,paddingRight:5,display:"flex",justifyContent:"flex-end",alignItems:"center",height:14}}>
+        <span style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:7.5,fontWeight:900,color:"#FFD000"}}>{fmtH(h)}</span>
+      </div>
+    );
+  });
+ 
+  var dayCols=DAYS.map(function(day){
+    var dd=props.activeWk.days[day];
+    var acts=(dd&&dd.activities)||[];
+    var scheduled=acts.filter(function(a){return a.time;});
+    var nonFixed=acts.filter(function(a){return a.title!=="Breakfast"&&a.title!=="Lunch";});
+    var hourLines=hours.map(function(h){return <div key={h} style={{position:"absolute",top:(h-hs)*HOUR_PX,left:0,right:0,height:1,background:"rgba(255,255,255,0.07)"}}/>;});
+    var halfLines=hours.slice(0,-1).map(function(h){return <div key={h+"h"} style={{position:"absolute",top:(h-hs)*HOUR_PX+HOUR_PX/2,left:0,right:0,height:1,background:"rgba(255,255,255,0.03)"}}/>;});
+    var tapZones=hours.slice(0,-1).map(function(h){
+      return <div key={"tz"+h} onClick={function(){props.onAddAt(day,m2t(h*60));}} style={{position:"absolute",top:(h-hs)*HOUR_PX+2,left:0,right:0,height:HOUR_PX-4,zIndex:5,cursor:"crosshair"}}/>;
+    });
+    var chips=scheduled.map(function(act){
+      var cidx=nonFixed.map(function(a){return a.id;}).indexOf(act.id);
+      if(cidx<0)cidx=0;
+      return <TLChip key={act.id} act={act} dayName={day} hs={hs} he={he} cidx={cidx} onTap={function(){props.onTap(act,day,dd?dd.date:null);}} onDrop={props.onDrop}/>;
+    });
+    return (
+      <div key={day} data-tlc={day} style={{flex:1,borderLeft:"1px solid rgba(255,255,255,0.07)",position:"relative",cursor:"crosshair"}}>
+        <div style={{position:"absolute",inset:0,pointerEvents:"none"}}>{hourLines}{halfLines}</div>
+        {tapZones}
+        {chips}
+      </div>
+    );
+  });
+ 
+  return (
+    <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden",animation:props.snapAnim?"snapPop 0.5s ease":"none"}}>
       <div style={{display:"flex",borderBottom:"2px solid rgba(255,255,255,0.12)",background:"rgba(0,0,0,0.30)",flexShrink:0}}>
         <div style={{width:TW,flexShrink:0}}/>
-        {DAYS.map((day,i)=>{
-          const w=WX[i],dd=activeWk.days[day],acts=(dd&&dd.activities)||[];
-          const done=acts.filter(a=>a.isComplete).length;
-          return(
-            <div key={day} style={{flex:1,padding:"5px 2px 4px",display:"flex",flexDirection:"column",alignItems:"center",gap:1,borderLeft:"1px solid rgba(255,255,255,0.07)"}}>
-              <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:8,fontWeight:900,color:"rgba(255,255,255,0.55)",letterSpacing:"0.5px"}}>{DSHORT[i]}</div>
-              <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:15,fontWeight:900,color:"#fff",lineHeight:1}}>{dayN(dd?dd.date:null)}</div>
-              <WIco t={w.t}/>
-              <span style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:7,fontWeight:800,color:"rgba(255,255,255,0.65)"}}>{w.temp}F</span>
-              {acts.length>0&&<div style={{background:done===acts.length?"#c62828":"rgba(255,255,255,0.15)",borderRadius:8,padding:"1px 4px",fontSize:7,fontWeight:700,color:"#fff",fontFamily:"Arial,sans-serif"}}>{done}/{acts.length}</div>}
-            </div>
-          );
-        })}
+        {dayHeaders}
       </div>
-      {/* Scrollable timeline */}
       <div ref={scrollRef} style={{flex:1,overflowY:"scroll",overflowX:"hidden"}}>
         <div style={{display:"flex",height:totalPx,position:"relative"}}>
-          {/* Hour labels */}
-          <div style={{width:TW,flexShrink:0,position:"relative",background:"rgba(0,0,0,0.1)"}}>
-            {hours.map(h=>(
-              <div key={h} style={{position:"absolute",top:(h-hs)*HOUR_PX-7,left:0,right:0,paddingRight:4,display:"flex",justifyContent:"flex-end",alignItems:"center",height:14}}>
-                <span style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:7.5,fontWeight:900,color:"#FFD000"}}>{fmtH(h)}</span>
-              </div>
-            ))}
-          </div>
-          {/* Day columns */}
-          {DAYS.map((day)=>{
-            const dd=activeWk.days[day];
-            const acts=(dd&&dd.activities)||[];
-            const scheduled=acts.filter(a=>a.time);
-            return(
-              <div key={day} data-tlc={day}
-                onClick={e=>{
-                  if(e.target===e.currentTarget||e.target.dataset.tlbg){
-                    const rect=e.currentTarget.getBoundingClientRect();
-                    const py=e.clientY-rect.top+(scrollRef.current?scrollRef.current.scrollTop:0);
-                    onAddAt(day,px2t(py,hs,he));
-                  }
-                }}
-                style={{flex:1,borderLeft:"1px solid rgba(255,255,255,0.07)",position:"relative",cursor:"crosshair"}}>
-                {/* Invisible tap zone strips every 56px for adding activities */}
-                {hours.slice(0,-1).map(h=>(
-                  <div key={"tap"+h} onClick={e=>{e.stopPropagation();onAddAt(day,m2t(h*60));}}
-                    style={{position:"absolute",top:(h-hs)*HOUR_PX+2,left:0,right:0,height:HOUR_PX-4,zIndex:5,cursor:"crosshair"}}/>
-                ))}
-                <div data-tlbg="1" style={{position:"absolute",inset:0,pointerEvents:"none"}}>
-                  {hours.map(h=><div key={h} style={{position:"absolute",top:(h-hs)*HOUR_PX,left:0,right:0,height:1,background:"rgba(255,255,255,0.07)"}}/>)}
-                  {hours.slice(0,-1).map(h=><div key={h+"h"} style={{position:"absolute",top:(h-hs)*HOUR_PX+HOUR_PX/2,left:0,right:0,height:1,background:"rgba(255,255,255,0.03)"}}/>)}
-                </div>
-                {(()=>{
-                  let paletteIdx=0;
-                  const colorMap={};
-                  sortA(acts).forEach(a=>{
-                    if(a.title==="Breakfast"){colorMap[a.id]={bg:"#FFD000",sh:"#b89200"};}
-                    else if(a.title==="Lunch"){colorMap[a.id]={bg:"#6D4C41",sh:"#3e2723"};}
-                    else{colorMap[a.id]=CHIP_PALETTE[paletteIdx%CHIP_PALETTE.length];paletteIdx++;}
-                  });
-                  return scheduled.map(act=>(
-                    <TLChip key={act.id} act={act} dayName={day} hs={hs} he={he}
-                      chipColor={colorMap[act.id]||CHIP_PALETTE[0]}
-                      onTap={()=>onTap(act,day,dd?dd.date:null)}
-                      onDrop={onDrop}
-                    />
-                  ));
-                })()}
-              </div>
-            );
-          })}
+          <div style={{width:TW,flexShrink:0,position:"relative",background:"rgba(0,0,0,0.1)"}}>{hourLabels}</div>
+          {dayCols}
         </div>
       </div>
     </div>
   );
 }
-
-// =============================================================================
-// MAIN APP
-// =============================================================================
+ 
+// ---- MAIN APP ---------------------------------------------------------------
 function App(){
-  const[modeData,setMD]=useState(()=>loadM());
-  const[state,setSt]=useState(()=>loadS()||buildState());
-  const[lib,setLib]=useState(()=>{const s=loadL();if(s&&s.length>0)return s;const m=loadM();return buildLib(m);});
-  const[modal,setModal]=useState(null);
-  const[libOpen,setLibO]=useState(false);
-  const[detail,setDet]=useState(null);
-  const[snap,setSnap]=useState(false);
-  const[sets,setSets]=useState(false);
-
-  useEffect(()=>{try{localStorage.setItem(SCH_KEY,JSON.stringify(state));}catch(e){}},[state]);
-  useEffect(()=>{saveL(lib);},[lib]);
-
-  function handleModeSelect(data){setMD(data);saveM(data);const s=loadL();if(!s)setLib(buildLib(data));}
+  var mdState=useState(function(){return loadM();}),modeData=mdState[0],setMD=mdState[1];
+  var stState=useState(function(){return loadS()||buildState();}),state=stState[0],setSt=stState[1];
+  var libState=useState(function(){var s=loadL();if(s)return s;var m=loadM();return buildLib(m);}),lib=libState[0],setLib=libState[1];
+  var modalState=useState(null),modal=modalState[0],setModal=modalState[1];
+  var libOState=useState(false),libOpen=libOState[0],setLibO=libOState[1];
+  var detState=useState(null),detail=detState[0],setDet=detState[1];
+  var snapState=useState(false),snap=snapState[0],setSnap=snapState[1];
+  var setsState=useState(false),sets=setsState[0],setSets=setsState[1];
+ 
+  useEffect(function(){saveS(state);},[state]);
+  useEffect(function(){saveL(lib);},[lib]);
+ 
+  function handleModeSelect(data){setMD(data);saveM(data);var s=loadL();if(!s||s.length===0)setLib(buildLib(data));}
   function handleModeChange(newMode,newPlanner){
-    const data={mode:newMode,planner:newPlanner};setMD(data);saveM(data);
-    const existing=lib.map(e=>e.title.toLowerCase());
-    const mk=newMode;
-    const isHS=newPlanner==="Homeschool";
-    const modeP=((MODES[mk]&&MODES[mk].extraPresets)||[]).filter(p=>!existing.includes(p.title.toLowerCase()));
-    const hsP=isHS?((MODES.parent&&MODES.parent.homeschoolPresets)||[]).filter(p=>!existing.includes(p.title.toLowerCase())):[];
-    const newP=[...hsP,...modeP];
-    if(newP.length>0){const ne=newP.map(p=>({id:genId(),title:p.title,time:p.time,isPaid:p.isPaid,cost:p.cost,website:"",mapLink:"",tags:p.tags,useCount:p.useCount,lastUsed:Date.now()-p.useCount*1000}));setLib(prev=>[...ne,...prev]);}
+    var data={mode:newMode,planner:newPlanner};setMD(data);saveM(data);
+    var existing=lib.map(function(e){return e.title.toLowerCase();});
+    var mk=newMode,isHS=newPlanner==="Homeschool";
+    var mp=((MODES[mk]&&MODES[mk].extraPresets)||[]).filter(function(p){return existing.indexOf(p.title.toLowerCase())<0;});
+    var hp=isHS?((MODES.parent&&MODES.parent.homeschoolPresets)||[]).filter(function(p){return existing.indexOf(p.title.toLowerCase())<0;}):[];
+    var newP=hp.concat(mp);
+    if(newP.length>0){var ne=newP.map(function(p){return {id:genId(),title:p.title,time:p.time,isPaid:false,cost:0,website:"",mapLink:"",tags:p.tags,useCount:p.useCount,lastUsed:Date.now()-p.useCount*1000};});setLib(function(prev){return ne.concat(prev);});}
   }
-
+ 
   if(!modeData)return <Onboard onSelect={handleModeSelect}/>;
-
-  const activeWk=state.weeks[state.activeWeek];
-  const wkKeys=Object.keys(state.weeks);
-  const wkIdx=wkKeys.indexOf(state.activeWeek);
-  const totalLib=lib.length;
-  const doneWk=Object.values(activeWk.days).flatMap(d=>d.activities||[]).filter(a=>a.isComplete).length;
-  const totalWk=Object.values(activeWk.days).flatMap(d=>d.activities||[]).length;
-
+ 
+  var activeWk=state.weeks[state.activeWeek];
+  var wkKeys=Object.keys(state.weeks);
+  var wkIdx=wkKeys.indexOf(state.activeWeek);
+  var totalLib=lib.length;
+  var doneWk=Object.values(activeWk.days).reduce(function(acc,d){return acc+(d.activities||[]).filter(function(a){return a.isComplete;}).length;},0);
+  var totalWk=Object.values(activeWk.days).reduce(function(acc,d){return acc+(d.activities||[]).length;},0);
+  var modeInfo=MODES[modeData.mode]||MODES.parent;
+  var isHS=modeData.planner==="Homeschool";
+  var headerSub=isHS?"Homeschool Playbook":modeData.planner?modeData.planner+"'s Playbook":modeInfo.label;
+ 
   function mutDay(dayName,fn){
-    setSt(prev=>{
-      const wk={...prev.weeks[prev.activeWeek]};
-      const dd={...wk.days[dayName]};
+    setSt(function(prev){
+      var wk=Object.assign({},prev.weeks[prev.activeWeek]);
+      var dd=Object.assign({},wk.days[dayName]);
       dd.activities=sortA(fn(dd.activities||[]));
-      wk.days={...wk.days,[dayName]:dd};
-      return{...prev,weeks:{...prev.weeks,[prev.activeWeek]:wk}};
+      wk.days=Object.assign({},wk.days);wk.days[dayName]=dd;
+      var weeks=Object.assign({},prev.weeks);weeks[prev.activeWeek]=wk;
+      return Object.assign({},prev,{weeks:weeks});
     });
   }
-
-  const handleAdd=useCallback((activity)=>{
-    const{day,...rest}=activity;
-    mutDay(day,acts=>[...acts,{...rest,isComplete:false}]);
-    setLib(prev=>upsert(prev,rest));
-    snap2();setSnap(true);setTimeout(()=>setSnap(false),600);setModal(null);
-  },[]);
-
-  const handleAddR=useCallback((base,rDays,allW)=>{
-    setSt(prev=>{
-      const nw={...prev.weeks};
-      const wkList=allW?Object.keys(nw):[prev.activeWeek];
-      wkList.forEach(wk=>{
-        const w={...nw[wk]};
-        rDays.forEach(d=>{
+ 
+  function handleAdd(activity){
+    var day=activity.day;
+    var rest=Object.assign({},activity);delete rest.day;
+    mutDay(day,function(acts){return acts.concat([Object.assign({},rest,{isComplete:false})]);});
+    setLib(function(prev){return upsert(prev,rest);});
+    snapSound();setSnap(true);setTimeout(function(){setSnap(false);},600);setModal(null);
+  }
+ 
+  function handleAddR(base,rDays,allW){
+    setSt(function(prev){
+      var nw=Object.assign({},prev.weeks);
+      var wkList=allW?Object.keys(nw):[prev.activeWeek];
+      wkList.forEach(function(wk){
+        var w=Object.assign({},nw[wk]);
+        rDays.forEach(function(d){
           if(!w.days[d])return;
-          const dd={...w.days[d]};
-          dd.activities=sortA([...(dd.activities||[]),{...base,id:genId(),isComplete:false}]);
-          w.days={...w.days,[d]:dd};
+          var dd=Object.assign({},w.days[d]);
+          dd.activities=sortA((dd.activities||[]).concat([Object.assign({},base,{id:genId(),isComplete:false})]));
+          w.days=Object.assign({},w.days);w.days[d]=dd;
         });
         nw[wk]=w;
       });
-      return{...prev,weeks:nw};
+      return Object.assign({},prev,{weeks:nw});
     });
-    setLib(prev=>upsert(prev,base));
-    snap2();setSnap(true);setTimeout(()=>setSnap(false),600);setModal(null);
-  },[]);
-
-  const handleLibAdd=useCallback((entry,day)=>{
-    const act={id:genId(),title:entry.title,time:entry.time,isPaid:entry.isPaid,cost:entry.cost,website:entry.website||"",mapLink:entry.mapLink||"",tags:entry.tags,notes:"",isComplete:false};
-    mutDay(day,acts=>[...acts,act]);
-    setLib(prev=>upsert(prev,{...entry,day}));
-    snap2();setSnap(true);setTimeout(()=>setSnap(false),600);
-  },[]);
-
-  const handleToggle=useCallback((dayName,actId)=>{
-    setSt(prev=>{
-      const wk={...prev.weeks[prev.activeWeek]};
-      const dd={...wk.days[dayName]};
-      const act=dd.activities.find(a=>a.id===actId);
-      if(act&&!act.isComplete)win2();
-      dd.activities=dd.activities.map(a=>a.id===actId?{...a,isComplete:!a.isComplete}:a);
-      wk.days={...wk.days,[dayName]:dd};
-      return{...prev,weeks:{...prev.weeks,[prev.activeWeek]:wk}};
+    setLib(function(prev){return upsert(prev,base);});
+    snapSound();setSnap(true);setTimeout(function(){setSnap(false);},600);setModal(null);
+  }
+ 
+  function handleLibAdd(entry,day){
+    var act={id:genId(),title:entry.title,time:entry.time,isPaid:false,cost:0,website:entry.website||"",mapLink:entry.mapLink||"",tags:entry.tags,notes:"",isComplete:false};
+    mutDay(day,function(acts){return acts.concat([act]);});
+    setLib(function(prev){return upsert(prev,Object.assign({},entry,{day:day}));});
+    snapSound();setSnap(true);setTimeout(function(){setSnap(false);},600);
+  }
+ 
+  function handleToggle(dayName,actId){
+    setSt(function(prev){
+      var wk=Object.assign({},prev.weeks[prev.activeWeek]);
+      var dd=Object.assign({},wk.days[dayName]);
+      var found=dd.activities.filter(function(a){return a.id===actId;})[0];
+      if(found&&!found.isComplete)winSound();
+      dd.activities=dd.activities.map(function(a){return a.id===actId?Object.assign({},a,{isComplete:!a.isComplete}):a;});
+      wk.days=Object.assign({},wk.days);wk.days[dayName]=dd;
+      var weeks=Object.assign({},prev.weeks);weeks[prev.activeWeek]=wk;
+      return Object.assign({},prev,{weeks:weeks});
     });
-  },[]);
-
-  const handleSave=useCallback((dayName,updated)=>{
-    mutDay(dayName,acts=>sortA(acts.map(a=>a.id===updated.id?updated:a)));
-    setLib(prev=>upsert(prev,updated));
-  },[]);
-
-  const handleDel=useCallback((dayName,actId)=>{mutDay(dayName,acts=>acts.filter(a=>a.id!==actId));},[]);
-
-  const handleDrop=useCallback((act,fromDay,toDay,newTime)=>{
-    setSt(prev=>{
-      const nw={...prev.weeks};const wk={...nw[prev.activeWeek]};
+  }
+ 
+  function handleSave(dayName,updated){
+    mutDay(dayName,function(acts){return sortA(acts.map(function(a){return a.id===updated.id?updated:a;}));});
+    setLib(function(prev){return upsert(prev,updated);});
+  }
+ 
+  function handleDel(dayName,actId){
+    mutDay(dayName,function(acts){return acts.filter(function(a){return a.id!==actId;});});
+  }
+ 
+  function handleDrop(act,fromDay,toDay,newTime){
+    setSt(function(prev){
+      var nw=Object.assign({},prev.weeks);
+      var wk=Object.assign({},nw[prev.activeWeek]);
       if(fromDay===toDay){
-        // Same day: single atomic update - remove old, insert updated
-        const dd={...wk.days[fromDay]};
-        dd.activities=sortA((dd.activities||[]).filter(a=>a.id!==act.id).concat([{...act,time:newTime}]));
-        wk.days={...wk.days,[fromDay]:dd};
+        var dd=Object.assign({},wk.days[fromDay]);
+        dd.activities=sortA(dd.activities.filter(function(a){return a.id!==act.id;}).concat([Object.assign({},act,{time:newTime})]));
+        wk.days=Object.assign({},wk.days);wk.days[fromDay]=dd;
       } else {
-        // Different days: remove from source, add to target
-        const fd={...wk.days[fromDay]};
-        fd.activities=(fd.activities||[]).filter(a=>a.id!==act.id);
-        const td={...wk.days[toDay]};
-        td.activities=sortA([...(td.activities||[]),{...act,time:newTime}]);
-        wk.days={...wk.days,[fromDay]:fd,[toDay]:td};
+        var fd=Object.assign({},wk.days[fromDay]);
+        fd.activities=(fd.activities||[]).filter(function(a){return a.id!==act.id;});
+        var td=Object.assign({},wk.days[toDay]);
+        td.activities=sortA((td.activities||[]).concat([Object.assign({},act,{time:newTime})]));
+        wk.days=Object.assign({},wk.days);wk.days[fromDay]=fd;wk.days[toDay]=td;
       }
       nw[prev.activeWeek]=wk;
-      return{...prev,weeks:nw};
+      return Object.assign({},prev,{weeks:nw});
     });
-    snap2();
-  },[]);
-
-  const handleAssign=useCallback((act,dayName,newTime)=>{
-    mutDay(dayName,acts=>sortA(acts.map(a=>a.id===act.id?{...a,time:newTime}:a)));
-  },[]);
-
-  const modeInfo=MODES[modeData.mode]||MODES.parent;
-  const isHS=modeData.planner==="Homeschool";
-  const headerSub=isHS?"Homeschool Playbook":modeData.planner?modeData.planner+"'s Playbook":modeInfo.label;
-  const headerIcon=isHS?"[HS]":modeInfo.icon;
-
-  return(
+    snapSound();
+  }
+ 
+  function handleAssign(act,dayName,newTime){
+    mutDay(dayName,function(acts){return sortA(acts.map(function(a){return a.id===act.id?Object.assign({},a,{time:newTime}):a;}));});
+  }
+ 
+  return (
     <div style={{height:"100%",display:"flex",flexDirection:"column",maxWidth:430,margin:"0 auto",position:"relative"}}>
       <div style={{position:"fixed",inset:0,zIndex:0,backgroundImage:"repeating-linear-gradient(0deg,rgba(0,0,0,0.07) 0px,rgba(0,0,0,0.07) 10px,transparent 10px,transparent 20px),repeating-linear-gradient(90deg,rgba(255,255,255,0.022) 0px,rgba(255,255,255,0.022) 1px,transparent 1px,transparent 40px),linear-gradient(180deg,#2e7320 0%,#337a24 12%,#2a6a1c 25%,#337a24 37%,#2a6a1c 50%,#337a24 62%,#2a6a1c 75%,#337a24 87%,#2a6a1c 100%)"}}/>
       <div style={{position:"relative",zIndex:1,height:"100%",display:"flex",flexDirection:"column"}}>
-        {/* HEADER */}
         <div style={{padding:"7px 10px 5px",display:"flex",alignItems:"center",justifyContent:"space-between",background:"rgba(0,0,0,0.40)",borderBottom:"3px solid rgba(255,208,0,0.3)",flexShrink:0}}>
           <div style={{display:"flex",alignItems:"center",gap:7}}>
-            <div style={{width:30,height:30,background:"#FFD000",borderRadius:7,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,borderBottom:"3px solid #b89200",fontFamily:"'Bangers',cursive",color:"#3a2600"}}>{headerIcon}</div>
+            <div style={{width:30,height:30,background:"#FFD000",borderRadius:7,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,borderBottom:"3px solid #b89200",fontFamily:"'Bangers',cursive",color:"#3a2600"}}>{isHS?"[HS]":modeInfo.icon}</div>
             <div>
               <span style={{fontFamily:"'Bangers',cursive",fontSize:24,color:"#FFD000",letterSpacing:"3px",textShadow:"-2px 2px 0 #7a5800",lineHeight:1,display:"block"}}>The Playbook</span>
               <span style={{fontFamily:"Arial,sans-serif",fontSize:9,color:"rgba(255,255,255,0.5)"}}>{headerSub}</span>
@@ -846,40 +888,31 @@ function App(){
               <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:8,fontWeight:900,color:"rgba(255,255,255,0.8)",textTransform:"uppercase"}}>{wkRange(activeWk)}</div>
               {totalWk>0&&<div style={{fontSize:8,color:"rgba(255,255,255,0.45)",fontFamily:"Arial,sans-serif"}}>{doneWk}/{totalWk} done</div>}
             </div>
-            <LBtn color="gray" small disabled={wkIdx===0} onClick={()=>setSt(p=>({...p,activeWeek:wkKeys[wkIdx-1]}))}>{"<"}</LBtn>
-            <LBtn color="gray" small disabled={wkIdx===wkKeys.length-1} onClick={()=>setSt(p=>({...p,activeWeek:wkKeys[wkIdx+1]}))}>{">"}</LBtn>
-            <button onClick={()=>setSets(true)} style={{background:"rgba(255,255,255,0.15)",border:"none",borderBottom:"3px solid rgba(0,0,0,0.3)",borderRadius:7,padding:"5px 7px",cursor:"pointer",color:"#fff",display:"flex",alignItems:"center"}}><Settings size={12}/></button>
+            <LBtn color="gray" small disabled={wkIdx===0} onClick={function(){setSt(function(p){return Object.assign({},p,{activeWeek:wkKeys[wkIdx-1]});});}}>{"<"}</LBtn>
+            <LBtn color="gray" small disabled={wkIdx===wkKeys.length-1} onClick={function(){setSt(function(p){return Object.assign({},p,{activeWeek:wkKeys[wkIdx+1]});});}}>{">"}</LBtn>
+            <button onClick={function(){setSets(true);}} style={{background:"rgba(255,255,255,0.15)",border:"none",borderBottom:"3px solid rgba(0,0,0,0.3)",borderRadius:7,padding:"5px 7px",cursor:"pointer",color:"#fff",display:"flex",alignItems:"center"}}><ISettings z={12}/></button>
           </div>
         </div>
-
-        {/* UNSCHEDULED TRAY */}
-        <USTray activeWk={activeWk} onAssign={handleAssign} onTap={(act,day,date)=>setDet({activity:{...act,_date:date},dayName:day})}/>
-
-        {/* TIMELINE */}
-        <TLGrid activeWk={activeWk} modeData={modeData}
-          onTap={(act,day,date)=>setDet({activity:{...act,_date:date},dayName:day})}
-          onDrop={handleDrop}
-          onAddAt={(day,time)=>setModal({defaultDay:day,defaultTime:time})}
-          snapAnim={snap}
-        />
-
-        {/* BOTTOM NAV */}
+        <USTray activeWk={activeWk} onAssign={handleAssign} onTap={function(act,day,date){setDet({activity:Object.assign({},act,{_date:date}),dayName:day});}}/>
+        <TLGrid activeWk={activeWk} modeData={modeData} onTap={function(act,day,date){setDet({activity:Object.assign({},act,{_date:date}),dayName:day});}} onDrop={handleDrop} onAddAt={function(day,time){setModal({defaultDay:day,defaultTime:time});}} snapAnim={snap}/>
         <div style={{background:"rgba(0,0,0,0.52)",backdropFilter:"blur(10px)",borderTop:"2px solid rgba(255,255,255,0.1)",padding:"7px 10px 12px",display:"flex",gap:6,flexShrink:0}}>
-          <button onClick={()=>setModal({defaultDay:DAYS[0]})} style={{flex:1.4,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,padding:"7px 4px 5px",borderRadius:10,border:"none",cursor:"pointer",background:"#FFD000",color:"#3a2600",borderBottom:"4px solid #b89200",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:8,textTransform:"uppercase",lineHeight:1.2}}><Plus size={15} sw={3}/>Add to Library</button>
-          <button onClick={()=>setLibO(true)} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,padding:"7px 4px 5px",borderRadius:10,border:"none",cursor:"pointer",background:"rgba(255,255,255,0.1)",color:"#fff",borderBottom:"4px solid rgba(0,0,0,0.25)",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:9,textTransform:"uppercase",position:"relative"}}><Archive size={15}/>Library{totalLib>0&&<div style={{position:"absolute",top:4,right:5,width:14,height:14,borderRadius:"50%",background:"#FFD000",color:"#3a2600",fontSize:8,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center"}}>{totalLib}</div>}</button>
+          <button onClick={function(){setModal({defaultDay:DAYS[0]});}} style={{flex:1.4,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,padding:"7px 4px 5px",borderRadius:10,border:"none",cursor:"pointer",background:"#FFD000",color:"#3a2600",borderBottom:"4px solid #b89200",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:8,textTransform:"uppercase",lineHeight:1.2}}><IPlus z={15}/> Add to Library</button>
+          <button onClick={function(){setLibO(true);}} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,padding:"7px 4px 5px",borderRadius:10,border:"none",cursor:"pointer",background:"rgba(255,255,255,0.1)",color:"#fff",borderBottom:"4px solid rgba(0,0,0,0.25)",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:9,textTransform:"uppercase",position:"relative"}}>
+            <IArchive z={15}/>Library
+            {totalLib>0&&<div style={{position:"absolute",top:4,right:5,width:14,height:14,borderRadius:"50%",background:"#FFD000",color:"#3a2600",fontSize:8,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center"}}>{totalLib}</div>}
+          </button>
         </div>
       </div>
-
-      {detail&&<Detail activity={detail.activity} dayName={detail.dayName} onClose={()=>setDet(null)} onSave={(u)=>{handleSave(detail.dayName,u);setDet(null);}} onToggle={(id)=>{handleToggle(detail.dayName,id);setDet({...detail,activity:{...detail.activity,isComplete:!detail.activity.isComplete}});}} onDelete={(id)=>{handleDel(detail.dayName,id);setDet(null);}}/>}
-      {libOpen&&<LibDrawer library={lib} onClose={()=>setLibO(false)} onAdd={(e,d)=>{handleLibAdd(e,d);setLibO(false);}} onDel={(id)=>setLib(prev=>prev.filter(e=>e.id!==id))} modeData={modeData}/>}
-      {modal&&<AddModal defaultDay={modal.defaultDay} defaultTime={modal.defaultTime} onClose={()=>setModal(null)} onSave={handleAdd} onSaveR={handleAddR}/>}
-      {sets&&<SettingsModal modeData={modeData} onClose={()=>setSets(false)} onChange={handleModeChange}/>}
+      {detail&&<Detail activity={detail.activity} dayName={detail.dayName} onClose={function(){setDet(null);}} onSave={function(u){handleSave(detail.dayName,u);setDet(null);}} onToggle={function(id){handleToggle(detail.dayName,id);setDet(function(d){return Object.assign({},d,{activity:Object.assign({},d.activity,{isComplete:!d.activity.isComplete})});});}} onDelete={function(id){handleDel(detail.dayName,id);setDet(null);}}/>}
+      {libOpen&&<LibDrawer library={lib} onClose={function(){setLibO(false);}} onAdd={function(e,d){handleLibAdd(e,d);setLibO(false);}} onDel={function(id){setLib(function(prev){return prev.filter(function(e){return e.id!==id;});});}} modeData={modeData}/>}
+      {modal&&<AddModal defaultDay={modal.defaultDay} defaultTime={modal.defaultTime} onClose={function(){setModal(null);}} onSave={handleAdd} onSaveR={handleAddR}/>}
+      {sets&&<SettingsModal modeData={modeData} onClose={function(){setSets(false);}} onChange={handleModeChange}/>}
     </div>
   );
 }
-
-const root=ReactDOM.createRoot(document.getElementById('root'));
+ 
+var root=ReactDOM.createRoot(document.getElementById("root"));
 root.render(<App/>);
-  </script>
+</script>
 </body>
 </html>
