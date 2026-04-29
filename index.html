@@ -518,7 +518,7 @@ function USTray({activeWk,onAssign,onTap}){
       <div style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:8,fontWeight:900,color:"rgba(255,255,255,0.4)",letterSpacing:"0.8px",textTransform:"uppercase",marginBottom:5}}>Unscheduled - tap AM/PM to place on timeline</div>
       <div style={{display:"flex",gap:5,overflowX:"auto",paddingBottom:2}}>
         {items.map(({act,day,date})=>{
-          const c=act.isComplete?DONE:act.title==="Breakfast"?{bg:"#b8860b",sh:"#7a5800"}:act.title==="Lunch"?{bg:"#1b5e20",sh:"#0a3010"}:tclr(act.tags);
+          const c=act.isComplete?DONE:chipColor;
           return(
             <div key={act.id} style={{flexShrink:0,background:c.bg+"33",border:"1px solid "+c.bg+"55",borderRadius:8,padding:"4px 7px",display:"flex",flexDirection:"column",gap:3,minWidth:0}}>
               <button onClick={()=>onTap(act,day,date)} style={{background:"none",border:"none",color:"#fff",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:9,cursor:"pointer",padding:0,textAlign:"left",textDecoration:act.isComplete?"line-through":"none",opacity:act.isComplete?0.65:1,whiteSpace:"nowrap",maxWidth:80,overflow:"hidden",textOverflow:"ellipsis"}}>
@@ -537,10 +537,10 @@ function USTray({activeWk,onAssign,onTap}){
 }
 
 // --- TIMELINE CHIP (draggable) ------------------------------------------------
-function TLChip({act,dayName,onTap,onDrop,hs,he}){
+function TLChip({act,dayName,onTap,onDrop,hs,he,chipColor}){
   const ref=useRef(null);
   const ds=useRef(null);
-  const c=act.isComplete?DONE:act.title==="Breakfast"?{bg:"#b8860b",sh:"#7a5800"}:act.title==="Lunch"?{bg:"#1b5e20",sh:"#0a3010"}:tclr(act.tags);
+  const c=act.isComplete?DONE:chipColor;
   const top=t2px(act.time,hs);
   const H=50;
   function pDown(e){
@@ -660,12 +660,35 @@ function TLGrid({activeWk,modeData,onTap,onDrop,onAddAt,snapAnim}){
                   {hours.map(h=><div key={h} style={{position:"absolute",top:(h-hs)*HOUR_PX,left:0,right:0,height:1,background:"rgba(255,255,255,0.07)"}}/>)}
                   {hours.slice(0,-1).map(h=><div key={h+"h"} style={{position:"absolute",top:(h-hs)*HOUR_PX+HOUR_PX/2,left:0,right:0,height:1,background:"rgba(255,255,255,0.03)"}}/>)}
                 </div>
-                {scheduled.map(act=>(
-                  <TLChip key={act.id} act={act} dayName={day} hs={hs} he={he}
-                    onTap={()=>onTap(act,day,dd?dd.date:null)}
-                    onDrop={onDrop}
-                  />
-                ))}
+                {(()=>{
+                  // Assign unique colours per day - no two activities same colour
+                  const PALETTE=[
+                    {bg:"#b8860b",sh:"#7a5800"}, // gold
+                    {bg:"#1565C0",sh:"#0a3f7f"}, // blue
+                    {bg:"#6a1b9a",sh:"#38006b"}, // purple
+                    {bg:"#c62828",sh:"#7f0000"}, // red
+                    {bg:"#00695C",sh:"#003d33"}, // teal
+                    {bg:"#2e7d32",sh:"#1a4a1d"}, // green
+                    {bg:"#e65100",sh:"#8c3300"}, // orange
+                    {bg:"#283593",sh:"#001064"}, // indigo
+                    {bg:"#558b2f",sh:"#255d00"}, // lime
+                    {bg:"#4e342e",sh:"#260e04"}, // brown-dark
+                  ];
+                  let paletteIdx=0;
+                  const colorMap={};
+                  sortA(acts).forEach(a=>{
+                    if(a.title==="Breakfast"){colorMap[a.id]={bg:"#FFD000",sh:"#b89200"};}
+                    else if(a.title==="Lunch"){colorMap[a.id]={bg:"#6D4C41",sh:"#3e2723"};}
+                    else{colorMap[a.id]=PALETTE[paletteIdx%PALETTE.length];paletteIdx++;}
+                  });
+                  return scheduled.map(act=>(
+                    <TLChip key={act.id} act={act} dayName={day} hs={hs} he={he}
+                      chipColor={colorMap[act.id]||PALETTE[0]}
+                      onTap={()=>onTap(act,day,dd?dd.date:null)}
+                      onDrop={onDrop}
+                    />
+                  ));
+                })()}
               </div>
             );
           })}
@@ -778,9 +801,20 @@ function App(){
   const handleDrop=useCallback((act,fromDay,toDay,newTime)=>{
     setSt(prev=>{
       const nw={...prev.weeks};const wk={...nw[prev.activeWeek]};
-      const fd={...wk.days[fromDay]};fd.activities=(fd.activities||[]).filter(a=>a.id!==act.id);
-      const td={...wk.days[toDay]};td.activities=sortA([...(td.activities||[]),{...act,time:newTime}]);
-      wk.days={...wk.days,[fromDay]:fd,[toDay]:td};nw[prev.activeWeek]=wk;
+      if(fromDay===toDay){
+        // Same day: single atomic update - remove old, insert updated
+        const dd={...wk.days[fromDay]};
+        dd.activities=sortA((dd.activities||[]).filter(a=>a.id!==act.id).concat([{...act,time:newTime}]));
+        wk.days={...wk.days,[fromDay]:dd};
+      } else {
+        // Different days: remove from source, add to target
+        const fd={...wk.days[fromDay]};
+        fd.activities=(fd.activities||[]).filter(a=>a.id!==act.id);
+        const td={...wk.days[toDay]};
+        td.activities=sortA([...(td.activities||[]),{...act,time:newTime}]);
+        wk.days={...wk.days,[fromDay]:fd,[toDay]:td};
+      }
+      nw[prev.activeWeek]=wk;
       return{...prev,weeks:nw};
     });
     snap2();
