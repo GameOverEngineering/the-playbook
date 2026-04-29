@@ -198,8 +198,7 @@ function getHours(modeData){
   if(modeData.mode==="parent"&&modeData.planner==="Homeschool")return MODE_HOURS.homeschool;
   return MODE_HOURS[modeData.mode]||MODE_HOURS.parent;
 }
-const MODE_HOURS_HS = {homeschool:{start:7,end:16}};
-const MODE_HOURS = {parent:{start:6,end:22},homeschool:{start:7,end:16},mancave:{start:10,end:24},girlsnight:{start:8,end:24}};
+
 
 function buildState(){
   const weeks={};const today=new Date();
