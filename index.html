@@ -596,6 +596,18 @@ function TLChip({act,dayName,onTap,onDrop,hs,he,chipColor}){
 }
 
 // --- TIMELINE GRID ------------------------------------------------------------
+const CHIP_PALETTE=[
+  {bg:"#b8860b",sh:"#7a5800"},
+  {bg:"#1565C0",sh:"#0a3f7f"},
+  {bg:"#6a1b9a",sh:"#38006b"},
+  {bg:"#c62828",sh:"#7f0000"},
+  {bg:"#00695C",sh:"#003d33"},
+  {bg:"#2e7d32",sh:"#1a4a1d"},
+  {bg:"#e65100",sh:"#8c3300"},
+  {bg:"#283593",sh:"#001064"},
+  {bg:"#558b2f",sh:"#255d00"},
+  {bg:"#4e342e",sh:"#260e04"},
+];
 function TLGrid({activeWk,modeData,onTap,onDrop,onAddAt,snapAnim}){
   const scrollRef=useRef(null);
   const hrs=getHours(modeData);
@@ -661,29 +673,16 @@ function TLGrid({activeWk,modeData,onTap,onDrop,onAddAt,snapAnim}){
                   {hours.slice(0,-1).map(h=><div key={h+"h"} style={{position:"absolute",top:(h-hs)*HOUR_PX+HOUR_PX/2,left:0,right:0,height:1,background:"rgba(255,255,255,0.03)"}}/>)}
                 </div>
                 {(()=>{
-                  // Assign unique colours per day - no two activities same colour
-                  const PALETTE=[
-                    {bg:"#b8860b",sh:"#7a5800"}, // gold
-                    {bg:"#1565C0",sh:"#0a3f7f"}, // blue
-                    {bg:"#6a1b9a",sh:"#38006b"}, // purple
-                    {bg:"#c62828",sh:"#7f0000"}, // red
-                    {bg:"#00695C",sh:"#003d33"}, // teal
-                    {bg:"#2e7d32",sh:"#1a4a1d"}, // green
-                    {bg:"#e65100",sh:"#8c3300"}, // orange
-                    {bg:"#283593",sh:"#001064"}, // indigo
-                    {bg:"#558b2f",sh:"#255d00"}, // lime
-                    {bg:"#4e342e",sh:"#260e04"}, // brown-dark
-                  ];
                   let paletteIdx=0;
                   const colorMap={};
                   sortA(acts).forEach(a=>{
                     if(a.title==="Breakfast"){colorMap[a.id]={bg:"#FFD000",sh:"#b89200"};}
                     else if(a.title==="Lunch"){colorMap[a.id]={bg:"#6D4C41",sh:"#3e2723"};}
-                    else{colorMap[a.id]=PALETTE[paletteIdx%PALETTE.length];paletteIdx++;}
+                    else{colorMap[a.id]=CHIP_PALETTE[paletteIdx%CHIP_PALETTE.length];paletteIdx++;}
                   });
                   return scheduled.map(act=>(
                     <TLChip key={act.id} act={act} dayName={day} hs={hs} he={he}
-                      chipColor={colorMap[act.id]||PALETTE[0]}
+                      chipColor={colorMap[act.id]||CHIP_PALETTE[0]}
                       onTap={()=>onTap(act,day,dd?dd.date:null)}
                       onDrop={onDrop}
                     />
