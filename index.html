@@ -113,7 +113,7 @@ const MODES = {
       {title:"Art",          time:"13:30",isPaid:false,cost:0, tags:["creative","subject"],useCount:6},
       {title:"PE",           time:"14:00",isPaid:false,cost:0, tags:["fitness","subject"], useCount:6},
       {title:"Writing",      time:"10:00",isPaid:false,cost:0, tags:["subject","learning"],useCount:5},
-      {title:"Music Lesson", time:"14:30",isPaid:true, cost:30,tags:["music","subject"],  useCount:4},
+      {title:"Music Lesson", time:"14:30",isPaid:true, cost:0,tags:["music","subject"],  useCount:4},
       {title:"Field Trip",   time:"09:00",isPaid:false,cost:0, tags:["outdoor","learning"],useCount:3},
       {title:"Library Visit",time:"13:00",isPaid:false,cost:0, tags:["learning"],          useCount:3},
       {title:"Nature Study", time:"11:30",isPaid:false,cost:0, tags:["nature","outdoor"],  useCount:3},
@@ -126,7 +126,7 @@ const MODES = {
       {title:"NFL Game",    time:"13:00",isPaid:false,cost:0,  tags:["sports","fun"],    useCount:8},
       {title:"NBA Game",    time:"19:30",isPaid:false,cost:0,  tags:["sports","fun"],    useCount:6},
       {title:"UFC Night",   time:"20:00",isPaid:false,cost:0,  tags:["sports","fun"],    useCount:5},
-      {title:"Golf Round",  time:"08:00",isPaid:true, cost:60, tags:["sports","outdoor"],useCount:5},
+      {title:"Golf Round",  time:"08:00",isPaid:true, cost:0, tags:["sports","outdoor"],useCount:5},
       {title:"Poker Night", time:"19:00",isPaid:false,cost:0,  tags:["social","fun"],    useCount:4},
       {title:"Gym Session", time:"11:00",isPaid:true, cost:0,  tags:["fitness"],         useCount:4},
       {title:"BBQ",         time:"17:00",isPaid:false,cost:0,  tags:["social","meal"],   useCount:4},
@@ -142,13 +142,13 @@ const MODES = {
     extraPresets:[
       {title:"Girls Night Out",  time:"19:00",isPaid:false,cost:0,  tags:["social","fun"],    useCount:8},
       {title:"The Bachelorette", time:"20:00",isPaid:false,cost:0,  tags:["fun","social"],    useCount:6},
-      {title:"Yoga Class",       time:"09:00",isPaid:true, cost:20, tags:["fitness","health"],useCount:6},
+      {title:"Yoga Class",       time:"09:00",isPaid:true, cost:0, tags:["fitness","health"],useCount:6},
       {title:"Brunch",           time:"11:00",isPaid:false,cost:0,  tags:["social","meal"],   useCount:5},
       {title:"Wine Night",       time:"19:00",isPaid:false,cost:0,  tags:["social","fun"],    useCount:5},
-      {title:"Pilates",          time:"09:00",isPaid:true, cost:25, tags:["fitness"],         useCount:4},
+      {title:"Pilates",          time:"09:00",isPaid:true, cost:0, tags:["fitness"],         useCount:4},
       {title:"Book Club",        time:"18:00",isPaid:false,cost:0,  tags:["social","learning"],useCount:4},
-      {title:"Spa Day",          time:"11:00",isPaid:true, cost:80, tags:["health","grooming"],useCount:4},
-      {title:"Nail Appointment", time:"14:00",isPaid:true, cost:50, tags:["grooming"],        useCount:3},
+      {title:"Spa Day",          time:"11:00",isPaid:true, cost:0, tags:["health","grooming"],useCount:4},
+      {title:"Nail Appointment", time:"14:00",isPaid:true, cost:0, tags:["grooming"],        useCount:3},
       {title:"Shopping",         time:"12:00",isPaid:false,cost:0,  tags:["social","fun"],    useCount:3},
       {title:"Meditation",       time:"09:00",isPaid:false,cost:0,  tags:["health","fitness"],useCount:2},
     ],
@@ -158,21 +158,21 @@ const MODES = {
 const BASE_PRESETS = [
   {title:"Park",        time:"",      isPaid:false,cost:0, tags:["outdoor"],        useCount:5},
   {title:"Library",     time:"",      isPaid:false,cost:0, tags:["learning"],       useCount:5},
-  {title:"BJJ",         time:"",      isPaid:true, cost:20,tags:["sports"],         useCount:4},
+  {title:"BJJ",         time:"",      isPaid:true, cost:0,tags:["sports"],         useCount:4},
   {title:"Soccer",      time:"",      isPaid:false,cost:0, tags:["sports","outdoor"],useCount:4},
-  {title:"Swimming",    time:"",      isPaid:true, cost:15,tags:["sports"],         useCount:3},
-  {title:"Art Class",   time:"",      isPaid:true, cost:25,tags:["creative"],       useCount:3},
+  {title:"Swimming",    time:"",      isPaid:true, cost:0,tags:["sports"],         useCount:3},
+  {title:"Art Class",   time:"",      isPaid:true, cost:0,tags:["creative"],       useCount:3},
   {title:"Bike Ride",   time:"",      isPaid:false,cost:0, tags:["outdoor","sports"],useCount:3},
   {title:"Movie Night", time:"18:00", isPaid:false,cost:0, tags:["family","fun"],   useCount:3},
   {title:"Playdate",    time:"",      isPaid:false,cost:0, tags:["social"],         useCount:2},
-  {title:"Piano",       time:"",      isPaid:true, cost:30,tags:["music"],          useCount:2},
+  {title:"Piano",       time:"",      isPaid:true, cost:0,tags:["music"],          useCount:2},
   {title:"Gym",         time:"",      isPaid:true, cost:0, tags:["fitness"],        useCount:2},
   {title:"Game Night",  time:"19:00", isPaid:false,cost:0, tags:["family","fun"],   useCount:2},
   {title:"Cooking",     time:"17:00", isPaid:false,cost:0, tags:["life skills"],    useCount:2},
   {title:"Nature Walk", time:"",      isPaid:false,cost:0, tags:["outdoor","nature"],useCount:1},
   {title:"Dentist",     time:"",      isPaid:true, cost:0, tags:["health"],         useCount:1},
   {title:"Doctor",      time:"",      isPaid:true, cost:0, tags:["health"],         useCount:1},
-  {title:"Haircut",     time:"",      isPaid:true, cost:20,tags:["grooming"],       useCount:1},
+  {title:"Haircut",     time:"",      isPaid:true, cost:0,tags:["grooming"],       useCount:1},
 ];
 
 // --- HELPERS ------------------------------------------------------------------
@@ -355,6 +355,7 @@ function SettingsModal({modeData,onClose,onChange}){
             </div>
           )}
           <LBtn color="yellow" onClick={()=>{onChange(pMode,needsPlan?pPlan:null);onClose();}} style={{width:"100%",justifyContent:"center"}}>Save Settings</LBtn>
+          <button onClick={()=>{if(window.confirm("Reset library to default presets for current mode?")){localStorage.removeItem("thePlaybook_library_v1");window.location.reload();}}} style={{width:"100%",background:"rgba(211,47,47,0.15)",border:"1px solid rgba(211,47,47,0.3)",borderRadius:9,padding:"9px",cursor:"pointer",fontFamily:"'Arial Black',Arial,sans-serif",fontWeight:900,fontSize:11,color:"rgba(255,100,100,0.8)",textTransform:"uppercase",letterSpacing:"0.3px"}}>Reset Library to Defaults</button>
         </div>
       </div>
     </div>
@@ -631,7 +632,7 @@ function TLGrid({activeWk,modeData,onTap,onDrop,onAddAt,snapAnim}){
           <div style={{width:TW,flexShrink:0,position:"relative",background:"rgba(0,0,0,0.1)"}}>
             {hours.map(h=>(
               <div key={h} style={{position:"absolute",top:(h-hs)*HOUR_PX-7,left:0,right:0,paddingRight:4,display:"flex",justifyContent:"flex-end",alignItems:"center",height:14}}>
-                <span style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:7.5,fontWeight:900,color:"rgba(255,255,255,0.35)"}}>{fmtH(h)}</span>
+                <span style={{fontFamily:"'Arial Black',Arial,sans-serif",fontSize:7.5,fontWeight:900,color:"#FFD000"}}>{fmtH(h)}</span>
               </div>
             ))}
           </div>
@@ -680,7 +681,7 @@ function TLGrid({activeWk,modeData,onTap,onDrop,onAddAt,snapAnim}){
 function App(){
   const[modeData,setMD]=useState(()=>loadM());
   const[state,setSt]=useState(()=>loadS()||buildState());
-  const[lib,setLib]=useState(()=>{const s=loadL();if(s)return s;const m=loadM();return buildLib(m);});
+  const[lib,setLib]=useState(()=>{const s=loadL();if(s&&s.length>0)return s;const m=loadM();return buildLib(m);});
   const[modal,setModal]=useState(null);
   const[libOpen,setLibO]=useState(false);
   const[detail,setDet]=useState(null);
